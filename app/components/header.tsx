@@ -56,9 +56,9 @@ export function Header() {
               </>
             ) : (
               <>
-                <SignInButton mode='modal'>
-                  <Button>Sign In</Button>
-                </SignInButton>
+                <Button asChild>
+                  <Link href='/sign-in'>Sign In</Link>
+                </Button>
                 {/* <SignUpButton mode='modal'>
                   <button className='text-blue-600 hover:text-blue-700 px-4 py-2 rounded-lg border border-blue-600 hover:border-blue-700 transition-colors'>
                     Sign Up
