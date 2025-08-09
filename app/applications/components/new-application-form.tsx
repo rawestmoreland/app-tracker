@@ -31,8 +31,9 @@ import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { UseFormReturn } from 'react-hook-form';
-import { Company } from '@prisma/client';
+import { ApplicationStatus, Company, RemoteType } from '@prisma/client';
 import { ApplicationFormData } from '../lib/new-application-schema';
+import { startCase } from 'lodash';
 
 export default function ApplicationForm({
   form,
@@ -258,10 +259,11 @@ export default function ApplicationForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='ON_SITE'>On-site</SelectItem>
-                      <SelectItem value='HYBRID'>Hybrid</SelectItem>
-                      <SelectItem value='REMOTE'>Remote</SelectItem>
-                      <SelectItem value='FLEXIBLE'>Flexible</SelectItem>
+                      {Object.values(RemoteType).map((remote) => (
+                        <SelectItem key={remote} value={remote}>
+                          {startCase(remote.replace('_', ' ').toLowerCase())}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormControl>
@@ -289,21 +291,11 @@ export default function ApplicationForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='DRAFT'>Draft</SelectItem>
-                      <SelectItem value='APPLIED'>Applied</SelectItem>
-                      <SelectItem value='UNDER_REVIEW'>Under Review</SelectItem>
-                      <SelectItem value='PHONE_SCREEN'>Phone Screen</SelectItem>
-                      <SelectItem value='TECHNICAL_INTERVIEW'>
-                        Technical Interview
-                      </SelectItem>
-                      <SelectItem value='ONSITE_INTERVIEW'>
-                        Onsite Interview
-                      </SelectItem>
-                      <SelectItem value='OFFER'>Offer</SelectItem>
-                      <SelectItem value='ACCEPTED'>Accepted</SelectItem>
-                      <SelectItem value='REJECTED'>Rejected</SelectItem>
-                      <SelectItem value='WITHDRAWN'>Withdrawn</SelectItem>
-                      <SelectItem value='GHOSTED'>Ghosted</SelectItem>
+                      {Object.values(ApplicationStatus).map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {startCase(status.replace('_', ' ').toLowerCase())}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormControl>

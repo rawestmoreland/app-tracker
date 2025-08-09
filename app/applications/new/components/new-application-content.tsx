@@ -40,6 +40,7 @@ export default function NewApplicationContent({
       status: ApplicationStatus.APPLIED,
       appliedAt: new Date(),
       companyId: companyId || '',
+      customFields: [],
     },
   });
 

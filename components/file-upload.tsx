@@ -128,10 +128,10 @@ export function FileUpload({
       <div
         className={`flex items-center justify-between p-4 border border-gray-300 rounded-lg bg-gray-50 ${className}`}
       >
-        <div className='flex items-center space-x-3'>
-          <File className='h-5 w-5 text-gray-500' />
-          <div>
-            <p className='text-sm font-medium text-gray-900'>
+        <div className='flex items-center space-x-3 min-w-0 w-full'>
+          <File className='h-5 w-5 text-gray-500 flex-shrink-0' />
+          <div className='flex flex-col min-w-0 w-full'>
+            <p className='text-sm font-medium text-gray-900 truncate'>
               {existingFile.filename}
             </p>
             <p className='text-xs text-gray-500'>Resume uploaded</p>

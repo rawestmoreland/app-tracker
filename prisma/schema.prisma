@@ -34,8 +34,11 @@ model User {
   contacts     Contact[]
   notes        Note[]
   interviews   Interview[]
+  events       ApplicationEvent[]
 
   Offer Offer[]
+
+  Company Company[] @relation("CreatedCompanies")
 }
 
 model Company {
@@ -50,9 +53,15 @@ model Company {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
+  isGlobal Boolean @default(false)
+  createdBy String?
+  visibility CompanyVisibility @default(PRIVATE)
+  
+
   // Relations
   applications Application[]
   contacts     Contact[]
+  creator      User? @relation("CreatedCompanies", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("companies")
 }
@@ -71,6 +80,19 @@ model Application {
   appliedAt   DateTime
   resume      String? // R2 object key for the uploaded resume
   resumeName  String? // Original filename of the resume
+  
+  // Response Timing Fields
+  firstResponseAt     DateTime? // When company first responded (any communication)
+  interviewInviteAt   DateTime? // When first interview was offered
+  firstInterviewAt    DateTime? // When first interview was scheduled
+  finalDecisionAt     DateTime? // When final decision was communicated
+  lastContactAt       DateTime? // Most recent communication from company
+  
+  // Metrics helpers (automatically calculated)
+  responseTimeHours   Int? // Hours between appliedAt and firstResponseAt
+  interviewTimeHours  Int? // Hours between firstResponseAt and firstInterviewAt
+  totalProcessHours   Int? // Hours between appliedAt and finalDecisionAt
+  
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 
@@ -79,11 +101,12 @@ model Application {
   companyId String
 
   // Relations
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  interviews Interview[]
-  notes      Note[]
-  Offer      Offer[]
+  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company      Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  interviews   Interview[]
+  notes        Note[]
+  Offer        Offer[]
+  events       ApplicationEvent[]       // Track all communication events
 
   @@map("applications")
 }
@@ -234,25 +257,55 @@ model Offer {
   @@map("offers")
 }
 
+model ApplicationEvent {
+  id        String            @id @default(cuid())
+  type      EventType
+  title     String            // e.g., "Phone screen invitation", "Rejection email"
+  content   String?           // Email content, call notes, etc.
+  occurredAt DateTime         // When this event happened
+  source    EventSource       // How did you learn about this (email, call, portal, etc.)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  // Foreign keys
+  applicationId String
+  userId        String
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("application_events")
+}
+
 // Enums
 enum UserRole {
   USER
   ADMIN
 }
 
+enum CompanyVisibility {
+  PUBLIC
+  PRIVATE
+  GLOBAL
+}
+
 enum ApplicationStatus {
-  DRAFT
-  APPLIED
-  UNDER_REVIEW
-  PHONE_SCREEN
-  TECHNICAL_INTERVIEW
-  ONSITE_INTERVIEW
-  REFERENCE_CHECK
-  OFFER
-  ACCEPTED
-  REJECTED
-  WITHDRAWN
-  GHOSTED
+  DRAFT                    // Application being prepared
+  APPLIED                  // Application submitted
+  CONFIRMATION_RECEIVED    // Auto-confirmation received
+  UNDER_REVIEW            // Application under review
+  PHONE_SCREEN            // Phone screening stage
+  TECHNICAL_INTERVIEW     // Technical interview stage
+  ONSITE_INTERVIEW        // Final/onsite interview stage
+  REFERENCE_CHECK         // Reference check in progress
+  OFFER_RECEIVED          // Job offer received
+  OFFER_NEGOTIATING       // Negotiating offer terms
+  ACCEPTED                // Offer accepted
+  REJECTED                // Application rejected
+  WITHDRAWN               // Application withdrawn
+  GHOSTED                 // No response from company
+  POSITION_FILLED         // Position filled by someone else
 }
 
 enum CompanySize {
@@ -348,4 +401,40 @@ enum EquityType {
   EQUITY_GRANT      // Direct equity grant
   WARRANTS          // Stock warrants
   CARRY             // Carried interest
+}
+
+enum EventType {
+  APPLICATION_SUBMITTED    // Initial application sent
+  CONFIRMATION_RECEIVED    // Auto-confirmation received
+  RESUME_REVIEWED         // HR reviewed resume
+  PHONE_SCREEN_INVITE     // Invitation to phone screen
+  PHONE_SCREEN_COMPLETED  // Phone screen done
+  TECHNICAL_INVITE        // Technical interview invitation
+  TECHNICAL_COMPLETED     // Technical interview done
+  ONSITE_INVITE          // Onsite/final interview invitation  
+  ONSITE_COMPLETED       // Onsite interview completed
+  REFERENCE_CHECK        // Reference check started
+  OFFER_RECEIVED         // Job offer received
+  OFFER_ACCEPTED         // Offer accepted
+  REJECTION_RECEIVED     // Rejection notification
+  POSITION_FILLED        // Position filled by someone else
+  WITHDRAWN              // Application withdrawn
+  FOLLOW_UP_SENT         // Follow-up message sent
+  FOLLOW_UP_RECEIVED     // Follow-up response received
+  NEGOTIATION_STARTED    // Salary negotiation started
+  CONTRACT_SENT          // Employment contract sent
+  OTHER                  // Other communication
+}
+
+enum EventSource {
+  EMAIL                  // Email communication
+  PHONE_CALL             // Phone call
+  LINKEDIN               // LinkedIn message
+  JOB_PORTAL            // Company job portal/ATS
+  IN_PERSON             // Face-to-face conversation
+  TEXT_MESSAGE          // SMS/text
+  VIDEO_CALL            // Video conference
+  RECRUITER             // Through recruiter
+  REFERRAL              // Through referral contact
+  OTHER                 // Other source
 }
