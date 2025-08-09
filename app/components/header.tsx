@@ -57,15 +57,13 @@ export function Header() {
             ) : (
               <>
                 <SignInButton mode='modal'>
-                  <button className='bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors'>
-                    Sign In
-                  </button>
+                  <Button>Sign In</Button>
                 </SignInButton>
-                <SignUpButton mode='modal'>
+                {/* <SignUpButton mode='modal'>
                   <button className='text-blue-600 hover:text-blue-700 px-4 py-2 rounded-lg border border-blue-600 hover:border-blue-700 transition-colors'>
                     Sign Up
                   </button>
-                </SignUpButton>
+                </SignUpButton> */}
               </>
             )}
           </div>
