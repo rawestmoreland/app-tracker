@@ -1,0 +1,351 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
+  // namespace = "PrismaJson"
+  // clientOutput = "<finds it automatically>"
+  // (./ -> relative to schema, or an importable path to require() it)
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      UserRole @default(USER)
+
+  // Relations
+  applications Application[]
+  contacts     Contact[]
+  notes        Note[]
+  interviews   Interview[]
+
+  Offer Offer[]
+}
+
+model Company {
+  id          String       @id @default(cuid())
+  name        String
+  website     String?
+  description String?
+  industry    String?
+  size        CompanySize?
+  location    String?
+  logo        String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  applications Application[]
+  contacts     Contact[]
+
+  @@map("companies")
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  title       String
+  description String?
+  jobUrl      String?
+  lowSalary   Int? // Salary range minimum in dollars
+  highSalary  Int? // Salary range maximum in dollars
+  currency    String            @default("USD") // Currency code (USD, EUR, etc.)
+  location    String?
+  remote      RemoteType?
+  status      ApplicationStatus @default(APPLIED)
+  appliedAt   DateTime
+  resume      String? // R2 object key for the uploaded resume
+  resumeName  String? // Original filename of the resume
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Foreign keys
+  userId    String
+  companyId String
+
+  // Relations
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  interviews Interview[]
+  notes      Note[]
+  Offer      Offer[]
+
+  @@map("applications")
+}
+
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  title     String?
+  linkedin  String?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys
+  userId    String
+  companyId String?
+
+  // Relations
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company    Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  interviews Interview[]
+
+  @@map("contacts")
+}
+
+model Interview {
+  id          String            @id @default(cuid())
+  type        InterviewType
+  format      InterviewFormat
+  meetingLink String?
+  scheduledAt DateTime?
+  duration    Int? // in minutes
+  feedback    String?
+  outcome     InterviewOutcome?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  // Foreign keys
+  applicationId String
+  userId        String
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contacts    Contact[]
+  notes       Note[]
+
+  @@map("interviews")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  content   String
+  type      NoteType @default(GENERAL)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys
+  userId        String
+  applicationId String?
+  interviewId   String?
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interview   Interview?   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@map("notes")
+}
+
+model Offer {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  status      OfferStatus @default(PENDING)
+  
+  // Compensation Details
+  baseSalary     Int? // Annual base salary in cents to avoid floating point issues
+  currency       String  @default("USD")
+  salaryType     SalaryType @default(ANNUAL) // Annual, hourly, contract, etc.
+  
+  // Bonus Information
+  signingBonus   Int? // One-time signing bonus in cents
+  annualBonus    Int? // Expected annual bonus in cents
+  bonusType      BonusType? // Fixed, performance-based, etc.
+  bonusDetails   String? // Additional bonus information
+  
+  // Equity/Stock Information
+  hasEquity      Boolean @default(false)
+  equityType     EquityType? // Stock options, RSUs, etc.
+  equityAmount   Int? // Number of shares/units
+  equityValue    Int? // Estimated value in cents
+  equityVesting  String? // Vesting schedule details
+  strikePrice    Int? // For stock options, in cents
+  
+  // Work Details
+  location       String?
+  remote         RemoteType?
+  startDate      DateTime?
+  department     String?
+  reportingTo    String? // Manager/supervisor name or title
+  
+  // Benefits & Perks
+  healthInsurance     Boolean @default(false)
+  dentalInsurance     Boolean @default(false)
+  visionInsurance     Boolean @default(false)
+  retirement401k      Boolean @default(false)
+  retirementMatch     String? // e.g., "50% up to 6%"
+  paidTimeOff         String? // e.g., "20 days"
+  sickLeave          String?
+  parentalLeave      String?
+  lifeInsurance      Boolean @default(false)
+  disabilityInsurance Boolean @default(false)
+  flexibleSchedule   Boolean @default(false)
+  workFromHome       Boolean @default(false)
+  professionalDevelopment String? // Training budget, conferences, etc.
+  gymMembership      Boolean @default(false)
+  commuter           String? // Transit stipend, parking, etc.
+  meals              String? // Free meals, stipend, etc.
+  equipment          String? // Laptop, monitor allowance, etc.
+  otherBenefits      String[] // Additional benefits as array
+  
+  // Offer Timeline
+  receivedAt     DateTime?
+  expiresAt      DateTime?
+  respondedAt    DateTime?
+  acceptedAt     DateTime?
+  declinedAt     DateTime?
+  
+  // Additional Information
+  notes          String? // Any additional notes about the offer
+  negotiationNotes String? // Notes about salary negotiation
+  comparisonNotes  String? // Notes comparing to other offers
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Foreign keys
+  userId        String
+  applicationId String
+
+  // Relations
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@map("offers")
+}
+
+// Enums
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ApplicationStatus {
+  DRAFT
+  APPLIED
+  UNDER_REVIEW
+  PHONE_SCREEN
+  TECHNICAL_INTERVIEW
+  ONSITE_INTERVIEW
+  REFERENCE_CHECK
+  OFFER
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  GHOSTED
+}
+
+enum CompanySize {
+  STARTUP
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum RemoteType {
+  ON_SITE
+  HYBRID
+  REMOTE
+  FLEXIBLE
+}
+
+enum InterviewType {
+  PHONE_SCREEN
+  TECHNICAL
+  BEHAVIORAL
+  SYSTEM_DESIGN
+  CODING_CHALLENGE
+  PAIR_PROGRAMMING
+  ONSITE
+  FINAL_ROUND
+  REFERENCE_CHECK
+  OTHER
+}
+
+enum InterviewFormat {
+  PHONE
+  VIDEO
+  IN_PERSON
+  CODING_PLATFORM
+  TAKE_HOME
+  OTHER
+}
+
+enum InterviewOutcome {
+  PASSED
+  FAILED
+  PENDING
+  CANCELLED
+  RESCHEDULED
+}
+
+enum NoteType {
+  GENERAL
+  INTERVIEW_PREP
+  FEEDBACK
+  FOLLOW_UP
+  SALARY_NEGOTIATION
+  OFFER_DETAILS
+}
+
+enum OfferStatus {
+  PENDING       // Offer received, no response yet
+  ACCEPTED      // Offer accepted
+  DECLINED      // Offer declined
+  NEGOTIATING   // Currently negotiating terms
+  EXPIRED       // Offer expired
+  WITHDRAWN     // Company withdrew the offer
+  COUNTERED     // Candidate made a counter offer
+}
+
+enum SalaryType {
+  ANNUAL        // Annual salary
+  HOURLY        // Hourly wage
+  CONTRACT      // Contract/project-based
+  COMMISSION    // Commission-based
+  MONTHLY       // Monthly salary
+  WEEKLY        // Weekly salary
+  DAILY         // Daily rate
+}
+
+enum BonusType {
+  FIXED         // Fixed amount bonus
+  PERFORMANCE   // Performance-based bonus
+  TARGET        // Target-based bonus
+  RETENTION     // Retention bonus
+  RELOCATION    // Relocation bonus
+  ANNUAL        // Annual bonus
+  QUARTERLY     // Quarterly bonus
+}
+
+enum EquityType {
+  STOCK_OPTIONS      // Stock options (ISO, NSO)
+  RSU               // Restricted Stock Units
+  ESPP              // Employee Stock Purchase Plan
+  PHANTOM_STOCK     // Phantom stock
+  PROFIT_SHARING    // Profit sharing
+  EQUITY_GRANT      // Direct equity grant
+  WARRANTS          // Stock warrants
+  CARRY             // Carried interest
+}
