@@ -10,14 +10,14 @@ export default function DashboardLayout({
 }>) {
   return (
     <ClerkProvider>
-      <div className='min-h-full flex flex-col'>
+      <div className='flex flex-col min-h-screen'>
         <Header />
         <main className='flex-1 bg-gray-50'>
           <div className='mx-auto container px-4 py-8 sm:px-6 lg:px-8'>
             {children}
           </div>
         </main>
-        <footer className='bg-white border-t border-gray-200 flex-none max-h-16'>
+        <footer className='bg-white border-t border-gray-200 h-16 shrink-0'>
           <div className='flex items-center justify-center h-16'>
             <p className='text-center text-sm text-gray-500'>
               &copy; {new Date().getFullYear()} App Tracker. All rights
