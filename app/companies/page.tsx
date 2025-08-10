@@ -27,6 +27,9 @@ async function fetchCompanies() {
         select: {
           id: true,
         },
+        where: {
+          userId: dbUser.id,
+        },
       },
     },
     orderBy: {
