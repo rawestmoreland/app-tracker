@@ -42,7 +42,7 @@ export default function ApplicationsTable({
         header: 'Position',
         cell: (info) => (
           <Link
-            href={`/applications/${info.row.original.id}`}
+            href={`/dashboard/applications/${info.row.original.id}`}
             className='hover:text-blue-900 font-medium underline hover:underline-offset-2'
           >
             {info.getValue()}
@@ -53,7 +53,7 @@ export default function ApplicationsTable({
         header: 'Company',
         cell: (info) => (
           <Link
-            href={`/companies/${info.row.original.company.id}`}
+            href={`/dashboard/companies/${info.row.original.company.id}`}
             className='text-blue-600 hover:text-blue-900 font-medium'
           >
             {info.row.original.company.name}
@@ -198,7 +198,7 @@ export default function ApplicationsTable({
         </p>
         <div className='mt-6'>
           <Link
-            href='/applications/new'
+            href='/dashboard/applications/new'
             className='inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700'
           >
             Add Application

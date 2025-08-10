@@ -62,7 +62,7 @@ export default function NotFound() {
               size='lg'
               className='bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300'
             >
-              <Link href='/dashboard' className='flex items-center space-x-2'>
+              <Link href='/' className='flex items-center space-x-2'>
                 <Home className='w-5 h-5' />
                 <span>Back to Dashboard</span>
               </Link>
@@ -74,12 +74,9 @@ export default function NotFound() {
               size='lg'
               className='border-2 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all duration-300'
             >
-              <Link
-                href='/dashboard/applications'
-                className='flex items-center space-x-2'
-              >
+              <Link href='/dashboard' className='flex items-center space-x-2'>
                 <ArrowLeft className='w-5 h-5' />
-                <span>View Applications</span>
+                <span>Back to Dashboard</span>
               </Link>
             </Button>
           </div>
