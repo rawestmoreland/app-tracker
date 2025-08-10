@@ -41,7 +41,12 @@ export default function ApplicationsTable({
       columnHelper.accessor('title', {
         header: 'Position',
         cell: (info) => (
-          <div className='font-medium text-gray-900'>{info.getValue()}</div>
+          <Link
+            href={`/applications/${info.row.original.id}`}
+            className='hover:text-blue-900 font-medium underline hover:underline-offset-2'
+          >
+            {info.getValue()}
+          </Link>
         ),
       }),
       columnHelper.accessor('company.name', {
@@ -148,20 +153,6 @@ export default function ApplicationsTable({
         cell: (info) => (
           <div className='text-gray-500'>
             {info.row.original.interviews.length}
-          </div>
-        ),
-      }),
-      columnHelper.display({
-        id: 'actions',
-        header: '',
-        cell: (info) => (
-          <div className='text-right'>
-            <Link
-              href={`/applications/${info.row.original.id}`}
-              className='text-blue-600 hover:text-blue-900 font-medium'
-            >
-              View
-            </Link>
           </div>
         ),
       }),
