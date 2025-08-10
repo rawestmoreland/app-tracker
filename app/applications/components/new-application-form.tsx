@@ -95,7 +95,7 @@ export default function ApplicationForm({
               <FormDescription>
                 Don&apos;t see your company?{' '}
                 <Link
-                  href='/companies/new'
+                  href='/companies/new?from=applications/new'
                   className='text-blue-600 hover:text-blue-800'
                 >
                   Add it here

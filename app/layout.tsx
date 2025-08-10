@@ -26,13 +26,17 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang='en'>
+      <html lang='en' className='h-full'>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`h-full ${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <div className='min-h-screen bg-gray-50'>
+          <div className='min-h-full'>
             <Header />
-            <main>{children}</main>
+            <main>
+              <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+                {children}
+              </div>
+            </main>
           </div>
         </body>
       </html>

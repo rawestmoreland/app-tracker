@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { CompanyVisibility } from '@prisma/client';
 
 export async function GET() {
   try {
@@ -17,6 +18,13 @@ export async function GET() {
     }
 
     const companies = await prisma.company.findMany({
+      where: {
+        OR: [
+          { visibility: 'GLOBAL' },
+          { visibility: 'PUBLIC' },
+          { createdBy: dbUser.id },
+        ],
+      },
       include: {
         applications: {
           where: { userId: dbUser.id },
@@ -52,13 +60,79 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, website, description, industry, size, location, logo } = body;
+    const {
+      name,
+      website,
+      description,
+      industry,
+      size,
+      location,
+      logo,
+      visibility = 'PRIVATE',
+      isGlobal = false,
+      useExistingCompanyId,
+    } = body;
 
     if (!name) {
       return NextResponse.json(
         { error: 'Company name is required' },
         { status: 400 }
       );
+    }
+
+    // If user wants to use an existing company, return that company
+    if (useExistingCompanyId) {
+      const existingCompany = await prisma.company.findUnique({
+        where: { id: useExistingCompanyId },
+      });
+
+      if (!existingCompany) {
+        return NextResponse.json(
+          { error: 'Company not found' },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(existingCompany);
+    }
+
+    // Check for exact duplicates in GLOBAL and PUBLIC companies
+    const exactDuplicate = await prisma.company.findFirst({
+      where: {
+        name: {
+          equals: name,
+          mode: 'insensitive',
+        },
+        OR: [{ visibility: 'GLOBAL' }, { visibility: 'PUBLIC' }],
+      },
+    });
+
+    if (exactDuplicate) {
+      return NextResponse.json(
+        {
+          error:
+            'A company with this name already exists in the public database',
+          existingCompany: exactDuplicate,
+        },
+        { status: 409 }
+      );
+    }
+
+    // Determine visibility and global status based on user role and preferences
+    let finalVisibility = visibility as CompanyVisibility;
+    let finalIsGlobal = isGlobal;
+
+    // Admin users can create global companies
+    if (dbUser.role === 'ADMIN' && isGlobal) {
+      finalVisibility = 'GLOBAL';
+      finalIsGlobal = true;
+    } else if (dbUser.role === 'ADMIN' && visibility === 'PUBLIC') {
+      finalVisibility = 'PUBLIC';
+      finalIsGlobal = false;
+    } else {
+      // Regular users can only create private companies
+      finalVisibility = 'PRIVATE';
+      finalIsGlobal = false;
     }
 
     const company = await prisma.company.create({
@@ -70,6 +144,9 @@ export async function POST(request: NextRequest) {
         size,
         location,
         logo,
+        visibility: finalVisibility,
+        isGlobal: finalIsGlobal,
+        createdBy: dbUser.id,
       },
     });
 

@@ -306,7 +306,21 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
                   colSpan={columns.length}
                   className='h-24 text-center'
                 >
-                  No companies found.
+                  <div className='flex flex-col gap-2'>
+                    <span className='text-muted-foreground'>
+                      No companies found.
+                    </span>
+                    <span className='text-muted-foreground'>
+                      Once you{' '}
+                      <Link
+                        href='/applications/new'
+                        className='underline text-blue-500'
+                      >
+                        create an application
+                      </Link>
+                      , you will see companies here.
+                    </span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

@@ -2,9 +2,28 @@ import { prisma } from '@/lib/prisma';
 import { CompaniesTable } from './components/companies-table';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { getSignedInUser } from '../lib/auth';
 
 async function fetchCompanies() {
+  const { dbUser } = await getSignedInUser();
+
   const companies = await prisma.company.findMany({
+    where: {
+      OR: [
+        {
+          applications: {
+            some: {
+              userId: dbUser.id,
+            },
+          },
+        },
+        {
+          creator: {
+            id: dbUser.id,
+          },
+        },
+      ],
+    },
     include: {
       applications: {
         select: {
@@ -36,7 +55,7 @@ export default async function CompaniesPage() {
   const companies = await fetchCompanies();
 
   return (
-    <div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6'>
+    <div className='space-y-6'>
       {/* Header */}
       <div className='flex items-center justify-between'>
         <div>
@@ -45,12 +64,12 @@ export default async function CompaniesPage() {
             Manage and track all the companies you&apos;re interested in
           </p>
         </div>
-        <Button asChild>
+        {/* <Button asChild>
           <Link href='/companies/new'>
             <div className='w-4 h-4 mr-2'>🏢</div>
             Add Company
           </Link>
-        </Button>
+        </Button> */}
       </div>
 
       {/* Stats Cards */}

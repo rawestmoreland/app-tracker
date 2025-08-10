@@ -1,74 +1,88 @@
 'use client';
 
-import { SignInButton, SignUpButton, UserButton, useAuth } from '@clerk/nextjs';
+import { UserButton, useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
+import { BellIcon } from 'lucide-react';
 
 export function Header() {
   const { isSignedIn, isLoaded } = useAuth();
+  const pathname = usePathname();
+
+  const isCurrentPath = (path: string) => {
+    return pathname === path;
+  };
 
   // Don't render authentication-dependent content until Clerk is loaded
-  if (!isLoaded) {
-    return (
-      <header className='bg-white shadow-sm border-b'>
-        <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-          <div className='flex justify-between items-center py-6'>
-            <div>
-              <h1 className='text-3xl font-bold text-gray-900'>
-                <Link href='/'>App Tracker</Link>
-              </h1>
-              <p className='text-gray-600'>
-                Track your job applications and interviews
-              </p>
-            </div>
-            <div className='flex items-center space-x-4'>
-              {/* Show skeleton or loading state */}
-              <div className='h-10 w-32 bg-gray-200 rounded animate-pulse'></div>
-            </div>
-          </div>
-        </div>
-      </header>
-    );
-  }
+  if (!isLoaded) return null;
 
   return (
-    <header className='bg-white shadow-sm border-b'>
-      <div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex justify-between items-center py-6'>
-          <div>
-            <h1 className='text-3xl font-bold text-gray-900'>
-              <Link href='/'>App Tracker</Link>
-            </h1>
-            <p className='text-gray-600'>
-              Track your job applications and interviews
-            </p>
-          </div>
-          <div className='flex items-center space-x-4'>
-            {isSignedIn ? (
-              <>
-                <Button asChild>
-                  <Link href='/applications/new'>Add Application</Link>
-                </Button>
-                <Button asChild variant='outline'>
-                  <Link href='/companies/new'>Add Company</Link>
-                </Button>
-                <UserButton />
-              </>
-            ) : (
-              <>
-                <Button asChild>
-                  <Link href='/sign-in'>Sign In</Link>
-                </Button>
-                {/* <SignUpButton mode='modal'>
-                  <button className='text-blue-600 hover:text-blue-700 px-4 py-2 rounded-lg border border-blue-600 hover:border-blue-700 transition-colors'>
-                    Sign Up
-                  </button>
-                </SignUpButton> */}
-              </>
+    <nav className='border-b border-gray-200 bg-white'>
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+        <div className='flex h-16 justify-between'>
+          <div className='flex'>
+            <div className='flex shrink-0 items-center'>
+              <Image
+                alt='App Tracker'
+                src='https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600'
+                className='h-8 w-auto'
+                width={32}
+                height={32}
+              />
+            </div>
+            {isSignedIn && (
+              <div className='hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8'>
+                <Link
+                  href='/'
+                  aria-current={isCurrentPath('/') ? 'page' : undefined}
+                  className={cn(
+                    isCurrentPath('/')
+                      ? 'border-indigo-600 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                    'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
+                  )}
+                >
+                  My Applications
+                </Link>
+                <Link
+                  href='/companies'
+                  aria-current={
+                    isCurrentPath('/companies') ? 'page' : undefined
+                  }
+                  className={cn(
+                    isCurrentPath('/companies')
+                      ? 'border-indigo-600 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                    'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
+                  )}
+                >
+                  My Companies
+                </Link>
+                <Link
+                  href='/interviews'
+                  aria-current={
+                    isCurrentPath('/interviews') ? 'page' : undefined
+                  }
+                  className={cn(
+                    isCurrentPath('/interviews')
+                      ? 'border-indigo-600 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                    'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium'
+                  )}
+                >
+                  My Interviews
+                </Link>
+              </div>
             )}
+          </div>
+          <div className='hidden sm:ml-6 sm:flex sm:items-center'>
+            <UserButton />
           </div>
         </div>
       </div>
-    </header>
+    </nav>
   );
 }
