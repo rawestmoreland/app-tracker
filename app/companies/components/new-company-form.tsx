@@ -257,6 +257,10 @@ export default function NewCompanyForm({
                   <Input {...field} placeholder='https://...' />
                 </FormControl>
                 <FormMessage />
+                <FormDescription>
+                  We recommend using a logo from LinkedIn. Just copy the
+                  company&apos;s image URL from the company&apos;s profile page.
+                </FormDescription>
               </FormItem>
             )}
           />
