@@ -67,9 +67,22 @@ export async function POST(request: NextRequest) {
       take: 5,
     });
 
+    // Separate public and private duplicates
+    const publicDuplicates = existingCompanies.filter(
+      (company) =>
+        company.visibility === 'PUBLIC' || company.visibility === 'GLOBAL'
+    );
+    const privateDuplicates = existingCompanies.filter(
+      (company) => company.visibility === 'PRIVATE'
+    );
+
     return NextResponse.json({
       hasDuplicates: existingCompanies.length > 0,
       duplicates: existingCompanies,
+      publicDuplicates,
+      privateDuplicates,
+      hasPublicDuplicates: publicDuplicates.length > 0,
+      hasPrivateDuplicates: privateDuplicates.length > 0,
     });
   } catch (error) {
     console.error('Error checking for duplicates:', error);

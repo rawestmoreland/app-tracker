@@ -1,7 +1,5 @@
 import { prisma } from '@/lib/prisma';
 import { CompaniesTable } from './components/companies-table';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { getSignedInUser } from '../lib/auth';
 
 async function fetchCompanies() {

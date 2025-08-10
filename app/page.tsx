@@ -7,6 +7,7 @@ import StatsContent from './components/dashboard/stats-content';
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { PlusIcon } from 'lucide-react';
 
 async function fetchApplications() {
   const { dbUser } = await getSignedInUser();
@@ -97,7 +98,9 @@ async function DashboardContent() {
             </h2>
             <div>
               <Button asChild>
-                <Link href='/applications/new'>New Application</Link>
+                <Link href='/applications/new'>
+                  <PlusIcon />
+                </Link>
               </Button>
             </div>
           </div>

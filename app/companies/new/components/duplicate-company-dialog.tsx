@@ -28,14 +28,16 @@ interface DuplicateCompanyDialogProps {
   duplicates: Company[];
   onUseExisting: (companyId: string) => void;
   onCreateNew: () => void;
+  isPublicDuplicate?: boolean;
 }
 
-export function DuplicateCompanyDialog({
+export default function DuplicateCompanyDialog({
   isOpen,
   onClose,
   duplicates,
   onUseExisting,
   onCreateNew,
+  isPublicDuplicate = false,
 }: DuplicateCompanyDialogProps) {
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
 
@@ -75,10 +77,15 @@ export function DuplicateCompanyDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className='sm:max-w-[600px]'>
         <DialogHeader>
-          <DialogTitle>Similar Companies Found</DialogTitle>
+          <DialogTitle>
+            {isPublicDuplicate
+              ? 'Company Already Exists'
+              : 'Similar Companies Found'}
+          </DialogTitle>
           <DialogDescription>
-            We found some companies with similar names. You can either use one
-            of the existing companies or create a new one.
+            {isPublicDuplicate
+              ? 'A company with this name already exists in the public database. You can use the existing company or create a private company instead.'
+              : 'We found some companies with similar names. You can either use one of the existing companies or create a new one.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -123,13 +130,15 @@ export function DuplicateCompanyDialog({
         </div>
 
         <DialogFooter className='flex flex-col sm:flex-row gap-2'>
-          <Button
-            variant='outline'
-            onClick={onCreateNew}
-            className='w-full sm:w-auto'
-          >
-            Create New Company
-          </Button>
+          {!isPublicDuplicate && (
+            <Button
+              variant='outline'
+              onClick={onCreateNew}
+              className='w-full sm:w-auto'
+            >
+              Create New Company
+            </Button>
+          )}
           <Button
             onClick={handleUseExisting}
             disabled={!selectedCompanyId}

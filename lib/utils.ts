@@ -54,3 +54,16 @@ export function getCompanySizeLabel(size: string) {
   };
   return sizes[size as keyof typeof sizes] || size;
 }
+
+export function getVisibilityDescription(visibility: string) {
+  switch (visibility) {
+    case 'PRIVATE':
+      return 'Only visible to you';
+    case 'PUBLIC':
+      return 'Visible to all users';
+    case 'GLOBAL':
+      return 'Visible to all users and marked as global';
+    default:
+      return '';
+  }
+}

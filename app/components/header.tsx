@@ -2,11 +2,9 @@
 
 import { UserButton, useAuth } from '@clerk/nextjs';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
-import { BellIcon } from 'lucide-react';
 
 export function Header() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -20,7 +18,7 @@ export function Header() {
   if (!isLoaded) return null;
 
   return (
-    <nav className='border-b border-gray-200 bg-white'>
+    <nav className='border-b border-gray-200 bg-white sticky top-0 z-50'>
       <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
         <div className='flex h-16 justify-between'>
           <div className='flex'>

@@ -96,28 +96,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(existingCompany);
     }
 
-    // Check for exact duplicates in GLOBAL and PUBLIC companies
-    const exactDuplicate = await prisma.company.findFirst({
-      where: {
-        name: {
-          equals: name,
-          mode: 'insensitive',
-        },
-        OR: [{ visibility: 'GLOBAL' }, { visibility: 'PUBLIC' }],
-      },
-    });
-
-    if (exactDuplicate) {
-      return NextResponse.json(
-        {
-          error:
-            'A company with this name already exists in the public database',
-          existingCompany: exactDuplicate,
-        },
-        { status: 409 }
-      );
-    }
-
     // Determine visibility and global status based on user role and preferences
     let finalVisibility = visibility as CompanyVisibility;
     let finalIsGlobal = isGlobal;
@@ -133,6 +111,31 @@ export async function POST(request: NextRequest) {
       // Regular users can only create private companies
       finalVisibility = 'PRIVATE';
       finalIsGlobal = false;
+    }
+
+    // Check for duplicates only if creating a PUBLIC or GLOBAL company
+    if (finalVisibility === 'PUBLIC' || finalVisibility === 'GLOBAL') {
+      const exactDuplicate = await prisma.company.findFirst({
+        where: {
+          name: {
+            equals: name,
+            mode: 'insensitive',
+          },
+          OR: [{ visibility: 'GLOBAL' }, { visibility: 'PUBLIC' }],
+        },
+      });
+
+      if (exactDuplicate) {
+        return NextResponse.json(
+          {
+            error:
+              'A company with this name already exists in the public database. Please use the existing company or create a private company instead.',
+            existingCompany: exactDuplicate,
+            isPublicDuplicate: true,
+          },
+          { status: 409 }
+        );
+      }
     }
 
     const company = await prisma.company.create({
