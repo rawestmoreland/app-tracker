@@ -350,7 +350,10 @@ function LandingPageContent() {
                 Dashboard <span aria-hidden='true'>&rarr;</span>
               </Link>
             ) : (
-              <Link href='/sign-in'>
+              <Link
+                href='/sign-in'
+                className='text-sm font-semibold leading-6 text-gray-900 hover:text-blue-600'
+              >
                 Sign in <span aria-hidden='true'>&rarr;</span>
               </Link>
             )}
