@@ -28,7 +28,7 @@ function HeroSection() {
           </p>
           <div className='mt-10 flex items-center justify-center gap-x-6'>
             <Button asChild size='lg' className='bg-blue-600 hover:bg-blue-700'>
-              <Link href='/sign-up'>Start Tracking Free</Link>
+              <Link href='/waitlist'>Join the waitlist</Link>
             </Button>
             <Button variant='outline' size='lg' asChild>
               <Link href='#features'>See How It Works</Link>
