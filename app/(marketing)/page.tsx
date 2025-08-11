@@ -282,7 +282,7 @@ function LandingPageContent() {
             name: 'App Track',
             description:
               'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
-            url: 'https://app-tracker.westmorelandcreative.com',
+            url: 'https://apptrack.space',
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web Browser',
             offers: {

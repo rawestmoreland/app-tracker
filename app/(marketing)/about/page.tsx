@@ -225,7 +225,7 @@ export default function AboutPage() {
                 <div className='flex justify-center gap-4 mt-2'>
                   <Button variant='outline' size='sm' asChild>
                     <Link
-                      href='https://twitter.com/intent/tweet?url=https://app-tracker.westmorelandcreative.com&text=Check%20out%20JobTracker%2C%20a%20free%20job%20application%20tracker%20for%20job%20seekers.'
+                      href='https://twitter.com/intent/tweet?url=https://apptrack.space&text=Check%20out%20App%20Track%2C%20a%20free%20job%20application%20tracker%20for%20job%20seekers.'
                       target='_blank'
                     >
                       Share on Twitter
