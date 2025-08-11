@@ -14,9 +14,9 @@ function HeroSection() {
     <section className='relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-20 sm:py-32'>
       <div className='mx-auto max-w-7xl px-6 lg:px-8'>
         <div className='mx-auto max-w-2xl text-center'>
-          <Badge variant='secondary' className='mb-4'>
+          {/* <Badge variant='secondary' className='mb-4'>
             🚀 Trusted by 10,000+ job seekers
-          </Badge>
+          </Badge> */}
           <h1 className='text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl'>
             Track Your Job Search
             <span className='block text-blue-600'>Like a Pro</span>

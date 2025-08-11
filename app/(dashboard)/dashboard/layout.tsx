@@ -9,7 +9,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider waitlistUrl='/waitlist'>
       <div className='flex flex-col min-h-screen'>
         <Header />
         <main className='flex-1 bg-gray-50'>
