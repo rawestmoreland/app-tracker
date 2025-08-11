@@ -144,7 +144,7 @@ export function Loading({
 }
 
 // Job-specific animated loading component
-export function JobTrackerLoading({ className }: { className?: string }) {
+export function AppTrackerLoading({ className }: { className?: string }) {
   return (
     <div
       className={cn(

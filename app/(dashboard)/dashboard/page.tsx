@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { JobTrackerLoading } from '@/components/ui/loading';
+import { AppTrackerLoading } from '@/components/ui/loading';
 import ApplicationsTable from '@/app/components/dashboard/applications-table';
 import { getSignedInUser } from '@/app/lib/auth';
 import { prisma } from '@/lib/prisma';
@@ -114,7 +114,7 @@ async function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <Suspense fallback={<JobTrackerLoading />}>
+    <Suspense fallback={<AppTrackerLoading />}>
       <DashboardContent />
     </Suspense>
   );

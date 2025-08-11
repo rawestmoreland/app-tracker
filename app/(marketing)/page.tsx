@@ -2,8 +2,8 @@
 
 import { Suspense } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { JobTrackerLoading } from '@/components/ui/loading';
+// import { Badge } from '@/components/ui/badge';
+import { AppTrackerLoading } from '@/components/ui/loading';
 import Link from 'next/link';
 import Script from 'next/script';
 import { useAuth } from '@clerk/nextjs';
@@ -139,14 +139,14 @@ function SocialProofSection() {
           </h2>
           <p className='mt-4 text-lg text-gray-600'>
             Join thousands of professionals who have streamlined their job
-            search with JobTracker.
+            search with App Tracker.
           </p>
         </div>
         <div className='mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3'>
           {[
             {
               quote:
-                'JobTracker completely transformed my job search. I went from scattered spreadsheets to a professional system that helped me land my dream role.',
+                'App Tracker completely transformed my job search. I went from scattered spreadsheets to a professional system that helped me land my dream role.',
               author: 'Sarah Chen',
               role: 'Software Engineer',
               company: 'TechCorp',
@@ -218,7 +218,7 @@ function CTASection() {
           </h2>
           <p className='mt-4 text-lg text-blue-100'>
             Join thousands of professionals who have already streamlined their
-            career journey with JobTracker.
+            career journey with App Tracker.
           </p>
           <div className='mt-10 flex items-center justify-center gap-x-6'>
             <Button
@@ -227,19 +227,19 @@ function CTASection() {
               variant='secondary'
               className='bg-white text-blue-600 hover:bg-gray-100'
             >
-              <Link href='/sign-up'>Get Started Free</Link>
+              <Link href='/waitlist'>Join the waitlist</Link>
             </Button>
             {isSignedIn ? (
               <Button asChild>
-                <Link href='/dashboard'>Dashboard</Link>
+                <Link href='/dashboard'>
+                  Dashboard <span aria-hidden='true'>&rarr;</span>
+                </Link>
               </Button>
             ) : (
-              <Button
-                variant='outline'
-                size='lg'
-                className='border-white text-white hover:bg-blue-700'
-              >
-                <Link href='/sign-in'>Sign In</Link>
+              <Button variant='outline' asChild>
+                <Link href='/sign-in'>
+                  Sign In <span aria-hidden='true'>&rarr;</span>
+                </Link>
               </Button>
             )}
           </div>
@@ -255,7 +255,7 @@ function Footer() {
     <footer className='bg-gray-900 h-12 shrink-0'>
       <div className='flex items-center justify-center h-12'>
         <p className='text-center text-sm text-gray-300'>
-          &copy; 2025 JobTracker. All rights reserved.
+          &copy; 2025 Westmoreland Creative. All rights reserved.
         </p>
       </div>
     </footer>
@@ -279,10 +279,10 @@ function LandingPageContent() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'SoftwareApplication',
-            name: 'JobTracker',
+            name: 'App Tracker',
             description:
               'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
-            url: 'https://jobtracker.app',
+            url: 'https://app-tracker.westmorelandcreative.com',
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web Browser',
             offers: {
@@ -298,7 +298,7 @@ function LandingPageContent() {
             },
             author: {
               '@type': 'Organization',
-              name: 'JobTracker',
+              name: 'App Tracker',
             },
             featureList: [
               'Application Tracking',
@@ -319,7 +319,7 @@ function LandingPageContent() {
           <div className='flex lg:flex-1'>
             <Link href='/' className='-m-1.5 p-1.5'>
               <span className='text-xl font-bold text-blue-600'>
-                JobTracker
+                App Tracker
               </span>
             </Link>
           </div>
@@ -330,12 +330,12 @@ function LandingPageContent() {
             >
               Features
             </Link>
-            <Link
+            {/* <Link
               href='/pricing'
               className='text-sm font-semibold leading-6 text-gray-900 hover:text-blue-600'
             >
               Pricing
-            </Link>
+            </Link> */}
             <Link
               href='/about'
               className='text-sm font-semibold leading-6 text-gray-900 hover:text-blue-600'
@@ -363,7 +363,7 @@ function LandingPageContent() {
       <main className='flex-1'>
         <HeroSection />
         <FeaturesSection />
-        <SocialProofSection />
+        {/* <SocialProofSection /> */}
         <CTASection />
       </main>
 
@@ -374,7 +374,7 @@ function LandingPageContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<JobTrackerLoading />}>
+    <Suspense fallback={<AppTrackerLoading />}>
       <LandingPageContent />
     </Suspense>
   );
