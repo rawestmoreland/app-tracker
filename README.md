@@ -1,4 +1,4 @@
-# App Tracker
+# App Track
 
 A comprehensive platform for tracking job applications, interviews, and career progress. Built with Next.js, Prisma, and Clerk authentication.
 

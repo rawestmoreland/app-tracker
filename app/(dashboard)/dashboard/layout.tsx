@@ -20,8 +20,8 @@ export default function DashboardLayout({
         <footer className='bg-white border-t border-gray-200 h-16 shrink-0'>
           <div className='flex items-center justify-center h-16'>
             <p className='text-center text-sm text-gray-500'>
-              &copy; {new Date().getFullYear()} App Tracker. All rights
-              reserved.
+              &copy; {new Date().getFullYear()} Westmoreland Creative LLC. All
+              rights reserved.
             </p>
           </div>
         </footer>

@@ -24,7 +24,7 @@ export function Header() {
           <div className='flex'>
             <div className='flex shrink-0 items-center'>
               <Image
-                alt='App Tracker'
+                alt='App Track'
                 src='https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600'
                 className='h-8 w-auto'
                 width={32}

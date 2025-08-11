@@ -16,9 +16,7 @@ export default function AboutPage() {
         >
           <div className='flex lg:flex-1'>
             <Link href='/' className='-m-1.5 p-1.5'>
-              <span className='text-xl font-bold text-blue-600'>
-                App Tracker
-              </span>
+              <span className='text-xl font-bold text-blue-600'>App Track</span>
             </Link>
           </div>
           <div className='flex gap-x-12'>

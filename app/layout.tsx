@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'App Tracker',
+  title: 'App Track',
   description: 'Track your job applications',
 };
 

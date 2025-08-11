@@ -41,7 +41,7 @@ export default function NotFound() {
             <div className='flex items-center justify-center space-x-2 mb-3'>
               <Briefcase className='w-6 h-6 text-blue-600' />
               <span className='text-lg font-semibold text-gray-800'>
-                App Tracker Pro Tip
+                App Track Pro Tip
               </span>
             </div>
             <p className='text-gray-700'>

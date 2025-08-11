@@ -139,14 +139,14 @@ function SocialProofSection() {
           </h2>
           <p className='mt-4 text-lg text-gray-600'>
             Join thousands of professionals who have streamlined their job
-            search with App Tracker.
+            search with App Track.
           </p>
         </div>
         <div className='mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3'>
           {[
             {
               quote:
-                'App Tracker completely transformed my job search. I went from scattered spreadsheets to a professional system that helped me land my dream role.',
+                'App Track completely transformed my job search. I went from scattered spreadsheets to a professional system that helped me land my dream role.',
               author: 'Sarah Chen',
               role: 'Software Engineer',
               company: 'TechCorp',
@@ -218,7 +218,7 @@ function CTASection() {
           </h2>
           <p className='mt-4 text-lg text-blue-100'>
             Join thousands of professionals who have already streamlined their
-            career journey with App Tracker.
+            career journey with App Track.
           </p>
           <div className='mt-10 flex items-center justify-center gap-x-6'>
             <Button
@@ -279,7 +279,7 @@ function LandingPageContent() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'SoftwareApplication',
-            name: 'App Tracker',
+            name: 'App Track',
             description:
               'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
             url: 'https://app-tracker.westmorelandcreative.com',
@@ -298,7 +298,7 @@ function LandingPageContent() {
             },
             author: {
               '@type': 'Organization',
-              name: 'App Tracker',
+              name: 'App Track',
             },
             featureList: [
               'Application Tracking',
@@ -318,9 +318,7 @@ function LandingPageContent() {
         >
           <div className='flex lg:flex-1'>
             <Link href='/' className='-m-1.5 p-1.5'>
-              <span className='text-xl font-bold text-blue-600'>
-                App Tracker
-              </span>
+              <span className='text-xl font-bold text-blue-600'>App Track</span>
             </Link>
           </div>
           <div className='flex gap-x-12'>
