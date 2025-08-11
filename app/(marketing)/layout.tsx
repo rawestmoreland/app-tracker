@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'JobTracker - Streamline Your Job Search & Application Management',
+  title: 'App Track - Streamline Your Job Search & Application Management',
   description:
     'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker. Get insights, stay organized, and land your dream job faster.',
   keywords: [
@@ -28,30 +28,30 @@ export const metadata: Metadata = {
     'application management',
     'interview scheduling',
   ],
-  authors: [{ name: 'JobTracker Team' }],
-  creator: 'JobTracker',
-  publisher: 'JobTracker',
+  authors: [{ name: 'App Track Team' }],
+  creator: 'App Track',
+  publisher: 'App Track',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://jobtracker.app'),
+  metadataBase: new URL('https://apptrack.space'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'JobTracker - Streamline Your Job Search & Application Management',
+    title: 'App Track - Streamline Your Job Search & Application Management',
     description:
       'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
-    url: 'https://jobtracker.app',
-    siteName: 'JobTracker',
+    url: 'https://apptrack.space',
+    siteName: 'App Track',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'JobTracker - Job Application Management Platform',
+        alt: 'App Track - Job Application Management Platform',
       },
     ],
     locale: 'en_US',
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'JobTracker - Streamline Your Job Search & Application Management',
+    title: 'App Track - Streamline Your Job Search & Application Management',
     description:
       'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
     images: ['/og-image.png'],

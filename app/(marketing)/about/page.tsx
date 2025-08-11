@@ -110,8 +110,8 @@ export default function AboutPage() {
                 <p className='text-gray-800 text-lg leading-relaxed mb-0'>
                   <strong className='text-blue-700'>The Solution:</strong> That
                   night, instead of wallowing in self-pity (okay, maybe a little
-                  wallowing), I channeled my frustration into code. I built
-                  JobTracker—a simple, intuitive way to keep track of every
+                  wallowing), I channeled my frustration into code. I built App
+                  Track—a simple, intuitive way to keep track of every
                   application, interview, and follow-up without losing my mind.
                 </p>
               </div>
@@ -120,7 +120,7 @@ export default function AboutPage() {
                 <p className='text-gray-800 text-lg leading-relaxed mb-0'>
                   <strong className='text-green-700'>The Mission:</strong> Now I
                   want to help every job seeker avoid the chaos I went through.
-                  That&apos;s why JobTracker is completely free—because looking
+                  That&apos;s why App Track is completely free—because looking
                   for work is stressful enough without worrying about
                   subscription fees.
                 </p>
@@ -193,10 +193,10 @@ export default function AboutPage() {
           <div className='mx-auto max-w-3xl text-center'>
             <Coffee className='mx-auto h-12 w-12 text-blue-200 mb-6' />
             <h2 className='text-3xl font-bold tracking-tight text-white sm:text-4xl'>
-              Found JobTracker Helpful?
+              Found App Track Helpful?
             </h2>
             <p className='mt-6 text-lg leading-8 text-blue-100'>
-              JobTracker will always be free, but if it&apos;s helped you stay
+              App Track will always be free, but if it&apos;s helped you stay
               organized and land interviews, a small donation helps me keep the
               servers running and continue improving the platform.
             </p>
@@ -287,11 +287,12 @@ export default function AboutPage() {
         <div className='mx-auto max-w-7xl px-6 py-12 lg:px-8'>
           <div className='text-center'>
             <Link href='/' className='text-xl font-bold text-blue-400'>
-              JobTracker
+              App Track
             </Link>
             <p className='mt-4 text-sm text-gray-400'>
-              Built with ❤️ by a fellow job seeker. &copy; 2025 JobTracker. All
-              rights reserved.
+              Built with ❤️ by a fellow job seeker. &copy;{' '}
+              {new Date().getFullYear()} Westmoreland Creative LLC. All rights
+              reserved.
             </p>
           </div>
         </div>
