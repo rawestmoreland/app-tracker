@@ -352,7 +352,9 @@ function LandingPageContent() {
                 Dashboard <span aria-hidden='true'>&rarr;</span>
               </Link>
             ) : (
-              <Link href='/sign-in'>Sign in</Link>
+              <Link href='/sign-in'>
+                Sign in <span aria-hidden='true'>&rarr;</span>
+              </Link>
             )}
           </div>
         </nav>
