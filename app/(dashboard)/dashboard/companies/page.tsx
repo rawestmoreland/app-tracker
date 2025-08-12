@@ -2,42 +2,58 @@ import { prisma } from '@/lib/prisma';
 import { CompaniesTable } from './components/companies-table';
 import { getSignedInUser } from '../../../lib/auth';
 
-async function fetchCompanies() {
+async function fetchCompanies(page: number = 1, limit: number = 10, search?: string) {
   const { dbUser } = await getSignedInUser();
+  const skip = (page - 1) * limit;
 
-  const companies = await prisma.company.findMany({
-    where: {
-      OR: [
+  let where: object = {
+    OR: [
+      { visibility: 'GLOBAL' as const },
+      { visibility: 'PUBLIC' as const },
+      { createdBy: dbUser.id },
+    ],
+  };
+
+  // Add search functionality
+  if (search && search.trim()) {
+    where = {
+      AND: [
+        where,
         {
-          applications: {
-            some: {
-              userId: dbUser.id,
-            },
-          },
-        },
-        {
-          creator: {
-            id: dbUser.id,
-          },
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { description: { contains: search, mode: 'insensitive' } },
+            { industry: { contains: search, mode: 'insensitive' } },
+            { location: { contains: search, mode: 'insensitive' } },
+          ],
         },
       ],
-    },
-    include: {
-      applications: {
-        select: {
-          id: true,
-        },
-        where: {
-          userId: dbUser.id,
+    };
+  }
+
+  const [companies, totalCount] = await Promise.all([
+    prisma.company.findMany({
+      where,
+      include: {
+        applications: {
+          select: {
+            id: true,
+          },
+          where: {
+            userId: dbUser.id,
+          },
         },
       },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip,
+      take: limit,
+    }),
+    prisma.company.count({ where }),
+  ]);
 
-  return companies.map((company) => ({
+  const companiesWithCounts = companies.map((company) => ({
     id: company.id,
     name: company.name,
     website: company.website,
@@ -50,10 +66,77 @@ async function fetchCompanies() {
     updatedAt: company.updatedAt,
     applicationCount: company.applications.length,
   }));
+
+  return {
+    companies: companiesWithCounts,
+    totalCount,
+    currentPage: page,
+    totalPages: Math.ceil(totalCount / limit),
+    hasNextPage: page < Math.ceil(totalCount / limit),
+    hasPreviousPage: page > 1,
+  };
 }
 
-export default async function CompaniesPage() {
-  const companies = await fetchCompanies();
+async function fetchCompanyStats() {
+  const { dbUser } = await getSignedInUser();
+
+  const where = {
+    OR: [
+      { visibility: 'GLOBAL' as const },
+      { visibility: 'PUBLIC' as const },
+      { createdBy: dbUser.id },
+    ],
+  };
+
+  const [totalApplications, largeCompaniesCount, companiesWithWebsites] = await Promise.all([
+    prisma.application.count({
+      where: {
+        userId: dbUser.id,
+        company: where,
+      },
+    }),
+    prisma.company.count({
+      where: {
+        ...where,
+        size: {
+          in: ['LARGE', 'ENTERPRISE'],
+        },
+      },
+    }),
+    prisma.company.count({
+      where: {
+        ...where,
+        website: {
+          not: null,
+        },
+      },
+    }),
+  ]);
+
+  return {
+    totalApplications,
+    largeCompaniesCount,
+    companiesWithWebsites,
+  };
+}
+
+interface CompaniesPageProps {
+  searchParams: Promise<{ page?: string; limit?: string; search?: string }>;
+}
+
+export default async function CompaniesPage({ searchParams }: CompaniesPageProps) {
+  const params = await searchParams;
+  const page = Number(params.page) || 1;
+  const limit = Number(params.limit) || 10;
+  const search = params.search || '';
+  
+  const [
+    { companies, totalCount, currentPage, totalPages, hasNextPage, hasPreviousPage },
+    { totalApplications, largeCompaniesCount, companiesWithWebsites }
+  ] = await Promise.all([
+    fetchCompanies(page, limit, search),
+    fetchCompanyStats(),
+  ]);
 
   return (
     <div className='space-y-6'>
@@ -82,7 +165,7 @@ export default async function CompaniesPage() {
               Total Companies
             </span>
           </div>
-          <p className='text-2xl font-bold'>{companies.length}</p>
+          <p className='text-2xl font-bold'>{totalCount}</p>
         </div>
         <div className='bg-card border rounded-lg p-4'>
           <div className='flex items-center gap-2'>
@@ -91,12 +174,7 @@ export default async function CompaniesPage() {
               Total Applications
             </span>
           </div>
-          <p className='text-2xl font-bold'>
-            {companies.reduce(
-              (sum, company) => sum + company.applicationCount,
-              0
-            )}
-          </p>
+          <p className='text-2xl font-bold'>{totalApplications}</p>
         </div>
         <div className='bg-card border rounded-lg p-4'>
           <div className='flex items-center gap-2'>
@@ -105,13 +183,7 @@ export default async function CompaniesPage() {
               Large Companies
             </span>
           </div>
-          <p className='text-2xl font-bold'>
-            {
-              companies.filter(
-                (c) => c.size === 'LARGE' || c.size === 'ENTERPRISE'
-              ).length
-            }
-          </p>
+          <p className='text-2xl font-bold'>{largeCompaniesCount}</p>
         </div>
         <div className='bg-card border rounded-lg p-4'>
           <div className='flex items-center gap-2'>
@@ -120,14 +192,20 @@ export default async function CompaniesPage() {
               With Websites
             </span>
           </div>
-          <p className='text-2xl font-bold'>
-            {companies.filter((c) => c.website).length}
-          </p>
+          <p className='text-2xl font-bold'>{companiesWithWebsites}</p>
         </div>
       </div>
 
       {/* Companies Table */}
-      <CompaniesTable companies={companies} />
+      <CompaniesTable 
+        companies={companies} 
+        totalCount={totalCount}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        hasNextPage={hasNextPage}
+        hasPreviousPage={hasPreviousPage}
+        initialSearch={search}
+      />
     </div>
   );
 }

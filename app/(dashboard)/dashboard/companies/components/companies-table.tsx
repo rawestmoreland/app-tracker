@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ColumnFiltersState,
   SortingState,
   VisibilityState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   createColumnHelper,
@@ -74,13 +73,56 @@ const sizeColors = {
 
 interface CompaniesTableProps {
   companies: Company[];
+  totalCount: number;
+  currentPage: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  initialSearch: string;
 }
 
-export function CompaniesTable({ companies }: CompaniesTableProps) {
+export function CompaniesTable({ 
+  companies, 
+  totalCount, 
+  currentPage, 
+  totalPages, 
+  hasNextPage, 
+  hasPreviousPage,
+  initialSearch
+}: CompaniesTableProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [searchInput, setSearchInput] = useState(initialSearch);
+
+  const navigateToPage = (page: number) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', page.toString());
+    router.push(`?${params.toString()}`);
+  };
+
+  const updateSearchUrl = useCallback((value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value.trim()) {
+      params.set('search', value);
+    } else {
+      params.delete('search');
+    }
+    params.delete('page'); // Reset to page 1 when searching
+    router.push(`?${params.toString()}`);
+  }, [searchParams, router]);
+
+  // Debounce search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      updateSearchUrl(searchInput);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchInput, updateSearchUrl]);
 
   const columnHelper = createColumnHelper<Company>();
 
@@ -207,11 +249,12 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    manualPagination: true,
+    manualFiltering: true,
+    pageCount: totalPages,
     state: {
       sorting,
       columnFilters,
@@ -228,10 +271,8 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
           <Search className='w-4 h-4 text-muted-foreground' />
           <Input
             placeholder='Search companies...'
-            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-            onChange={(event) =>
-              table.getColumn('name')?.setFilterValue(event.target.value)
-            }
+            value={searchInput}
+            onChange={(event) => setSearchInput(event.target.value)}
             className='max-w-sm'
           />
         </div>
@@ -331,28 +372,35 @@ export function CompaniesTable({ companies }: CompaniesTableProps) {
       </div>
 
       {/* Pagination */}
-      <div className='flex items-center justify-end space-x-2 py-4'>
-        <div className='flex-1 text-sm text-muted-foreground'>
-          {table.getFilteredSelectedRowModel().rows.length} of{' '}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+      <div className='flex items-center justify-between space-x-2 py-4'>
+        <div className='flex items-center space-x-2'>
+          <div className='text-sm text-muted-foreground'>
+            Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalCount)} of {totalCount} companies
+            {initialSearch && ` matching "${initialSearch}"`}
+          </div>
         </div>
-        <div className='space-x-2'>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+        <div className='flex items-center space-x-2'>
+          <div className='text-sm text-muted-foreground'>
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className='space-x-2'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => navigateToPage(currentPage - 1)}
+              disabled={!hasPreviousPage}
+            >
+              Previous
+            </Button>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => navigateToPage(currentPage + 1)}
+              disabled={!hasNextPage}
+            >
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </div>
