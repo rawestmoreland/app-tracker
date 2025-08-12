@@ -1,11 +1,61 @@
 'use server';
 
-import { getSignedInUser } from '@/app/lib/auth';
-import { prisma } from '@/lib/prisma';
-import { ApplicationFormData } from '../../lib/new-application-schema';
 import { revalidatePath } from 'next/cache';
-import { NoteFormData } from '../../lib/new-note-schema';
-import { R2Service } from '@/lib/r2';
+import { prisma } from '@/lib/prisma';
+import { ApplicationStatus } from '@prisma/client';
+import { getSignedInUser } from '@/app/lib/auth';
+import { R2Service } from '../r2';
+import { NoteFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-note-schema';
+import { ApplicationFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-application-schema';
+
+export async function updateApplicationStatus(
+  applicationId: string,
+  status: ApplicationStatus
+) {
+  try {
+    const { dbUser } = await getSignedInUser();
+
+    if (!dbUser) {
+      return { error: 'Unauthorized' };
+    }
+
+    if (!status || !Object.values(ApplicationStatus).includes(status)) {
+      return { error: 'Invalid status provided' };
+    }
+
+    // Check if application belongs to the user
+    const existingApplication = await prisma.application.findFirst({
+      where: {
+        id: applicationId,
+        userId: dbUser.id,
+      },
+    });
+
+    if (!existingApplication) {
+      return { error: 'Application not found' };
+    }
+
+    // Update the application status
+    const updatedApplication = await prisma.application.update({
+      where: {
+        id: applicationId,
+      },
+      data: {
+        status,
+        updatedAt: new Date(),
+      },
+    });
+
+    // Revalidate the dashboard page
+    revalidatePath('/dashboard');
+    revalidatePath(`/dashboard/applications/${applicationId}`);
+
+    return { success: true, application: updatedApplication };
+  } catch (error) {
+    console.error('Error updating application status:', error);
+    return { error: 'Failed to update application status' };
+  }
+}
 
 export async function deleteApplication(id: string) {
   const { dbUser } = await getSignedInUser();

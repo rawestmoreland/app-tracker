@@ -31,7 +31,7 @@ import {
   deleteApplication,
   deleteResume,
   updateApplication,
-} from '../actions/application-actions';
+} from '@/lib/actions/application-actions';
 import { NoteFormData, noteSchema } from '../../lib/new-note-schema';
 import {
   Form,

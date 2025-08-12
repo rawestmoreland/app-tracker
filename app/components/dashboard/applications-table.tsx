@@ -10,7 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { DashboardApplication } from '@/lib/types/dashboard';
-import { getRemotePolicyColor, getStatusColor } from '@/lib/utils';
+import { getRemotePolicyColor } from '@/lib/utils';
+import { StatusDropdown } from './status-dropdown';
 import {
   ColumnFiltersState,
   createColumnHelper,
@@ -78,15 +79,12 @@ export default function ApplicationsTable({
           </Button>
         ),
         cell: (info) => {
-          const status = info.getValue();
+          const application = info.row.original;
           return (
-            <span
-              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                status ?? ''
-              )}`}
-            >
-              {status?.replace('_', ' ')}
-            </span>
+            <StatusDropdown
+              applicationId={application.id}
+              currentStatus={application.status}
+            />
           );
         },
       }),
