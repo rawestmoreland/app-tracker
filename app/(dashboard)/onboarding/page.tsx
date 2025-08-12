@@ -31,6 +31,7 @@ import {
   Building2,
   Sparkles,
 } from 'lucide-react';
+import { isEmpty } from 'lodash';
 
 const signupReasonData = {
   [SignupReason.BETWEEN_JOBS]: {
@@ -81,7 +82,7 @@ export default function OnboardingComponent() {
     setIsSubmitting(true);
     try {
       const res = await completeOnboarding(data);
-      if (res?.message) {
+      if (!isEmpty(res?.message)) {
         await user?.reload();
         router.push('/dashboard');
       }
