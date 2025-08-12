@@ -5,7 +5,7 @@ export const schema = z
   .object({
     title: z.string().min(1),
     description: z.string().optional(),
-    jobUrl: z.url().optional(),
+    jobUrl: z.url().optional().or(z.literal('')),
     lowSalary: z.number().min(0).optional(),
     highSalary: z.number().min(0).optional(),
     currency: z.string(),
