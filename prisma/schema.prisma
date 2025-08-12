@@ -81,6 +81,7 @@ model Application {
   appliedAt   DateTime
   resume      String? // R2 object key for the uploaded resume
   resumeName  String? // Original filename of the resume
+  referredBy  String? // Who referred you to this job
 
   // Response Timing Fields
   firstResponseAt   DateTime? // When company first responded (any communication)

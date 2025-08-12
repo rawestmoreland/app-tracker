@@ -82,7 +82,9 @@ export default function OnboardingComponent() {
     setIsSubmitting(true);
     try {
       const res = await completeOnboarding(data);
-      if (!isEmpty(res?.message)) {
+      if (
+        (res?.message as { onboardingComplete: boolean })?.onboardingComplete
+      ) {
         await user?.reload();
         router.push('/dashboard');
       }
