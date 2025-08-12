@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   ColumnFiltersState,
@@ -97,6 +97,7 @@ export function CompaniesTable({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [searchInput, setSearchInput] = useState(initialSearch);
+  const previousSearchInput = useRef(initialSearch);
 
   const navigateToPage = (page: number) => {
     const params = new URLSearchParams(searchParams);
@@ -115,8 +116,23 @@ export function CompaniesTable({
     router.push(`?${params.toString()}`);
   }, [searchParams, router]);
 
-  // Debounce search
+  // Update previous search input when initialSearch prop changes (navigation)
   useEffect(() => {
+    if (initialSearch !== previousSearchInput.current) {
+      setSearchInput(initialSearch);
+      previousSearchInput.current = initialSearch;
+    }
+  }, [initialSearch]);
+
+  // Debounce search - only when search input actually changes
+  useEffect(() => {
+    // Only update URL if the search input has actually changed from user interaction
+    if (searchInput === previousSearchInput.current) {
+      return;
+    }
+
+    previousSearchInput.current = searchInput;
+
     const timeoutId = setTimeout(() => {
       updateSearchUrl(searchInput);
     }, 300);
