@@ -94,6 +94,7 @@ export default function ApplicationContent({
       status: application?.status || ApplicationStatus.APPLIED,
       appliedAt: application?.appliedAt || new Date(),
       companyId: application?.company.id || '',
+      referredBy: application?.referredBy || '',
     },
   });
 

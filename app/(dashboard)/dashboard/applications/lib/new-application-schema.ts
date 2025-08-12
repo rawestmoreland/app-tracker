@@ -14,6 +14,7 @@ export const schema = z
     status: z.enum(ApplicationStatus).optional(),
     appliedAt: z.date(),
     companyId: z.string().min(1),
+    referredBy: z.string().max(255).optional(),
   })
   .refine(
     (data) => {

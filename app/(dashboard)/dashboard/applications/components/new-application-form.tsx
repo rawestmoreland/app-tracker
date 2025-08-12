@@ -351,6 +351,20 @@ export default function ApplicationForm({
           />
         </div>
 
+        <FormField
+          control={form.control}
+          name='referredBy'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Referred By</FormLabel>
+              <FormControl>
+                <Input type='text' {...field} placeholder='e.g., John Doe' />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className='flex justify-end space-x-4 pt-6'>
           <Button
             onClick={() => (isEdit ? cancelEdit?.() : router.back())}
