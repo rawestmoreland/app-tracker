@@ -143,7 +143,7 @@ export default function ApplicationContent({
     const result = await deleteApplication(application.id);
 
     if (result.success) {
-      router.push('/');
+      router.push('/dashboard');
     } else {
       alert(result.error || 'Failed to delete application');
     }
@@ -221,7 +221,7 @@ export default function ApplicationContent({
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href='/'>Dashboard</Link>
+                  <Link href='/dashboard'>Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />

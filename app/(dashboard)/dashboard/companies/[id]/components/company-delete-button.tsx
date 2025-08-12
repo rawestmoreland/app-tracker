@@ -25,7 +25,7 @@ export function CompanyDeleteButton({ companyId }: CompanyDeleteButtonProps) {
       });
 
       if (response.ok) {
-        router.push('/');
+        router.push('/dashboard');
       } else {
         console.error('Failed to delete company');
       }
