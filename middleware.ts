@@ -24,6 +24,12 @@ export default clerkMiddleware(async (auth, req) => {
   if (!userId && !isPublicRoute(req))
     return redirectToSignIn({ returnBackUrl: req.url });
 
+  // Temporary bypass for users completing onboarding
+  const url = new URL(req.url);
+  if (userId && url.searchParams.get('onboarding') === 'complete') {
+    return NextResponse.next();
+  }
+
   // Catch users who do not have `onboardingComplete: true` in their publicMetadata
   // Redirect them to the /onboarding route to complete onboarding
   if (

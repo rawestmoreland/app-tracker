@@ -8,20 +8,25 @@ import { SignupReason } from '@prisma/client';
 export const completeOnboarding = async (data: {
   signupReason: SignupReason;
 }) => {
-  const { dbUser } = await getSignedInUser();
-
-  if (!dbUser) {
-    return { message: 'No Logged In User' };
-  }
-  const client = await clerkClient();
-
   try {
+    const { dbUser } = await getSignedInUser();
+
+    if (!dbUser) {
+      console.error('No logged in user found');
+      return { message: 'No Logged In User' };
+    }
+
+    console.log('Updating user metadata for:', dbUser.clerkId);
+    const client = await clerkClient();
+
     const res = await client.users.updateUser(dbUser.clerkId, {
       publicMetadata: {
         onboardingComplete: true,
         signupReason: data.signupReason,
       },
     });
+
+    console.log('Clerk user updated:', res.publicMetadata);
 
     const updatedUser = await prisma.user.update({
       where: {
@@ -31,8 +36,12 @@ export const completeOnboarding = async (data: {
         signupReason: data.signupReason,
       },
     });
+
+    console.log('Database user updated:', updatedUser.id);
+
     return { message: res.publicMetadata, updatedUser };
   } catch (err) {
+    console.error('Error in completeOnboarding:', err);
     return { error: 'There was an error updating the user metadata.' };
   }
 };

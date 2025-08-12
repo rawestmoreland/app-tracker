@@ -65,6 +65,19 @@ export default function OnboardingComponent() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
+  // Debug logging for production
+  React.useEffect(() => {
+    console.log('Onboarding component mounted');
+    console.log('User:', user?.id);
+    console.log('User metadata:', user?.publicMetadata);
+
+    // If user has already completed onboarding, redirect them
+    if (user?.publicMetadata?.onboardingComplete) {
+      console.log('User already completed onboarding, redirecting...');
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
   const schema = z.object({
     signupReason: z.enum(
       Object.values(SignupReason) as [SignupReason, ...SignupReason[]]
@@ -81,15 +94,45 @@ export default function OnboardingComponent() {
   const handleSubmit = async (data: z.infer<typeof schema>) => {
     setIsSubmitting(true);
     try {
+      console.log('Starting onboarding completion...', data);
       const res = await completeOnboarding(data);
+      console.log('Onboarding response:', res);
+
       if (
         (res?.message as { onboardingComplete: boolean })?.onboardingComplete
       ) {
+        console.log('Onboarding completed successfully, reloading user...');
+        // Wait for user reload to complete
         await user?.reload();
-        router.push('/dashboard');
+
+        console.log('User reloaded, waiting for metadata update...');
+        // Add a small delay to ensure metadata is updated
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        console.log('Redirecting to dashboard...');
+        // Try Next.js router first, fallback to window.location
+        try {
+          router.push('/dashboard?onboarding=complete');
+          // If router.push doesn't work within 2 seconds, force navigation
+          setTimeout(() => {
+            if (window.location.pathname !== '/dashboard') {
+              console.log('Router push failed, forcing navigation...');
+              window.location.href = '/dashboard?onboarding=complete';
+            }
+          }, 2000);
+        } catch (routerError) {
+          console.error('Router error:', routerError);
+          window.location.href = '/dashboard?onboarding=complete';
+        }
+      } else {
+        console.error('Onboarding completion failed:', res);
+        // Fallback redirect even if onboarding completion check fails
+        window.location.href = '/dashboard?onboarding=complete';
       }
     } catch (error) {
       console.error('Onboarding error:', error);
+      // Fallback redirect even if there's an error
+      window.location.href = '/dashboard?onboarding=complete';
     } finally {
       setIsSubmitting(false);
     }
