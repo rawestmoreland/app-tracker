@@ -21,13 +21,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  role      UserRole @default(USER)
+  id           String        @id @default(cuid())
+  clerkId      String        @unique
+  email        String        @unique
+  name         String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  role         UserRole      @default(USER)
+  isDonor      Boolean       @default(false)
+  signupReason SignupReason? @default(OTHER)
 
   // Relations
   applications Application[]
@@ -53,15 +55,14 @@ model Company {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  isGlobal Boolean @default(false)
-  createdBy String?
+  isGlobal   Boolean           @default(false)
+  createdBy  String?
   visibility CompanyVisibility @default(PRIVATE)
-  
 
   // Relations
   applications Application[]
   contacts     Contact[]
-  creator      User? @relation("CreatedCompanies", fields: [createdBy], references: [id], onDelete: SetNull)
+  creator      User?         @relation("CreatedCompanies", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("companies")
 }
@@ -80,33 +81,33 @@ model Application {
   appliedAt   DateTime
   resume      String? // R2 object key for the uploaded resume
   resumeName  String? // Original filename of the resume
-  
+
   // Response Timing Fields
-  firstResponseAt     DateTime? // When company first responded (any communication)
-  interviewInviteAt   DateTime? // When first interview was offered
-  firstInterviewAt    DateTime? // When first interview was scheduled
-  finalDecisionAt     DateTime? // When final decision was communicated
-  lastContactAt       DateTime? // Most recent communication from company
-  
+  firstResponseAt   DateTime? // When company first responded (any communication)
+  interviewInviteAt DateTime? // When first interview was offered
+  firstInterviewAt  DateTime? // When first interview was scheduled
+  finalDecisionAt   DateTime? // When final decision was communicated
+  lastContactAt     DateTime? // Most recent communication from company
+
   // Metrics helpers (automatically calculated)
-  responseTimeHours   Int? // Hours between appliedAt and firstResponseAt
-  interviewTimeHours  Int? // Hours between firstResponseAt and firstInterviewAt
-  totalProcessHours   Int? // Hours between appliedAt and finalDecisionAt
-  
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  responseTimeHours  Int? // Hours between appliedAt and firstResponseAt
+  interviewTimeHours Int? // Hours between firstResponseAt and firstInterviewAt
+  totalProcessHours  Int? // Hours between appliedAt and finalDecisionAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Foreign keys
   userId    String
   companyId String
 
   // Relations
-  user         User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company      Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  interviews   Interview[]
-  notes        Note[]
-  Offer        Offer[]
-  events       ApplicationEvent[]       // Track all communication events
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company    Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  interviews Interview[]
+  notes      Note[]
+  Offer      Offer[]
+  events     ApplicationEvent[] // Track all communication events
 
   @@map("applications")
 }
@@ -184,67 +185,67 @@ model Offer {
   title       String
   description String?
   status      OfferStatus @default(PENDING)
-  
+
   // Compensation Details
-  baseSalary     Int? // Annual base salary in cents to avoid floating point issues
-  currency       String  @default("USD")
-  salaryType     SalaryType @default(ANNUAL) // Annual, hourly, contract, etc.
-  
+  baseSalary Int? // Annual base salary in cents to avoid floating point issues
+  currency   String     @default("USD")
+  salaryType SalaryType @default(ANNUAL) // Annual, hourly, contract, etc.
+
   // Bonus Information
-  signingBonus   Int? // One-time signing bonus in cents
-  annualBonus    Int? // Expected annual bonus in cents
-  bonusType      BonusType? // Fixed, performance-based, etc.
-  bonusDetails   String? // Additional bonus information
-  
+  signingBonus Int? // One-time signing bonus in cents
+  annualBonus  Int? // Expected annual bonus in cents
+  bonusType    BonusType? // Fixed, performance-based, etc.
+  bonusDetails String? // Additional bonus information
+
   // Equity/Stock Information
-  hasEquity      Boolean @default(false)
-  equityType     EquityType? // Stock options, RSUs, etc.
-  equityAmount   Int? // Number of shares/units
-  equityValue    Int? // Estimated value in cents
-  equityVesting  String? // Vesting schedule details
-  strikePrice    Int? // For stock options, in cents
-  
+  hasEquity     Boolean     @default(false)
+  equityType    EquityType? // Stock options, RSUs, etc.
+  equityAmount  Int? // Number of shares/units
+  equityValue   Int? // Estimated value in cents
+  equityVesting String? // Vesting schedule details
+  strikePrice   Int? // For stock options, in cents
+
   // Work Details
-  location       String?
-  remote         RemoteType?
-  startDate      DateTime?
-  department     String?
-  reportingTo    String? // Manager/supervisor name or title
-  
+  location    String?
+  remote      RemoteType?
+  startDate   DateTime?
+  department  String?
+  reportingTo String? // Manager/supervisor name or title
+
   // Benefits & Perks
-  healthInsurance     Boolean @default(false)
-  dentalInsurance     Boolean @default(false)
-  visionInsurance     Boolean @default(false)
-  retirement401k      Boolean @default(false)
-  retirementMatch     String? // e.g., "50% up to 6%"
-  paidTimeOff         String? // e.g., "20 days"
-  sickLeave          String?
-  parentalLeave      String?
-  lifeInsurance      Boolean @default(false)
-  disabilityInsurance Boolean @default(false)
-  flexibleSchedule   Boolean @default(false)
-  workFromHome       Boolean @default(false)
+  healthInsurance         Boolean  @default(false)
+  dentalInsurance         Boolean  @default(false)
+  visionInsurance         Boolean  @default(false)
+  retirement401k          Boolean  @default(false)
+  retirementMatch         String? // e.g., "50% up to 6%"
+  paidTimeOff             String? // e.g., "20 days"
+  sickLeave               String?
+  parentalLeave           String?
+  lifeInsurance           Boolean  @default(false)
+  disabilityInsurance     Boolean  @default(false)
+  flexibleSchedule        Boolean  @default(false)
+  workFromHome            Boolean  @default(false)
   professionalDevelopment String? // Training budget, conferences, etc.
-  gymMembership      Boolean @default(false)
-  commuter           String? // Transit stipend, parking, etc.
-  meals              String? // Free meals, stipend, etc.
-  equipment          String? // Laptop, monitor allowance, etc.
-  otherBenefits      String[] // Additional benefits as array
-  
+  gymMembership           Boolean  @default(false)
+  commuter                String? // Transit stipend, parking, etc.
+  meals                   String? // Free meals, stipend, etc.
+  equipment               String? // Laptop, monitor allowance, etc.
+  otherBenefits           String[] // Additional benefits as array
+
   // Offer Timeline
-  receivedAt     DateTime?
-  expiresAt      DateTime?
-  respondedAt    DateTime?
-  acceptedAt     DateTime?
-  declinedAt     DateTime?
-  
+  receivedAt  DateTime?
+  expiresAt   DateTime?
+  respondedAt DateTime?
+  acceptedAt  DateTime?
+  declinedAt  DateTime?
+
   // Additional Information
-  notes          String? // Any additional notes about the offer
+  notes            String? // Any additional notes about the offer
   negotiationNotes String? // Notes about salary negotiation
   comparisonNotes  String? // Notes comparing to other offers
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Foreign keys
   userId        String
@@ -258,14 +259,14 @@ model Offer {
 }
 
 model ApplicationEvent {
-  id        String            @id @default(cuid())
-  type      EventType
-  title     String            // e.g., "Phone screen invitation", "Rejection email"
-  content   String?           // Email content, call notes, etc.
-  occurredAt DateTime         // When this event happened
-  source    EventSource       // How did you learn about this (email, call, portal, etc.)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  id         String      @id @default(cuid())
+  type       EventType
+  title      String // e.g., "Phone screen invitation", "Rejection email"
+  content    String? // Email content, call notes, etc.
+  occurredAt DateTime // When this event happened
+  source     EventSource // How did you learn about this (email, call, portal, etc.)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
 
   // Foreign keys
   applicationId String
@@ -291,21 +292,21 @@ enum CompanyVisibility {
 }
 
 enum ApplicationStatus {
-  DRAFT                    // Application being prepared
-  APPLIED                  // Application submitted
-  CONFIRMATION_RECEIVED    // Auto-confirmation received
-  UNDER_REVIEW            // Application under review
-  PHONE_SCREEN            // Phone screening stage
-  TECHNICAL_INTERVIEW     // Technical interview stage
-  ONSITE_INTERVIEW        // Final/onsite interview stage
-  REFERENCE_CHECK         // Reference check in progress
-  OFFER_RECEIVED          // Job offer received
-  OFFER_NEGOTIATING       // Negotiating offer terms
-  ACCEPTED                // Offer accepted
-  REJECTED                // Application rejected
-  WITHDRAWN               // Application withdrawn
-  GHOSTED                 // No response from company
-  POSITION_FILLED         // Position filled by someone else
+  DRAFT // Application being prepared
+  APPLIED // Application submitted
+  CONFIRMATION_RECEIVED // Auto-confirmation received
+  UNDER_REVIEW // Application under review
+  PHONE_SCREEN // Phone screening stage
+  TECHNICAL_INTERVIEW // Technical interview stage
+  ONSITE_INTERVIEW // Final/onsite interview stage
+  REFERENCE_CHECK // Reference check in progress
+  OFFER_RECEIVED // Job offer received
+  OFFER_NEGOTIATING // Negotiating offer terms
+  ACCEPTED // Offer accepted
+  REJECTED // Application rejected
+  WITHDRAWN // Application withdrawn
+  GHOSTED // No response from company
+  POSITION_FILLED // Position filled by someone else
 }
 
 enum CompanySize {
@@ -363,78 +364,85 @@ enum NoteType {
 }
 
 enum OfferStatus {
-  PENDING       // Offer received, no response yet
-  ACCEPTED      // Offer accepted
-  DECLINED      // Offer declined
-  NEGOTIATING   // Currently negotiating terms
-  EXPIRED       // Offer expired
-  WITHDRAWN     // Company withdrew the offer
-  COUNTERED     // Candidate made a counter offer
+  PENDING // Offer received, no response yet
+  ACCEPTED // Offer accepted
+  DECLINED // Offer declined
+  NEGOTIATING // Currently negotiating terms
+  EXPIRED // Offer expired
+  WITHDRAWN // Company withdrew the offer
+  COUNTERED // Candidate made a counter offer
 }
 
 enum SalaryType {
-  ANNUAL        // Annual salary
-  HOURLY        // Hourly wage
-  CONTRACT      // Contract/project-based
-  COMMISSION    // Commission-based
-  MONTHLY       // Monthly salary
-  WEEKLY        // Weekly salary
-  DAILY         // Daily rate
+  ANNUAL // Annual salary
+  HOURLY // Hourly wage
+  CONTRACT // Contract/project-based
+  COMMISSION // Commission-based
+  MONTHLY // Monthly salary
+  WEEKLY // Weekly salary
+  DAILY // Daily rate
 }
 
 enum BonusType {
-  FIXED         // Fixed amount bonus
-  PERFORMANCE   // Performance-based bonus
-  TARGET        // Target-based bonus
-  RETENTION     // Retention bonus
-  RELOCATION    // Relocation bonus
-  ANNUAL        // Annual bonus
-  QUARTERLY     // Quarterly bonus
+  FIXED // Fixed amount bonus
+  PERFORMANCE // Performance-based bonus
+  TARGET // Target-based bonus
+  RETENTION // Retention bonus
+  RELOCATION // Relocation bonus
+  ANNUAL // Annual bonus
+  QUARTERLY // Quarterly bonus
 }
 
 enum EquityType {
-  STOCK_OPTIONS      // Stock options (ISO, NSO)
-  RSU               // Restricted Stock Units
-  ESPP              // Employee Stock Purchase Plan
-  PHANTOM_STOCK     // Phantom stock
-  PROFIT_SHARING    // Profit sharing
-  EQUITY_GRANT      // Direct equity grant
-  WARRANTS          // Stock warrants
-  CARRY             // Carried interest
+  STOCK_OPTIONS // Stock options (ISO, NSO)
+  RSU // Restricted Stock Units
+  ESPP // Employee Stock Purchase Plan
+  PHANTOM_STOCK // Phantom stock
+  PROFIT_SHARING // Profit sharing
+  EQUITY_GRANT // Direct equity grant
+  WARRANTS // Stock warrants
+  CARRY // Carried interest
 }
 
 enum EventType {
-  APPLICATION_SUBMITTED    // Initial application sent
-  CONFIRMATION_RECEIVED    // Auto-confirmation received
-  RESUME_REVIEWED         // HR reviewed resume
-  PHONE_SCREEN_INVITE     // Invitation to phone screen
-  PHONE_SCREEN_COMPLETED  // Phone screen done
-  TECHNICAL_INVITE        // Technical interview invitation
-  TECHNICAL_COMPLETED     // Technical interview done
-  ONSITE_INVITE          // Onsite/final interview invitation  
-  ONSITE_COMPLETED       // Onsite interview completed
-  REFERENCE_CHECK        // Reference check started
-  OFFER_RECEIVED         // Job offer received
-  OFFER_ACCEPTED         // Offer accepted
-  REJECTION_RECEIVED     // Rejection notification
-  POSITION_FILLED        // Position filled by someone else
-  WITHDRAWN              // Application withdrawn
-  FOLLOW_UP_SENT         // Follow-up message sent
-  FOLLOW_UP_RECEIVED     // Follow-up response received
-  NEGOTIATION_STARTED    // Salary negotiation started
-  CONTRACT_SENT          // Employment contract sent
-  OTHER                  // Other communication
+  APPLICATION_SUBMITTED // Initial application sent
+  CONFIRMATION_RECEIVED // Auto-confirmation received
+  RESUME_REVIEWED // HR reviewed resume
+  PHONE_SCREEN_INVITE // Invitation to phone screen
+  PHONE_SCREEN_COMPLETED // Phone screen done
+  TECHNICAL_INVITE // Technical interview invitation
+  TECHNICAL_COMPLETED // Technical interview done
+  ONSITE_INVITE // Onsite/final interview invitation  
+  ONSITE_COMPLETED // Onsite interview completed
+  REFERENCE_CHECK // Reference check started
+  OFFER_RECEIVED // Job offer received
+  OFFER_ACCEPTED // Offer accepted
+  REJECTION_RECEIVED // Rejection notification
+  POSITION_FILLED // Position filled by someone else
+  WITHDRAWN // Application withdrawn
+  FOLLOW_UP_SENT // Follow-up message sent
+  FOLLOW_UP_RECEIVED // Follow-up response received
+  NEGOTIATION_STARTED // Salary negotiation started
+  CONTRACT_SENT // Employment contract sent
+  OTHER // Other communication
 }
 
 enum EventSource {
-  EMAIL                  // Email communication
-  PHONE_CALL             // Phone call
-  LINKEDIN               // LinkedIn message
-  JOB_PORTAL            // Company job portal/ATS
-  IN_PERSON             // Face-to-face conversation
-  TEXT_MESSAGE          // SMS/text
-  VIDEO_CALL            // Video conference
-  RECRUITER             // Through recruiter
-  REFERRAL              // Through referral contact
-  OTHER                 // Other source
+  EMAIL // Email communication
+  PHONE_CALL // Phone call
+  LINKEDIN // LinkedIn message
+  JOB_PORTAL // Company job portal/ATS
+  IN_PERSON // Face-to-face conversation
+  TEXT_MESSAGE // SMS/text
+  VIDEO_CALL // Video conference
+  RECRUITER // Through recruiter
+  REFERRAL // Through referral contact
+  OTHER // Other source
+}
+
+enum SignupReason {
+  BETWEEN_JOBS
+  JUST_GRADUATED
+  EMPLOYED_AND_LOOKING
+  OTHER
 }

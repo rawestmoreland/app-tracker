@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { CoffeeIcon } from 'lucide-react';
 
 export function Header() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -78,7 +80,16 @@ export function Header() {
               </div>
             )}
           </div>
-          <div className='hidden sm:ml-6 sm:flex sm:items-center'>
+          <div className='hidden sm:ml-6 sm:flex sm:items-center gap-4'>
+            <Button variant='outline' asChild>
+              <Link
+                href='https://buymeacoffee.com/westmorelandcreative'
+                target='_blank'
+              >
+                <CoffeeIcon className='w-5 h-5' />
+                Donate
+              </Link>
+            </Button>
             <UserButton />
           </div>
         </div>
