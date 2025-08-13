@@ -1,9 +1,10 @@
 'use client';
 
-import { Header } from '@/app/components/header';
+import { Header } from '@/app/_components/header';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -40,6 +41,7 @@ export default function RootLayout({
               </div>
             </footer>
           </div>
+          <GoogleAnalytics gaId='G-FE9XBVBH38' />
         </body>
       </html>
     </ClerkProvider>

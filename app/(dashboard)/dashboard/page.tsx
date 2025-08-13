@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
 import { AppTrackerLoading } from '@/components/ui/loading';
-import ApplicationsTable from '@/app/components/dashboard/applications-table';
+import ApplicationsTable from '@/app/_components/dashboard/applications-table';
 import { getSignedInUser } from '@/app/lib/auth';
 import { prisma } from '@/lib/prisma';
-import StatsContent from '@/app/components/dashboard/stats-content';
+import StatsContent from '@/app/_components/dashboard/stats-content';
 
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
