@@ -2,11 +2,57 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { ApplicationStatus } from '@prisma/client';
+import { ApplicationStatus, EventType, EventSource } from '@prisma/client';
 import { getSignedInUser } from '@/app/lib/auth';
 import { R2Service } from '../r2';
 import { NoteFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-note-schema';
 import { ApplicationFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-application-schema';
+
+// Helper function to map ApplicationStatus to EventType
+function getEventTypeFromStatus(status: ApplicationStatus): EventType {
+  const statusToEventMap: Record<ApplicationStatus, EventType> = {
+    DRAFT: EventType.OTHER,
+    APPLIED: EventType.APPLICATION_SUBMITTED,
+    CONFIRMATION_RECEIVED: EventType.CONFIRMATION_RECEIVED,
+    UNDER_REVIEW: EventType.RESUME_REVIEWED,
+    PHONE_SCREEN: EventType.PHONE_SCREEN_INVITE,
+    TECHNICAL_INTERVIEW: EventType.TECHNICAL_INVITE,
+    ONSITE_INTERVIEW: EventType.ONSITE_INVITE,
+    REFERENCE_CHECK: EventType.REFERENCE_CHECK,
+    OFFER_RECEIVED: EventType.OFFER_RECEIVED,
+    OFFER_NEGOTIATING: EventType.NEGOTIATION_STARTED,
+    ACCEPTED: EventType.OFFER_ACCEPTED,
+    REJECTED: EventType.REJECTION_RECEIVED,
+    WITHDRAWN: EventType.WITHDRAWN,
+    GHOSTED: EventType.OTHER,
+    POSITION_FILLED: EventType.POSITION_FILLED,
+  };
+
+  return statusToEventMap[status];
+}
+
+// Helper function to get event title from status
+function getEventTitleFromStatus(status: ApplicationStatus): string {
+  const statusToTitleMap: Record<ApplicationStatus, string> = {
+    DRAFT: 'Application draft created',
+    APPLIED: 'Application submitted',
+    CONFIRMATION_RECEIVED: 'Application confirmation received',
+    UNDER_REVIEW: 'Application under review',
+    PHONE_SCREEN: 'Phone screen invitation',
+    TECHNICAL_INTERVIEW: 'Technical interview invitation',
+    ONSITE_INTERVIEW: 'Onsite interview invitation',
+    REFERENCE_CHECK: 'Reference check initiated',
+    OFFER_RECEIVED: 'Job offer received',
+    OFFER_NEGOTIATING: 'Offer negotiation started',
+    ACCEPTED: 'Offer accepted',
+    REJECTED: 'Application rejected',
+    WITHDRAWN: 'Application withdrawn',
+    GHOSTED: 'No response received',
+    POSITION_FILLED: 'Position filled by another candidate',
+  };
+
+  return statusToTitleMap[status];
+}
 
 export async function updateApplicationStatus(
   applicationId: string,
@@ -35,6 +81,9 @@ export async function updateApplicationStatus(
       return { error: 'Application not found' };
     }
 
+    // Only create activity log if status actually changed
+    const statusChanged = existingApplication.status !== status;
+
     // Update the application status
     const updatedApplication = await prisma.application.update({
       where: {
@@ -46,6 +95,24 @@ export async function updateApplicationStatus(
       },
     });
 
+    // Create activity log entry if status changed
+    if (statusChanged) {
+      await prisma.applicationEvent.create({
+        data: {
+          type: getEventTypeFromStatus(status),
+          title: getEventTitleFromStatus(status),
+          content: `Status changed from ${existingApplication.status.replace(
+            /_/g,
+            ' '
+          )} to ${status.replace(/_/g, ' ')}`,
+          occurredAt: new Date(),
+          source: EventSource.OTHER,
+          applicationId,
+          userId: dbUser.id,
+        },
+      });
+    }
+
     // Revalidate the dashboard page
     revalidatePath('/dashboard');
     revalidatePath(`/dashboard/applications/${applicationId}`);
@@ -54,6 +121,59 @@ export async function updateApplicationStatus(
   } catch (error) {
     console.error('Error updating application status:', error);
     return { error: 'Failed to update application status' };
+  }
+}
+
+// New function to manually add activity log entries
+export async function addActivityLogEntry(
+  applicationId: string,
+  data: {
+    type: EventType;
+    title: string;
+    content?: string;
+    occurredAt: Date;
+    source: EventSource;
+  }
+) {
+  try {
+    const { dbUser } = await getSignedInUser();
+
+    if (!dbUser) {
+      return { error: 'Unauthorized' };
+    }
+
+    // Check if application belongs to the user
+    const existingApplication = await prisma.application.findFirst({
+      where: {
+        id: applicationId,
+        userId: dbUser.id,
+      },
+    });
+
+    if (!existingApplication) {
+      return { error: 'Application not found' };
+    }
+
+    // Create the activity log entry
+    const event = await prisma.applicationEvent.create({
+      data: {
+        type: data.type,
+        title: data.title,
+        content: data.content,
+        occurredAt: data.occurredAt,
+        source: data.source,
+        applicationId,
+        userId: dbUser.id,
+      },
+    });
+
+    // Revalidate the application page
+    revalidatePath(`/dashboard/applications/${applicationId}`);
+
+    return { success: true, event };
+  } catch (error) {
+    console.error('Error adding activity log entry:', error);
+    return { error: 'Failed to add activity log entry' };
   }
 }
 

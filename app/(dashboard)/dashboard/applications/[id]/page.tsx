@@ -34,6 +34,11 @@ const fetchApplication = async (id: string) => {
         },
       },
       notes: true,
+      events: {
+        orderBy: {
+          occurredAt: 'desc',
+        },
+      },
     },
   });
 

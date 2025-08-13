@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { EventType, EventSource } from '@prisma/client';
 
 export async function GET() {
   try {
@@ -78,27 +79,45 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const application = await prisma.application.create({
-      data: {
-        title,
-        description,
-        jobUrl,
-        lowSalary,
-        highSalary,
-        currency,
-        location,
-        remote,
-        status: status || 'APPLIED',
-        appliedAt: new Date(appliedAt),
-        userId: dbUser.id,
-        companyId,
-      },
-      include: {
-        company: true,
-      },
+    // Create application and initial activity log entry in a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      const application = await tx.application.create({
+        data: {
+          title,
+          description,
+          jobUrl,
+          lowSalary,
+          highSalary,
+          currency,
+          location,
+          remote,
+          status: status || 'APPLIED',
+          appliedAt: new Date(appliedAt),
+          userId: dbUser.id,
+          companyId,
+        },
+        include: {
+          company: true,
+        },
+      });
+
+      // Create initial activity log entry
+      await tx.applicationEvent.create({
+        data: {
+          type: EventType.APPLICATION_SUBMITTED,
+          title: 'Application submitted',
+          content: `Application submitted for ${title} at ${application.company.name}`,
+          occurredAt: new Date(appliedAt),
+          source: EventSource.OTHER,
+          applicationId: application.id,
+          userId: dbUser.id,
+        },
+      });
+
+      return application;
     });
 
-    return NextResponse.json(application, { status: 201 });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     console.error('Error creating application:', error);
     return NextResponse.json(

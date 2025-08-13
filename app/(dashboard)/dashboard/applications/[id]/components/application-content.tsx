@@ -11,6 +11,7 @@ import {
   Company,
   Note,
   NoteType,
+  ApplicationEvent,
 } from '@prisma/client';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
@@ -59,6 +60,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { DollarSignIcon, GlobeIcon, LinkIcon, MapPinIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import ActivityLog from './activity-log';
 
 type FullApplication = Application & {
   company: Company;
@@ -66,6 +68,7 @@ type FullApplication = Application & {
     contacts: Contact[];
   })[];
   notes: Note[];
+  events: ApplicationEvent[];
   appliedAt: Date;
 };
 
@@ -564,6 +567,12 @@ export default function ApplicationContent({
                 </div>
               )}
             </div>
+
+            {/* Activity Log */}
+            <ActivityLog
+              events={application.events}
+              applicationId={application.id}
+            />
           </div>
 
           {/* Sidebar */}
