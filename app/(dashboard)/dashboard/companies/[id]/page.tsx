@@ -432,7 +432,7 @@ export default async function CompanyDetail({ params }: PageProps) {
         <div className='p-6 border-b border-gray-200'>
           <div className='flex justify-between items-center'>
             <h2 className='text-xl font-semibold'>Contacts</h2>
-            <Link href='/contacts/new'>
+            <Link href={`/dashboard/contacts/new?companyId=${company.id}`}>
               <Button>New Contact</Button>
             </Link>
           </div>
@@ -499,7 +499,7 @@ export default async function CompanyDetail({ params }: PageProps) {
           <div className='p-6 text-center text-gray-500'>
             No contacts yet.
             <Link
-              href='/contacts/new'
+              href={`/dashboard/contacts/new?companyId=${company.id}`}
               className='text-blue-600 hover:text-blue-800 ml-1'
             >
               Add your first contact

@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import NewCompanyForm from '../../components/new-company-form';
+import NewCompanyForm from '../../_components/new-company-form';
 import DuplicateCompanyDialog from './duplicate-company-dialog';
 import Link from 'next/link';
 import { CompanyFormData, companySchema } from '../../lib/new-company-schema';

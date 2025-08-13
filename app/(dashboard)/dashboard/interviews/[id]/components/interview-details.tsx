@@ -502,7 +502,7 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
                 </Button>
                 <Button variant='outline' className='w-full' asChild>
                   <Link
-                    href={`/contacts/new?applicationId=${interview.application.id}`}
+                    href={`dashboard/contacts/new?companyId=${interview.application.company.id}`}
                   >
                     Add Contact
                   </Link>

@@ -1,8 +1,12 @@
 import { prisma } from '@/lib/prisma';
-import { CompaniesTable } from './components/companies-table';
+import { CompaniesTable } from './_components/companies-table';
 import { getSignedInUser } from '../../../lib/auth';
 
-async function fetchCompanies(page: number = 1, limit: number = 10, search?: string) {
+async function fetchCompanies(
+  page: number = 1,
+  limit: number = 10,
+  search?: string
+) {
   const { dbUser } = await getSignedInUser();
   const skip = (page - 1) * limit;
 
@@ -88,30 +92,31 @@ async function fetchCompanyStats() {
     ],
   };
 
-  const [totalApplications, largeCompaniesCount, companiesWithWebsites] = await Promise.all([
-    prisma.application.count({
-      where: {
-        userId: dbUser.id,
-        company: where,
-      },
-    }),
-    prisma.company.count({
-      where: {
-        ...where,
-        size: {
-          in: ['LARGE', 'ENTERPRISE'],
+  const [totalApplications, largeCompaniesCount, companiesWithWebsites] =
+    await Promise.all([
+      prisma.application.count({
+        where: {
+          userId: dbUser.id,
+          company: where,
         },
-      },
-    }),
-    prisma.company.count({
-      where: {
-        ...where,
-        website: {
-          not: null,
+      }),
+      prisma.company.count({
+        where: {
+          ...where,
+          size: {
+            in: ['LARGE', 'ENTERPRISE'],
+          },
         },
-      },
-    }),
-  ]);
+      }),
+      prisma.company.count({
+        where: {
+          ...where,
+          website: {
+            not: null,
+          },
+        },
+      }),
+    ]);
 
   return {
     totalApplications,
@@ -124,15 +129,24 @@ interface CompaniesPageProps {
   searchParams: Promise<{ page?: string; limit?: string; search?: string }>;
 }
 
-export default async function CompaniesPage({ searchParams }: CompaniesPageProps) {
+export default async function CompaniesPage({
+  searchParams,
+}: CompaniesPageProps) {
   const params = await searchParams;
   const page = Number(params.page) || 1;
   const limit = Number(params.limit) || 10;
   const search = params.search || '';
-  
+
   const [
-    { companies, totalCount, currentPage, totalPages, hasNextPage, hasPreviousPage },
-    { totalApplications, largeCompaniesCount, companiesWithWebsites }
+    {
+      companies,
+      totalCount,
+      currentPage,
+      totalPages,
+      hasNextPage,
+      hasPreviousPage,
+    },
+    { totalApplications, largeCompaniesCount, companiesWithWebsites },
   ] = await Promise.all([
     fetchCompanies(page, limit, search),
     fetchCompanyStats(),
@@ -197,8 +211,8 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
       </div>
 
       {/* Companies Table */}
-      <CompaniesTable 
-        companies={companies} 
+      <CompaniesTable
+        companies={companies}
         totalCount={totalCount}
         currentPage={currentPage}
         totalPages={totalPages}

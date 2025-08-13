@@ -1,14 +1,14 @@
-import { getSignedInUser } from '@/app/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { getSignedInUser } from "@/app/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-import { notFound } from 'next/navigation';
-import ApplicationContent from './components/application-content';
+import { notFound } from "next/navigation";
+import ApplicationContent from "./components/application-content";
 
 const fetchCompanies = async () => {
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   const companies = await prisma.company.findMany();
@@ -20,7 +20,7 @@ const fetchApplication = async (id: string) => {
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   const application = await prisma.application.findUnique({
@@ -36,7 +36,7 @@ const fetchApplication = async (id: string) => {
       notes: true,
       events: {
         orderBy: {
-          occurredAt: 'desc',
+          occurredAt: "desc",
         },
       },
     },

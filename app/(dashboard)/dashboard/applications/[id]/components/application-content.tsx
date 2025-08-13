@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-'use client';
+"use client";
 
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   ApplicationStatus,
   Interview,
@@ -12,28 +12,28 @@ import {
   Note,
   NoteType,
   ApplicationEvent,
-} from '@prisma/client';
-import Link from 'next/link';
-import { notFound, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { ApplicationFormData, schema } from '../../lib/new-application-schema';
-import ApplicationForm from '../../components/new-application-form';
-import { format } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { FileUpload } from '@/components/file-upload';
+} from "@prisma/client";
+import Link from "next/link";
+import { notFound, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { ApplicationFormData, schema } from "../../lib/new-application-schema";
+import ApplicationForm from "../../components/new-application-form";
+import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { FileUpload } from "@/components/file-upload";
 import {
   getRemotePolicyColor,
   getSizeColor,
   getStatusColor,
-} from '@/lib/utils';
+} from "@/lib/utils";
 import {
   addNote,
   deleteApplication,
   deleteResume,
   updateApplication,
-} from '@/lib/actions/application-actions';
-import { NoteFormData, noteSchema } from '../../lib/new-note-schema';
+} from "@/lib/actions/application-actions";
+import { NoteFormData, noteSchema } from "../../lib/new-note-schema";
 import {
   Form,
   FormControl,
@@ -41,15 +41,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -57,10 +57,10 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { DollarSignIcon, GlobeIcon, LinkIcon, MapPinIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import ActivityLog from './activity-log';
+} from "@/components/ui/breadcrumb";
+import { DollarSignIcon, GlobeIcon, LinkIcon, MapPinIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import ActivityLog from "./activity-log";
 
 type FullApplication = Application & {
   company: Company;
@@ -86,25 +86,25 @@ export default function ApplicationContent({
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title: '',
-      description: '',
-      jobUrl: '',
+      title: "",
+      description: "",
+      jobUrl: "",
       lowSalary: undefined,
       highSalary: undefined,
-      currency: 'USD',
-      location: '',
+      currency: "USD",
+      location: "",
       remote: application?.remote || RemoteType.ON_SITE,
       status: application?.status || ApplicationStatus.APPLIED,
       appliedAt: application?.appliedAt || new Date(),
-      companyId: application?.company.id || '',
-      referredBy: application?.referredBy || '',
+      companyId: application?.company.id || "",
+      referredBy: application?.referredBy || "",
     },
   });
 
   const noteForm = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
     defaultValues: {
-      content: '',
+      content: "",
       type: NoteType.GENERAL,
       interviewId: undefined,
       applicationId: application.id,
@@ -114,17 +114,17 @@ export default function ApplicationContent({
   useEffect(() => {
     if (editing) {
       form.reset({
-        title: application?.title || '',
-        description: application?.description || '',
-        jobUrl: application?.jobUrl || '',
+        title: application?.title || "",
+        description: application?.description || "",
+        jobUrl: application?.jobUrl || "",
         lowSalary: application?.lowSalary || 0,
         highSalary: application?.highSalary || 0,
-        currency: application?.currency || 'USD',
-        location: application?.location || '',
+        currency: application?.currency || "USD",
+        location: application?.location || "",
         remote: application?.remote || RemoteType.ON_SITE,
         status: application?.status || ApplicationStatus.APPLIED,
         appliedAt: application?.appliedAt || new Date(),
-        companyId: application?.company.id || '',
+        companyId: application?.company.id || "",
       });
     }
   }, [editing]);
@@ -135,21 +135,21 @@ export default function ApplicationContent({
     if (result.success) {
       setEditing(false);
     } else {
-      alert(result.error || 'Failed to update application');
+      alert(result.error || "Failed to update application");
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this application?')) {
+    if (!confirm("Are you sure you want to delete this application?")) {
       return;
     }
 
     const result = await deleteApplication(application.id);
 
     if (result.success) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     } else {
-      alert(result.error || 'Failed to delete application');
+      alert(result.error || "Failed to delete application");
     }
   };
 
@@ -159,7 +159,7 @@ export default function ApplicationContent({
     if (result.success) {
       noteForm.reset();
     } else {
-      alert(result.error || 'Failed to add note');
+      alert(result.error || "Failed to add note");
     }
   };
 
@@ -175,37 +175,37 @@ export default function ApplicationContent({
     const result = await deleteResume(application.id);
 
     if (result.success) {
-      alert('Resume deleted successfully');
+      alert("Resume deleted successfully");
     } else {
-      alert(result.error || 'Failed to delete resume');
+      alert(result.error || "Failed to delete resume");
     }
   };
 
   const displaySalary = (
     lowSalary: number | undefined,
-    highSalary: number | undefined
+    highSalary: number | undefined,
   ) => {
-    let salaryString = '';
+    let salaryString = "";
     if (lowSalary && highSalary) {
-      salaryString = `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+      salaryString = `${new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
         maximumFractionDigits: 0,
-      }).format(lowSalary)} - ${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+      }).format(lowSalary)} - ${new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     } else if (lowSalary) {
-      salaryString = `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+      salaryString = `${new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
         maximumFractionDigits: 0,
       }).format(lowSalary)}`;
     } else if (highSalary) {
-      salaryString = `${new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
+      salaryString = `${new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     }
@@ -217,15 +217,15 @@ export default function ApplicationContent({
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
-      <div className='max-w-4xl mx-auto px-4 sm:px-6 lg:px-8'>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className='mb-8'>
+        <div className="mb-8">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href='/dashboard'>Dashboard</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -236,34 +236,34 @@ export default function ApplicationContent({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <div className='flex justify-between items-start mt-6'>
+          <div className="mt-6 flex items-start justify-between">
             <div>
-              <h1 className='text-3xl font-bold text-gray-900'>
+              <h1 className="text-3xl font-bold text-gray-900">
                 {application.title}
               </h1>
-              <div className='flex items-center space-x-2'>
+              <div className="flex items-center space-x-2">
                 {application.company.logo && (
                   <img
                     src={application.company.logo}
                     alt={application.company.name}
-                    className='w-10 h-10 rounded-md'
+                    className="h-10 w-10 rounded-md"
                   />
                 )}
-                <p className='text-xl text-gray-600 mt-1'>
+                <p className="mt-1 text-xl text-gray-600">
                   {application.company.name}
                 </p>
               </div>
             </div>
-            <div className='flex space-x-3'>
+            <div className="flex space-x-3">
               <button
                 onClick={() => setEditing(!editing)}
-                className='px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50'
+                className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                {editing ? 'Cancel' : 'Edit'}
+                {editing ? "Cancel" : "Edit"}
               </button>
               <button
                 onClick={handleDelete}
-                className='px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 hover:bg-red-50'
+                className="rounded-md border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
               >
                 Delete
               </button>
@@ -271,12 +271,12 @@ export default function ApplicationContent({
           </div>
         </div>
 
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Main Content */}
-          <div className='lg:col-span-2 space-y-6'>
+          <div className="space-y-6 lg:col-span-2">
             {/* Application Details */}
-            <div className='bg-white rounded-lg shadow p-6'>
-              <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
                 Application Details
               </h2>
 
@@ -289,45 +289,45 @@ export default function ApplicationContent({
                   cancelEdit={() => setEditing(false)}
                 />
               ) : (
-                <div className='space-y-4'>
-                  <div className='flex items-center justify-between'>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
                     <span
-                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        application.status
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getStatusColor(
+                        application.status,
                       )}`}
                     >
-                      {application.status.replace('_', ' ')}
+                      {application.status.replace("_", " ")}
                     </span>
-                    <span className='text-sm text-gray-500'>
-                      Applied: {format(application.appliedAt, 'MM/dd/yyyy')}
+                    <span className="text-sm text-gray-500">
+                      Applied: {format(application.appliedAt, "MM/dd/yyyy")}
                     </span>
                   </div>
 
                   {application.description && (
                     <div>
-                      <h3 className='text-sm font-medium text-gray-700'>
+                      <h3 className="text-sm font-medium text-gray-700">
                         Description
                       </h3>
-                      <div className='mt-1 text-sm text-gray-900 whitespace-pre-wrap'>
+                      <div className="mt-1 text-sm whitespace-pre-wrap text-gray-900">
                         {application.description}
                       </div>
                     </div>
                   )}
 
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {application.jobUrl && (
                       <div>
-                        <div className='flex items-center space-x-2'>
-                          <LinkIcon className='w-4 h-4 text-gray-500' />
-                          <h3 className='text-sm font-medium text-gray-700'>
+                        <div className="flex items-center space-x-2">
+                          <LinkIcon className="h-4 w-4 text-gray-500" />
+                          <h3 className="text-sm font-medium text-gray-700">
                             Job URL
                           </h3>
                         </div>
                         <a
                           href={application.jobUrl}
-                          target='_blank'
-                          rel='noopener noreferrer'
-                          className='mt-1 text-sm text-blue-600 hover:text-blue-800'
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 text-sm text-blue-600 hover:text-blue-800"
                         >
                           View Job Posting
                         </a>
@@ -336,16 +336,16 @@ export default function ApplicationContent({
 
                     {(application.lowSalary || application.highSalary) && (
                       <div>
-                        <div className='flex items-center space-x-2'>
-                          <DollarSignIcon className='w-4 h-4 text-gray-500' />
-                          <h3 className='text-sm font-medium text-gray-700'>
+                        <div className="flex items-center space-x-2">
+                          <DollarSignIcon className="h-4 w-4 text-gray-500" />
+                          <h3 className="text-sm font-medium text-gray-700">
                             Salary
                           </h3>
                         </div>
-                        <p className='mt-1 text-sm text-gray-900'>
+                        <p className="mt-1 text-sm text-gray-900">
                           {displaySalary(
                             application.lowSalary || 0,
-                            application.highSalary || 0
+                            application.highSalary || 0,
                           )}
                         </p>
                       </div>
@@ -353,13 +353,13 @@ export default function ApplicationContent({
 
                     {application.location && (
                       <div>
-                        <div className='flex items-center space-x-2'>
-                          <MapPinIcon className='w-4 h-4 text-gray-500' />
-                          <h3 className='text-sm font-medium text-gray-700'>
+                        <div className="flex items-center space-x-2">
+                          <MapPinIcon className="h-4 w-4 text-gray-500" />
+                          <h3 className="text-sm font-medium text-gray-700">
                             Location
                           </h3>
                         </div>
-                        <p className='mt-1 text-sm text-gray-900'>
+                        <p className="mt-1 text-sm text-gray-900">
                           {application.location}
                         </p>
                       </div>
@@ -367,16 +367,16 @@ export default function ApplicationContent({
 
                     {application.remote && (
                       <div>
-                        <div className='flex items-center space-x-2'>
-                          <GlobeIcon className='w-4 h-4 text-gray-500' />
-                          <h3 className='text-sm font-medium text-gray-700'>
+                        <div className="flex items-center space-x-2">
+                          <GlobeIcon className="h-4 w-4 text-gray-500" />
+                          <h3 className="text-sm font-medium text-gray-700">
                             Remote Policy
                           </h3>
                         </div>
                         <Badge
                           className={getRemotePolicyColor(application.remote)}
                         >
-                          {application.remote.replace('_', ' ')}
+                          {application.remote.replace("_", " ")}
                         </Badge>
                       </div>
                     )}
@@ -386,9 +386,9 @@ export default function ApplicationContent({
             </div>
 
             {/* Interviews */}
-            <div className='bg-white rounded-lg shadow p-6'>
-              <div className='flex justify-between items-center mb-4'>
-                <h2 className='text-xl font-semibold text-gray-900'>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">
                   Interviews
                 </h2>
                 <Button asChild>
@@ -401,28 +401,28 @@ export default function ApplicationContent({
               </div>
 
               {application.interviews.length === 0 ? (
-                <p className='text-gray-500 text-center py-4'>
+                <p className="py-4 text-center text-gray-500">
                   No interviews scheduled yet.
                 </p>
               ) : (
-                <div className='space-y-4'>
+                <div className="space-y-4">
                   {application.interviews.map((interview) => (
                     <Link
                       key={interview.id}
                       href={`/dashboard/interviews/${interview.id}`}
-                      className='block border border-gray-200 rounded-lg p-4'
+                      className="block rounded-lg border border-gray-200 p-4"
                     >
-                      <div className='flex justify-between items-start'>
+                      <div className="flex items-start justify-between">
                         <div>
-                          <h3 className='font-medium text-gray-900'>
-                            {interview.type.replace('_', ' ')}
+                          <h3 className="font-medium text-gray-900">
+                            {interview.type.replace("_", " ")}
                           </h3>
-                          <p className='text-sm text-gray-600'>
-                            {interview.format.replace('_', ' ')}
+                          <p className="text-sm text-gray-600">
+                            {interview.format.replace("_", " ")}
                             {interview.scheduledAt &&
                               ` • ${format(
                                 interview.scheduledAt,
-                                'MM/dd/yyyy'
+                                "MM/dd/yyyy",
                               )}`}
                             {interview.duration &&
                               ` • ${interview.duration} minutes`}
@@ -430,12 +430,12 @@ export default function ApplicationContent({
                         </div>
                         {interview.outcome && (
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              interview.outcome === 'PASSED'
-                                ? 'bg-green-100 text-green-800'
-                                : interview.outcome === 'FAILED'
-                                ? 'bg-red-100 text-red-800'
-                                : 'bg-yellow-100 text-yellow-800'
+                            className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                              interview.outcome === "PASSED"
+                                ? "bg-green-100 text-green-800"
+                                : interview.outcome === "FAILED"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-100 text-yellow-800"
                             }`}
                           >
                             {interview.outcome}
@@ -444,13 +444,13 @@ export default function ApplicationContent({
                       </div>
 
                       {interview.contacts.length > 0 && (
-                        <div className='mt-2'>
-                          <p className='text-sm text-gray-600'>Interviewers:</p>
-                          <div className='flex flex-wrap gap-2 mt-1'>
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-600">Interviewers:</p>
+                          <div className="mt-1 flex flex-wrap gap-2">
                             {interview.contacts.map((contact) => (
                               <span
                                 key={contact.id}
-                                className='text-sm bg-gray-100 px-2 py-1 rounded'
+                                className="rounded bg-gray-100 px-2 py-1 text-sm"
                               >
                                 {contact.name}
                               </span>
@@ -460,9 +460,9 @@ export default function ApplicationContent({
                       )}
 
                       {interview.feedback && (
-                        <div className='mt-2'>
-                          <p className='text-sm text-gray-600'>Feedback:</p>
-                          <div className='text-sm text-gray-900 mt-1 whitespace-pre-wrap'>
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-600">Feedback:</p>
+                          <div className="mt-1 text-sm whitespace-pre-wrap text-gray-900">
                             {interview.feedback}
                           </div>
                         </div>
@@ -474,20 +474,20 @@ export default function ApplicationContent({
             </div>
 
             {/* Notes */}
-            <div className='bg-white rounded-lg shadow p-6'>
-              <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
                 Notes
               </h2>
 
               <Form {...noteForm}>
                 <form
                   onSubmit={noteForm.handleSubmit(handleAddNote)}
-                  className='mb-4'
+                  className="mb-4"
                 >
-                  <div className='space-y-3'>
+                  <div className="space-y-3">
                     <FormField
                       control={noteForm.control}
-                      name='content'
+                      name="content"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Add Note</FormLabel>
@@ -498,10 +498,10 @@ export default function ApplicationContent({
                         </FormItem>
                       )}
                     />
-                    <div className='flex justify-between items-end'>
+                    <div className="flex items-end justify-between">
                       <FormField
                         control={noteForm.control}
-                        name='type'
+                        name="type"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Type</FormLabel>
@@ -511,7 +511,7 @@ export default function ApplicationContent({
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder='Select a note type' />
+                                  <SelectValue placeholder="Select a note type" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
@@ -536,31 +536,31 @@ export default function ApplicationContent({
                           </FormItem>
                         )}
                       />
-                      <Button type='submit'>Add Note</Button>
+                      <Button type="submit">Add Note</Button>
                     </div>
                   </div>
                 </form>
               </Form>
 
               {application.notes.length === 0 ? (
-                <p className='text-gray-500 text-center py-4'>No notes yet.</p>
+                <p className="py-4 text-center text-gray-500">No notes yet.</p>
               ) : (
-                <div className='space-y-4'>
+                <div className="space-y-4">
                   {application.notes.map((note) => (
                     <div
                       key={note.id}
-                      className='border-l-4 border-blue-500 pl-4'
+                      className="border-l-4 border-blue-500 pl-4"
                     >
-                      <div className='flex justify-between items-start'>
-                        <div className='text-sm text-gray-900 whitespace-pre-wrap flex-1'>
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 text-sm whitespace-pre-wrap text-gray-900">
                           {note.content}
                         </div>
-                        <span className='text-xs text-gray-500 ml-2 flex-shrink-0'>
-                          {format(note.createdAt, 'MM/dd/yyyy')}
+                        <span className="ml-2 flex-shrink-0 text-xs text-gray-500">
+                          {format(note.createdAt, "MM/dd/yyyy")}
                         </span>
                       </div>
-                      <span className='inline-block mt-1 text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded'>
-                        {note.type.replace('_', ' ')}
+                      <span className="mt-1 inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
+                        {note.type.replace("_", " ")}
                       </span>
                     </div>
                   ))}
@@ -576,10 +576,10 @@ export default function ApplicationContent({
           </div>
 
           {/* Sidebar */}
-          <div className='space-y-6'>
+          <div className="space-y-6">
             {/* Resume Upload */}
-            <div className='bg-white rounded-lg shadow p-6'>
-              <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
                 Resume
               </h2>
               <FileUpload
@@ -594,40 +594,43 @@ export default function ApplicationContent({
                       }
                     : undefined
                 }
-                accept='.pdf,.doc,.docx'
+                accept=".pdf,.doc,.docx"
                 maxSize={10 * 1024 * 1024} // 10MB
                 applicationId={application.id}
                 stackButtons
-                className='flex-col gap-2'
+                className="flex-col gap-2"
               />
               {uploadError && (
-                <p className='text-red-600 text-sm mt-2'>{uploadError}</p>
+                <p className="mt-2 text-sm text-red-600">{uploadError}</p>
               )}
             </div>
 
             {/* Company Info */}
-            <div className='bg-white rounded-lg shadow p-6'>
-              <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
                 Company
               </h2>
-              <div className='space-y-3'>
+              <div className="space-y-3">
                 <div>
-                  <h3 className='text-sm font-medium text-gray-700'>Name</h3>
-                  <p className='text-sm text-gray-900'>
+                  <h3 className="text-sm font-medium text-gray-700">Name</h3>
+                  <Link
+                    href={`/dashboard/companies/${application.companyId}`}
+                    className="text-sm text-blue-600 hover:text-blue-800"
+                  >
                     {application.company.name}
-                  </p>
+                  </Link>
                 </div>
 
                 {application.company.website && (
                   <div>
-                    <h3 className='text-sm font-medium text-gray-700'>
+                    <h3 className="text-sm font-medium text-gray-700">
                       Website
                     </h3>
                     <a
                       href={application.company.website}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-sm text-blue-600 hover:text-blue-800'
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-blue-600 hover:text-blue-800"
                     >
                       Visit Website
                     </a>
@@ -636,10 +639,10 @@ export default function ApplicationContent({
 
                 {application.company.industry && (
                   <div>
-                    <h3 className='text-sm font-medium text-gray-700'>
+                    <h3 className="text-sm font-medium text-gray-700">
                       Industry
                     </h3>
-                    <p className='text-sm text-gray-900'>
+                    <p className="text-sm text-gray-900">
                       {application.company.industry}
                     </p>
                   </div>
@@ -647,19 +650,19 @@ export default function ApplicationContent({
 
                 {application.company.size && (
                   <div>
-                    <h3 className='text-sm font-medium text-gray-700'>Size</h3>
+                    <h3 className="text-sm font-medium text-gray-700">Size</h3>
                     <Badge className={getSizeColor(application.company.size)}>
-                      {application.company.size.replace('_', ' ')}
+                      {application.company.size.replace("_", " ")}
                     </Badge>
                   </div>
                 )}
 
                 {application.company.location && (
                   <div>
-                    <h3 className='text-sm font-medium text-gray-700'>
+                    <h3 className="text-sm font-medium text-gray-700">
                       Location
                     </h3>
-                    <p className='text-sm text-gray-900'>
+                    <p className="text-sm text-gray-900">
                       {application.company.location}
                     </p>
                   </div>
@@ -668,27 +671,29 @@ export default function ApplicationContent({
             </div>
 
             {/* Quick Actions */}
-            <div className='bg-white rounded-lg shadow p-6'>
-              <h2 className='text-xl font-semibold text-gray-900 mb-4'>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <h2 className="mb-4 text-xl font-semibold text-gray-900">
                 Quick Actions
               </h2>
-              <div className='space-y-3'>
-                <Button variant='outline' className='w-full' asChild>
+              <div className="space-y-3">
+                <Button variant="outline" className="w-full" asChild>
                   <Link
                     href={`/dashboard/applications/${application.id}/interviews/new`}
                   >
                     Schedule Interview
                   </Link>
                 </Button>
-                <Button variant='outline' className='w-full' asChild>
-                  <Link href={`/contacts/new?applicationId=${application.id}`}>
+                <Button variant="outline" className="w-full" asChild>
+                  <Link
+                    href={`/dashboard/contacts/new?companyId=${application.company.id}`}
+                  >
                     Add Contact
                   </Link>
                 </Button>
                 {!editing && (
                   <Button
-                    variant='outline'
-                    className='w-full'
+                    variant="outline"
+                    className="w-full"
                     onClick={() => setEditing(true)}
                   >
                     Edit Application
