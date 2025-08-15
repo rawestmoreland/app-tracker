@@ -87,7 +87,7 @@ export function Header() {
                   >
                     My Companies
                   </Link>
-                  <Link
+                  {/* <Link
                     href="/dashboard/interviews"
                     aria-current={
                       isCurrentPath("/dashboard/interviews")
@@ -102,7 +102,7 @@ export function Header() {
                     )}
                   >
                     My Interviews
-                  </Link>
+                  </Link> */}
                 </div>
               )}
             </div>
@@ -139,9 +139,9 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard/companies">My Companies</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
+                    {/* <DropdownMenuItem asChild>
                       <Link href="/dashboard/interviews">My Interviews</Link>
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link
