@@ -1,17 +1,17 @@
 'use server';
 
-import { prisma } from '@/lib/prisma';
 import { getSignedInUser } from '@/app/lib/auth';
-import { generateSankeyData, SankeyData } from '../application-flow';
+import { ActivityTracker } from '@/lib/services/activity-tracker';
+import { SankeyData } from '../application-flow';
 import { ApplicationStatus } from '@prisma/client';
 
 /**
  * Get sankey diagram data for the current user's application flow
  */
-export async function getUserApplicationFlowData(): Promise<{ 
-  success: boolean; 
-  data?: SankeyData; 
-  error?: string 
+export async function getUserApplicationFlowData(days?: number): Promise<{
+  success: boolean;
+  data?: SankeyData;
+  error?: string;
 }> {
   try {
     const { dbUser } = await getSignedInUser();
@@ -20,25 +20,8 @@ export async function getUserApplicationFlowData(): Promise<{
       return { success: false, error: 'Unauthorized' };
     }
 
-    // Get all status transitions for the user
-    const transitions = await prisma.applicationStatusTransition.groupBy({
-      by: ['fromStatus', 'toStatus'],
-      where: {
-        userId: dbUser.id,
-      },
-      _count: {
-        id: true,
-      },
-    });
-
-    // Transform the data for sankey diagram
-    const sankeyTransitions = transitions.map(transition => ({
-      fromStatus: transition.fromStatus,
-      toStatus: transition.toStatus,
-      count: transition._count.id,
-    }));
-
-    const sankeyData = generateSankeyData(sankeyTransitions);
+    // Use the new ActivityTracker method for fast Sankey data generation
+    const sankeyData = await ActivityTracker.generateUserSankeyData(dbUser.id, days);
 
     return { success: true, data: sankeyData };
   } catch (error) {
@@ -50,7 +33,7 @@ export async function getUserApplicationFlowData(): Promise<{
 /**
  * Get conversion rates at each stage of the application process
  */
-export async function getApplicationConversionRates(): Promise<{
+export async function getApplicationConversionRates(days?: number): Promise<{
   success: boolean;
   data?: Array<{
     stage: ApplicationStatus;
@@ -68,84 +51,60 @@ export async function getApplicationConversionRates(): Promise<{
       return { success: false, error: 'Unauthorized' };
     }
 
-    // Get all applications and their final status
-    const applications = await prisma.application.findMany({
-      where: {
-        userId: dbUser.id,
-      },
-      select: {
-        id: true,
-        status: true,
-        statusTransitions: {
-          orderBy: {
-            transitionAt: 'asc',
-          },
-        },
-      },
-    });
+    // Get status transitions using the new ActivityTracker
+    const transitions = await ActivityTracker.getUserStatusTransitions(dbUser.id, days || 90);
+
+    // Import the progression analysis function
+    const { isProgressiveTransition } = await import('@/lib/application-flow');
 
     // Analyze progression through each stage
-    const stageAnalysis = new Map<ApplicationStatus, {
-      applicationsAtStage: number;
-      progressedToNext: number;
-      droppedOff: number;
-    }>();
-
-    applications.forEach(app => {
-      const transitions = app.statusTransitions;
-      
-      // Track which stages this application went through
-      const stagesReached = new Set<ApplicationStatus>();
-      
-      // Add initial stage if there are transitions
-      if (transitions.length > 0) {
-        const firstTransition = transitions[0];
-        if (firstTransition.fromStatus) {
-          stagesReached.add(firstTransition.fromStatus);
-        }
+    const stageAnalysis = new Map<
+      ApplicationStatus,
+      {
+        applicationsAtStage: number;
+        progressedToNext: number;
+        droppedOff: number;
       }
-      
-      // Add all stages from transitions
-      transitions.forEach(transition => {
-        stagesReached.add(transition.toStatus);
-      });
+    >();
 
-      // For each stage reached, determine if application progressed further
-      Array.from(stagesReached).forEach(stage => {
-        if (!stageAnalysis.has(stage)) {
-          stageAnalysis.set(stage, {
+    // Count transitions from each stage
+    transitions.forEach(({ fromStatus, toStatus, count }) => {
+      if (fromStatus) {
+        // Initialize stage if not exists
+        if (!stageAnalysis.has(fromStatus)) {
+          stageAnalysis.set(fromStatus, {
             applicationsAtStage: 0,
             progressedToNext: 0,
             droppedOff: 0,
           });
         }
 
-        const analysis = stageAnalysis.get(stage)!;
-        analysis.applicationsAtStage++;
-
-        // Check if application progressed beyond this stage
-        const hasProgressedBeyond = transitions.some(transition => 
-          transition.fromStatus === stage && transition.isProgression
-        );
-
-        if (hasProgressedBeyond) {
-          analysis.progressedToNext++;
+        const analysis = stageAnalysis.get(fromStatus)!;
+        analysis.applicationsAtStage += count;
+        
+        // Count as progression if this is a positive transition
+        const isProgression = isProgressiveTransition(fromStatus, toStatus);
+        if (isProgression) {
+          analysis.progressedToNext += count;
         } else {
-          analysis.droppedOff++;
+          analysis.droppedOff += count;
         }
-      });
+      }
     });
 
     // Convert to array with conversion rates
-    const conversionData = Array.from(stageAnalysis.entries()).map(([stage, analysis]) => ({
-      stage,
-      applicationsAtStage: analysis.applicationsAtStage,
-      progressedToNext: analysis.progressedToNext,
-      conversionRate: analysis.applicationsAtStage > 0 
-        ? (analysis.progressedToNext / analysis.applicationsAtStage) * 100 
-        : 0,
-      droppedOff: analysis.droppedOff,
-    }));
+    const conversionData = Array.from(stageAnalysis.entries()).map(
+      ([stage, analysis]) => ({
+        stage,
+        applicationsAtStage: analysis.applicationsAtStage,
+        progressedToNext: analysis.progressedToNext,
+        conversionRate:
+          analysis.applicationsAtStage > 0
+            ? (analysis.progressedToNext / analysis.applicationsAtStage) * 100
+            : 0,
+        droppedOff: analysis.droppedOff,
+      }),
+    ).filter(data => data.applicationsAtStage > 0); // Only include stages with data
 
     return { success: true, data: conversionData };
   } catch (error) {
@@ -157,7 +116,7 @@ export async function getApplicationConversionRates(): Promise<{
 /**
  * Get summary statistics for hiring success
  */
-export async function getHiringSuccessStats(): Promise<{
+export async function getHiringSuccessStats(days?: number): Promise<{
   success: boolean;
   data?: {
     totalApplications: number;
@@ -175,39 +134,53 @@ export async function getHiringSuccessStats(): Promise<{
       return { success: false, error: 'Unauthorized' };
     }
 
-    // Get all applications
-    const applications = await prisma.application.findMany({
+    // Get transition statistics using the new ActivityTracker
+    const transitionStats = await ActivityTracker.getStatusTransitionStats(dbUser.id, days || 90);
+    
+    // Calculate total applications from initial status transitions
+    const transitions = await ActivityTracker.getUserStatusTransitions(dbUser.id, days || 90);
+    const initialApplications = transitions
+      .filter(t => t.fromStatus === null) // Initial applications
+      .reduce((sum, t) => sum + t.count, 0);
+
+    // Get hired count from final statuses
+    const totalHired = transitionStats.finalStatuses['ACCEPTED'] || 0;
+    const hiringRate = initialApplications > 0 ? (totalHired / initialApplications) * 100 : 0;
+
+    // Calculate average time to hire using activity data
+    // Get all applications that were accepted and their timelines
+    const { prisma } = await import('@/lib/prisma');
+    const acceptedApplications = await prisma.application.findMany({
       where: {
         userId: dbUser.id,
+        status: 'ACCEPTED',
+        ...(days && {
+          appliedAt: {
+            gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+          }
+        })
       },
       select: {
         id: true,
-        status: true,
         appliedAt: true,
-        statusTransitions: {
+        activities: {
           where: {
-            toStatus: 'ACCEPTED',
+            type: 'APPLICATION_STATUS_CHANGED',
+            toStatus: 'ACCEPTED'
           },
-          orderBy: {
-            transitionAt: 'desc',
-          },
+          orderBy: { createdAt: 'desc' },
           take: 1,
-        },
-      },
+          select: { createdAt: true }
+        }
+      }
     });
 
-    const totalApplications = applications.length;
-    const hiredApplications = applications.filter(app => app.status === 'ACCEPTED');
-    const totalHired = hiredApplications.length;
-    const hiringRate = totalApplications > 0 ? (totalHired / totalApplications) * 100 : 0;
-
-    // Calculate average time to hire
     let totalTimeToHire = 0;
     let hiredCount = 0;
-    
-    hiredApplications.forEach(app => {
-      if (app.statusTransitions.length > 0) {
-        const hiredDate = app.statusTransitions[0].transitionAt;
+
+    acceptedApplications.forEach((app) => {
+      if (app.activities.length > 0) {
+        const hiredDate = app.activities[0].createdAt;
         const appliedDate = app.appliedAt;
         const timeDiff = hiredDate.getTime() - appliedDate.getTime();
         const daysDiff = timeDiff / (1000 * 3600 * 24);
@@ -218,31 +191,23 @@ export async function getHiringSuccessStats(): Promise<{
 
     const averageTimeToHire = hiredCount > 0 ? totalTimeToHire / hiredCount : 0;
 
-    // Find most common drop-off stage
-    const rejectedApplications = applications.filter(app => 
-      ['REJECTED', 'WITHDRAWN', 'GHOSTED', 'POSITION_FILLED'].includes(app.status)
-    );
-
-    const dropOffCounts = new Map<ApplicationStatus, number>();
-    rejectedApplications.forEach(app => {
-      dropOffCounts.set(app.status as ApplicationStatus, 
-        (dropOffCounts.get(app.status as ApplicationStatus) || 0) + 1
-      );
-    });
-
+    // Find most common drop-off stage from transition stats
+    const negativeStatuses: ApplicationStatus[] = ['REJECTED', 'WITHDRAWN', 'GHOSTED', 'POSITION_FILLED'];
     let mostCommonDropOffStage: ApplicationStatus | null = null;
     let maxCount = 0;
-    dropOffCounts.forEach((count, stage) => {
+
+    negativeStatuses.forEach(status => {
+      const count = transitionStats.finalStatuses[status] || 0;
       if (count > maxCount) {
         maxCount = count;
-        mostCommonDropOffStage = stage;
+        mostCommonDropOffStage = status;
       }
     });
 
     return {
       success: true,
       data: {
-        totalApplications,
+        totalApplications: initialApplications,
         totalHired,
         hiringRate,
         averageTimeToHire,

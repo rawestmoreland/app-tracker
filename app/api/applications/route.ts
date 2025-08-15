@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { EventType, EventSource } from '@prisma/client';
-import { getStageOrder } from '@/lib/application-flow';
+import { ActivityTracker } from '@/lib/services/activity-tracker';
 
 export async function GET() {
   try {
@@ -80,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create application and initial activity log entry in a transaction
+    // Create application in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const application = await tx.application.create({
         data: {
@@ -115,22 +115,23 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      // Create initial status transition for sankey diagram tracking
-      await tx.applicationStatusTransition.create({
-        data: {
-          fromStatus: null, // Initial transition has no "from" status
-          toStatus: status || 'APPLIED',
-          transitionAt: new Date(appliedAt),
-          reason: 'Initial application submission',
-          isProgression: true, // Initial application is always progressive
-          stageOrder: getStageOrder(status || 'APPLIED'),
-          applicationId: application.id,
-          userId: dbUser.id,
-        },
-      });
-
       return application;
     });
+
+    // Track both the application creation and initial status using consolidated activity tracking
+    await Promise.all([
+      ActivityTracker.trackApplicationCreated(
+        result.id,
+        result.title,
+        result.company.name
+      ),
+      ActivityTracker.trackApplicationInitialStatus(
+        result.id,
+        result.title,
+        status || 'APPLIED',
+        new Date(appliedAt)
+      ),
+    ]);
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

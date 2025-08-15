@@ -13,13 +13,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { addContact } from "@/lib/actions/contact-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Company } from "@prisma/client";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { addContact } from "../_actions/add-contact";
 
 export default function NewContactContent({
   companies,
