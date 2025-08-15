@@ -13,7 +13,10 @@ import { DashboardApplication } from "@/lib/types/dashboard";
 import { getRemotePolicyColor } from "@/lib/utils";
 import { StatusDropdown } from "./status-dropdown";
 import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
-import { applicationStatusOptions, remoteTypeOptions } from "@/lib/filter-options";
+import {
+  applicationStatusOptions,
+  remoteTypeOptions,
+} from "@/lib/filter-options";
 import {
   ColumnFiltersState,
   createColumnHelper,
@@ -23,8 +26,10 @@ import {
   getFacetedUniqueValues,
   getFilteredRowModel,
   getSortedRowModel,
+  getPaginationRowModel,
   SortingState,
   useReactTable,
+  PaginationState,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { ChevronDown, ChevronsUpDown, ChevronUp, PlusIcon } from "lucide-react";
@@ -38,6 +43,10 @@ export default function ApplicationsTable({
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const columnHelper = createColumnHelper<DashboardApplication>();
 
@@ -178,9 +187,12 @@ export default function ApplicationsTable({
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
+    getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
     state: {
       sorting,
       columnFilters,
+      pagination,
     },
   });
 
@@ -285,20 +297,63 @@ export default function ApplicationsTable({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="px-3 py-4 sm:px-6">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="flex items-center justify-between space-x-2 py-4 px-4 sm:px-6">
+        <div className="flex items-center space-x-2">
+          <div className="text-sm text-muted-foreground">
+            Showing{" "}
+            {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}{" "}
+            to{" "}
+            {Math.min(
+              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+              table.getFilteredRowModel().rows.length
+            )}{" "}
+            of {table.getFilteredRowModel().rows.length} applications
+          </div>
+        </div>
+        <div className="flex items-center space-x-2">
+          <div className="text-sm text-muted-foreground">
+            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
