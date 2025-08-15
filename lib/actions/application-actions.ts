@@ -7,6 +7,7 @@ import { getSignedInUser } from '@/app/lib/auth';
 import { R2Service } from '../r2';
 import { NoteFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-note-schema';
 import { ApplicationFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-application-schema';
+import { ActivityTracker } from '../services/activity-tracker';
 
 // Helper function to map ApplicationStatus to EventType
 function getEventTypeFromStatus(status: ApplicationStatus): EventType {
@@ -56,7 +57,7 @@ function getEventTitleFromStatus(status: ApplicationStatus): string {
 
 export async function updateApplicationStatus(
   applicationId: string,
-  status: ApplicationStatus
+  status: ApplicationStatus,
 ) {
   try {
     const { dbUser } = await getSignedInUser();
@@ -95,22 +96,34 @@ export async function updateApplicationStatus(
       },
     });
 
-    // Create activity log entry if status changed
+    // Create activity log entry and status transition if status changed
     if (statusChanged) {
+      const transitionTime = new Date();
+
+      // Create traditional activity log entry
       await prisma.applicationEvent.create({
         data: {
           type: getEventTypeFromStatus(status),
           title: getEventTitleFromStatus(status),
           content: `Status changed from ${existingApplication.status.replace(
             /_/g,
-            ' '
+            ' ',
           )} to ${status.replace(/_/g, ' ')}`,
-          occurredAt: new Date(),
+          occurredAt: transitionTime,
           source: EventSource.OTHER,
           applicationId,
           userId: dbUser.id,
         },
       });
+
+      // Create the activity entry
+      await ActivityTracker.trackApplicationStatusChanged(
+        applicationId,
+        updatedApplication.title,
+        existingApplication.status,
+        status,
+        `Status update via application interface`,
+      );
     }
 
     // Revalidate the dashboard page
@@ -133,7 +146,7 @@ export async function addActivityLogEntry(
     content?: string;
     occurredAt: Date;
     source: EventSource;
-  }
+  },
 ) {
   try {
     const { dbUser } = await getSignedInUser();
@@ -242,6 +255,12 @@ export async function addNote(id: string, data: NoteFormData) {
         },
       },
     });
+
+    await ActivityTracker.trackNoteCreated(
+      note.id,
+      note.type,
+      note.application?.company.name,
+    );
 
     revalidatePath(`/dashboard/applications/${id}`);
     return { success: true, note };

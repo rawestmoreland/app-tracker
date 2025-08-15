@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { EventType, EventSource } from '@prisma/client';
+import { ActivityTracker } from '@/lib/services/activity-tracker';
 
 export async function GET() {
   try {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create application and initial activity log entry in a transaction
+    // Create application in a transaction
     const result = await prisma.$transaction(async (tx) => {
       const application = await tx.application.create({
         data: {
@@ -116,6 +117,21 @@ export async function POST(request: NextRequest) {
 
       return application;
     });
+
+    // Track both the application creation and initial status using consolidated activity tracking
+    await Promise.all([
+      ActivityTracker.trackApplicationCreated(
+        result.id,
+        result.title,
+        result.company.name
+      ),
+      ActivityTracker.trackApplicationInitialStatus(
+        result.id,
+        result.title,
+        status || 'APPLIED',
+        new Date(appliedAt)
+      ),
+    ]);
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {

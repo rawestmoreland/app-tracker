@@ -37,6 +37,7 @@ model User {
   notes        Note[]
   interviews   Interview[]
   events       ApplicationEvent[]
+  activities   Activity[]
 
   Offer Offer[]
 
@@ -64,6 +65,7 @@ model Company {
   // Relations
   applications Application[]
   contacts     Contact[]
+  activities   Activity[]
   creator      User?         @relation("CreatedCompanies", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("companies")
@@ -121,6 +123,7 @@ model Application {
   company    Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
   interviews Interview[]
   notes      Note[]
+  activities Activity[]
   Offer      Offer[]
   events     ApplicationEvent[] // Track all communication events
 
@@ -145,6 +148,7 @@ model Contact {
   // Relations
   user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   company    Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  activities Activity[]
   interviews Interview[]
 
   @@map("contacts")
@@ -170,6 +174,7 @@ model Interview {
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   contacts    Contact[]
+  activities  Activity[]
   notes       Note[]
 
   @@map("interviews")
@@ -191,6 +196,7 @@ model Note {
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   interview   Interview?   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  activities  Activity[]
 
   @@map("notes")
 }
@@ -269,6 +275,7 @@ model Offer {
   // Relations
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  activities  Activity[]
 
   @@map("offers")
 }
@@ -292,6 +299,62 @@ model ApplicationEvent {
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("application_events")
+}
+
+
+model Activity {
+  id          String       @id @default(cuid())
+  type        ActivityType
+  action      String       // "created", "updated", "deleted", "viewed", etc.
+  entityType  EntityType   // What was acted upon
+  entityId    String       // ID of the entity that was acted upon
+  entityName  String?      // Display name of the entity (for easier querying)
+  
+  // Metadata about the activity
+  description String       // Human-readable description: "Created application for Software Engineer at Google"
+  metadata    Json?        // Additional data about the activity (changes made, etc.)
+  
+  // Dedicated columns for status transitions (for fast querying)
+  fromStatus    ApplicationStatus? // Previous status (null for initial)
+  toStatus      ApplicationStatus? // New status (only for status change activities)
+  isProgression Boolean?           // Whether this represents forward progress
+  stageOrder    Int?               // Order in the application flow
+  
+  // Context
+  ipAddress   String?      // IP address where action occurred
+  userAgent   String?      // User agent string
+  platform    Platform?    // Web, mobile, etc.
+  
+  createdAt   DateTime     @default(now())
+  
+  // Foreign keys
+  userId      String
+  
+  // Optional relations to specific entities (for easier querying)
+  applicationId String?
+  companyId     String?
+  contactId     String?
+  interviewId   String?
+  noteId        String?
+  offerId       String?
+  
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  contact     Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  interview   Interview?   @relation(fields: [interviewId], references: [id], onDelete: SetNull)
+  note        Note?        @relation(fields: [noteId], references: [id], onDelete: SetNull)
+  offer       Offer?       @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  
+  @@map("activities")
+  @@index([userId, createdAt])
+  @@index([userId, entityType, createdAt])
+  @@index([userId, type, createdAt])
+  @@index([userId, fromStatus, toStatus])
+  @@index([userId, toStatus, createdAt])
+  @@index([applicationId, type, createdAt])
+  @@index([type, fromStatus, toStatus])
 }
 
 // Enums
@@ -466,5 +529,107 @@ enum SignupReason {
   BETWEEN_JOBS
   JUST_GRADUATED
   EMPLOYED_AND_LOOKING
+  OTHER
+}
+
+enum ActivityType {
+  // Account & Profile
+  ACCOUNT_CREATED
+  PROFILE_UPDATED
+  SETTINGS_CHANGED
+  PASSWORD_CHANGED
+  
+  // Application Management
+  APPLICATION_CREATED
+  APPLICATION_UPDATED
+  APPLICATION_DELETED
+  APPLICATION_VIEWED
+  APPLICATION_STATUS_CHANGED
+  APPLICATION_ARCHIVED
+  
+  // Company Management
+  COMPANY_CREATED
+  COMPANY_UPDATED
+  COMPANY_DELETED
+  COMPANY_VIEWED
+  
+  // Contact Management
+  CONTACT_CREATED
+  CONTACT_UPDATED
+  CONTACT_DELETED
+  CONTACT_VIEWED
+  
+  // Interview Management
+  INTERVIEW_CREATED
+  INTERVIEW_UPDATED
+  INTERVIEW_DELETED
+  INTERVIEW_COMPLETED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_RESCHEDULED
+  INTERVIEW_CANCELLED
+  
+  // Note Management
+  NOTE_CREATED
+  NOTE_UPDATED
+  NOTE_DELETED
+  NOTE_VIEWED
+  
+  // Offer Management
+  OFFER_CREATED
+  OFFER_UPDATED
+  OFFER_DELETED
+  OFFER_ACCEPTED
+  OFFER_DECLINED
+  OFFER_NEGOTIATED
+  
+  // Document Management
+  RESUME_UPLOADED
+  RESUME_UPDATED
+  RESUME_DELETED
+  DOCUMENT_VIEWED
+  
+  // Dashboard & Analytics
+  DASHBOARD_VIEWED
+  ANALYTICS_VIEWED
+  REPORT_GENERATED
+  DATA_EXPORTED
+  
+  // Feature Requests
+  FEATURE_REQUEST_CREATED
+  FEATURE_REQUEST_UPDATED
+  
+  // System Events
+  LOGIN
+  LOGOUT
+  SESSION_EXPIRED
+  
+  // Collaboration
+  DATA_SHARED
+  PERMISSIONS_CHANGED
+  
+  // Other
+  OTHER
+}
+
+enum EntityType {
+  USER
+  APPLICATION
+  COMPANY
+  CONTACT
+  INTERVIEW
+  NOTE
+  OFFER
+  FEATURE_REQUEST
+  DOCUMENT
+  DASHBOARD
+  SETTINGS
+  OTHER
+}
+
+enum Platform {
+  WEB
+  MOBILE_IOS
+  MOBILE_ANDROID
+  API
   OTHER
 }
