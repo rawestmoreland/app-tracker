@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { CompanyVisibility } from '@prisma/client';
 import { getSignedInUser } from '@/app/lib/auth';
+import { ActivityTracker } from '@/lib/services/activity-tracker';
 
 export async function GET() {
   try {
@@ -146,6 +147,9 @@ export async function POST(request: NextRequest) {
         createdBy: dbUser.id,
       },
     });
+
+    // Track the company creation activity
+    await ActivityTracker.trackCompanyCreated(company.id, company.name);
 
     return NextResponse.json(company, { status: 201 });
   } catch (error) {

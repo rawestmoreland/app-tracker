@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
+import { ActivityTracker } from '@/lib/services/activity-tracker';
 
 export async function GET() {
   try {
@@ -84,6 +85,13 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Track the contact creation activity
+    await ActivityTracker.trackContactCreated(
+      contact.id,
+      contact.name,
+      contact.company?.name
+    );
 
     return NextResponse.json(contact, { status: 201 });
   } catch (error) {
