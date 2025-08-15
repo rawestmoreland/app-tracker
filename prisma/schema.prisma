@@ -37,6 +37,7 @@ model User {
   notes        Note[]
   interviews   Interview[]
   events       ApplicationEvent[]
+  statusTransitions ApplicationStatusTransition[]
 
   Offer Offer[]
 
@@ -123,6 +124,7 @@ model Application {
   notes      Note[]
   Offer      Offer[]
   events     ApplicationEvent[] // Track all communication events
+  statusTransitions ApplicationStatusTransition[] // Track status progression for sankey diagrams
 
   @@map("applications")
 }
@@ -292,6 +294,27 @@ model ApplicationEvent {
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("application_events")
+}
+
+model ApplicationStatusTransition {
+  id            String            @id @default(cuid())
+  fromStatus    ApplicationStatus? // null for initial status (first transition to APPLIED)
+  toStatus      ApplicationStatus
+  transitionAt  DateTime          @default(now())
+  reason        String?           // Optional reason for the transition
+  isProgression Boolean           @default(true) // true for forward movement, false for rejections/withdrawals
+  stageOrder    Int?              // Order in the typical flow (for sankey diagram positioning)
+  createdAt     DateTime          @default(now())
+
+  // Foreign keys
+  applicationId String
+  userId        String
+
+  // Relations
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("application_status_transitions")
 }
 
 // Enums

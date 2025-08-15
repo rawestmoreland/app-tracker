@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { EventType, EventSource } from '@prisma/client';
+import { getStageOrder } from '@/lib/application-flow';
 
 export async function GET() {
   try {
@@ -109,6 +110,20 @@ export async function POST(request: NextRequest) {
           content: `Application submitted for ${title} at ${application.company.name}`,
           occurredAt: new Date(appliedAt),
           source: EventSource.OTHER,
+          applicationId: application.id,
+          userId: dbUser.id,
+        },
+      });
+
+      // Create initial status transition for sankey diagram tracking
+      await tx.applicationStatusTransition.create({
+        data: {
+          fromStatus: null, // Initial transition has no "from" status
+          toStatus: status || 'APPLIED',
+          transitionAt: new Date(appliedAt),
+          reason: 'Initial application submission',
+          isProgression: true, // Initial application is always progressive
+          stageOrder: getStageOrder(status || 'APPLIED'),
           applicationId: application.id,
           userId: dbUser.id,
         },

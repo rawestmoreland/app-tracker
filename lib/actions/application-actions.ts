@@ -7,6 +7,7 @@ import { getSignedInUser } from '@/app/lib/auth';
 import { R2Service } from '../r2';
 import { NoteFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-note-schema';
 import { ApplicationFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-application-schema';
+import { isProgressiveTransition, getStageOrder } from '../application-flow';
 
 // Helper function to map ApplicationStatus to EventType
 function getEventTypeFromStatus(status: ApplicationStatus): EventType {
@@ -95,8 +96,11 @@ export async function updateApplicationStatus(
       },
     });
 
-    // Create activity log entry if status changed
+    // Create activity log entry and status transition if status changed
     if (statusChanged) {
+      const transitionTime = new Date();
+
+      // Create traditional activity log entry
       await prisma.applicationEvent.create({
         data: {
           type: getEventTypeFromStatus(status),
@@ -105,8 +109,22 @@ export async function updateApplicationStatus(
             /_/g,
             ' '
           )} to ${status.replace(/_/g, ' ')}`,
-          occurredAt: new Date(),
+          occurredAt: transitionTime,
           source: EventSource.OTHER,
+          applicationId,
+          userId: dbUser.id,
+        },
+      });
+
+      // Create status transition entry for sankey diagram tracking
+      await prisma.applicationStatusTransition.create({
+        data: {
+          fromStatus: existingApplication.status,
+          toStatus: status,
+          transitionAt: transitionTime,
+          reason: `Status update via application interface`,
+          isProgression: isProgressiveTransition(existingApplication.status, status),
+          stageOrder: getStageOrder(status),
           applicationId,
           userId: dbUser.id,
         },
