@@ -6,7 +6,22 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CoffeeIcon, LaptopMinimalCheckIcon } from "lucide-react";
+import {
+  CircleQuestionMarkIcon,
+  CoffeeIcon,
+  LaptopMinimalCheckIcon,
+} from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { FeedbackDialog } from "@/components/feedback-dialog";
 
 export function Header() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -89,6 +104,7 @@ export function Header() {
                 Donate
               </Link>
             </Button>
+            <FeedbackDialog />
             <UserButton />
           </div>
         </div>

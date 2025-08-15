@@ -48,9 +48,11 @@ export default function NewContactContent({
     const { error, message, contact } = await addContact(data);
 
     if (error) {
-      toast.error(message);
+      toast(message, {
+        description: "Please try again.",
+      });
     } else {
-      toast.success(message);
+      toast(message);
       router.push(`/dashboard/companies/${contact?.companyId}`);
     }
   };

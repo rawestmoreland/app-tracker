@@ -41,6 +41,8 @@ model User {
   Offer Offer[]
 
   Company Company[] @relation("CreatedCompanies")
+
+  FeatureRequest FeatureRequest[]
 }
 
 model Company {
@@ -65,6 +67,18 @@ model Company {
   creator      User?         @relation("CreatedCompanies", fields: [createdBy], references: [id], onDelete: SetNull)
 
   @@map("companies")
+}
+
+model FeatureRequest {
+  id String @id @default(cuid())
+  description String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    FeatureRequestStatus @default(PENDING)
+
+  @@map("feature_requests")
 }
 
 model Application {
@@ -426,6 +440,13 @@ enum EventType {
   NEGOTIATION_STARTED // Salary negotiation started
   CONTRACT_SENT // Employment contract sent
   OTHER // Other communication
+}
+
+enum FeatureRequestStatus {
+  PENDING
+  IMPLEMENTED
+  ADDED_TO_ROADMAP
+  REJECTED
 }
 
 enum EventSource {
