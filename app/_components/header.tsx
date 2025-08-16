@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import { UserButton, useAuth } from "@clerk/nextjs";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { UserButton, useAuth } from '@clerk/nextjs';
+import Link from 'next/link';
+import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   CircleQuestionMarkIcon,
   CoffeeIcon,
   LaptopMinimalCheckIcon,
   MenuIcon,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -19,16 +19,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { FeedbackDialog } from "@/components/feedback-dialog";
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { FeedbackDialog } from '@/components/feedback-dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 
 export function Header() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -62,13 +62,13 @@ export function Header() {
                   <Link
                     href="/dashboard"
                     aria-current={
-                      isCurrentPath("/dashboard") ? "page" : undefined
+                      isCurrentPath('/dashboard') ? 'page' : undefined
                     }
                     className={cn(
-                      isCurrentPath("/dashboard")
-                        ? "border-indigo-600 text-gray-900"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                      isCurrentPath('/dashboard')
+                        ? 'border-indigo-600 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                      'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     )}
                   >
                     My Applications
@@ -76,18 +76,18 @@ export function Header() {
                   <Link
                     href="/dashboard/companies"
                     aria-current={
-                      isCurrentPath("/dashboard/companies") ? "page" : undefined
+                      isCurrentPath('/dashboard/companies') ? 'page' : undefined
                     }
                     className={cn(
-                      isCurrentPath("/dashboard/companies")
-                        ? "border-indigo-600 text-gray-900"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                      isCurrentPath('/dashboard/companies')
+                        ? 'border-indigo-600 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                      'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     )}
                   >
                     My Companies
                   </Link>
-                  <Link
+                  {/* <Link
                     href="/dashboard/activity"
                     aria-current={
                       isCurrentPath("/dashboard/activity") ? "page" : undefined
@@ -100,7 +100,7 @@ export function Header() {
                     )}
                   >
                     Activity
-                  </Link>
+                  </Link> */}
                   {/* <Link
                     href="/dashboard/interviews"
                     aria-current={

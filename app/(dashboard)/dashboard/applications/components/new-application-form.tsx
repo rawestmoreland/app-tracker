@@ -34,6 +34,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { ApplicationStatus, Company, RemoteType } from '@prisma/client';
 import { ApplicationFormData } from '../lib/new-application-schema';
 import { startCase } from 'lodash';
+import { TiptapEditor } from '@/components/tiptap-editor';
 
 export default function ApplicationForm({
   form,
@@ -53,19 +54,19 @@ export default function ApplicationForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleSubmit)}
-        className='flex flex-col gap-4'
+        className="flex flex-col gap-4"
       >
         <FormField
           control={form.control}
-          name='title'
+          name="title"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Job Title *</FormLabel>
               <FormControl>
                 <Input
-                  type='text'
+                  type="text"
                   {...field}
-                  placeholder='e.g., Senior Software Engineer'
+                  placeholder="e.g., Senior Software Engineer"
                 />
               </FormControl>
               <FormMessage />
@@ -74,7 +75,7 @@ export default function ApplicationForm({
         />
         <FormField
           control={form.control}
-          name='companyId'
+          name="companyId"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Company *</FormLabel>
@@ -86,17 +87,17 @@ export default function ApplicationForm({
                   }))}
                   value={field.value}
                   onValueChange={field.onChange}
-                  placeholder='Select a company'
-                  searchPlaceholder='Search companies...'
-                  emptyText='No company found.'
-                  className='w-full'
+                  placeholder="Select a company"
+                  searchPlaceholder="Search companies..."
+                  emptyText="No company found."
+                  className="w-full"
                 />
               </FormControl>
               <FormDescription>
                 Don&apos;t see your company?{' '}
                 <Link
-                  href='/dashboard/companies/new?from=applications/new'
-                  className='text-blue-600 hover:text-blue-800'
+                  href="/dashboard/companies/new?from=applications/new"
+                  className="text-blue-600 hover:text-blue-800"
                 >
                   Add it here
                 </Link>
@@ -108,15 +109,15 @@ export default function ApplicationForm({
 
         <FormField
           control={form.control}
-          name='description'
+          name="description"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Job Description</FormLabel>
               <FormControl>
-                <Textarea
-                  rows={6}
-                  {...field}
-                  placeholder='Enter job description with line breaks as needed...'
+                <TiptapEditor
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Enter job description with line breaks as needed..."
                 />
               </FormControl>
               <FormMessage />
@@ -124,15 +125,15 @@ export default function ApplicationForm({
           )}
         />
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
-            name='jobUrl'
+            name="jobUrl"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Job URL</FormLabel>
                 <FormControl>
-                  <Input type='url' {...field} placeholder='https://...' />
+                  <Input type="url" {...field} placeholder="https://..." />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -141,7 +142,7 @@ export default function ApplicationForm({
 
           <FormField
             control={form.control}
-            name='currency'
+            name="currency"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Currency</FormLabel>
@@ -150,17 +151,17 @@ export default function ApplicationForm({
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger className='w-full'>
-                      <SelectValue placeholder='Select currency' />
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value='USD'>USD ($)</SelectItem>
-                    <SelectItem value='EUR'>EUR (€)</SelectItem>
-                    <SelectItem value='GBP'>GBP (£)</SelectItem>
-                    <SelectItem value='CAD'>CAD (C$)</SelectItem>
-                    <SelectItem value='AUD'>AUD (A$)</SelectItem>
-                    <SelectItem value='JPY'>JPY (¥)</SelectItem>
+                    <SelectItem value="USD">USD ($)</SelectItem>
+                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                    <SelectItem value="GBP">GBP (£)</SelectItem>
+                    <SelectItem value="CAD">CAD (C$)</SelectItem>
+                    <SelectItem value="AUD">AUD (A$)</SelectItem>
+                    <SelectItem value="JPY">JPY (¥)</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -169,23 +170,23 @@ export default function ApplicationForm({
           />
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
-            name='lowSalary'
+            name="lowSalary"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Low Salary</FormLabel>
                 <FormControl>
                   <Input
-                    type='number'
+                    type="number"
                     {...field}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined
+                        e.target.value ? Number(e.target.value) : undefined,
                       )
                     }
-                    placeholder='e.g., 80000'
+                    placeholder="e.g., 80000"
                   />
                 </FormControl>
                 <FormDescription>
@@ -198,20 +199,20 @@ export default function ApplicationForm({
 
           <FormField
             control={form.control}
-            name='highSalary'
+            name="highSalary"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>High Salary</FormLabel>
                 <FormControl>
                   <Input
-                    type='number'
+                    type="number"
                     {...field}
                     onChange={(e) =>
                       field.onChange(
-                        e.target.value ? Number(e.target.value) : undefined
+                        e.target.value ? Number(e.target.value) : undefined,
                       )
                     }
-                    placeholder='e.g., 120000'
+                    placeholder="e.g., 120000"
                   />
                 </FormControl>
                 <FormDescription>
@@ -223,18 +224,18 @@ export default function ApplicationForm({
           />
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
-            name='location'
+            name="location"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
                   <Input
-                    type='text'
+                    type="text"
                     {...field}
-                    placeholder='e.g., San Francisco, CA'
+                    placeholder="e.g., San Francisco, CA"
                   />
                 </FormControl>
                 <FormMessage />
@@ -244,7 +245,7 @@ export default function ApplicationForm({
 
           <FormField
             control={form.control}
-            name='remote'
+            name="remote"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Remote Policy</FormLabel>
@@ -254,8 +255,8 @@ export default function ApplicationForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select remote policy' />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select remote policy" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -273,10 +274,10 @@ export default function ApplicationForm({
           />
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField
             control={form.control}
-            name='status'
+            name="status"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
@@ -286,8 +287,8 @@ export default function ApplicationForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select status' />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select status" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -306,7 +307,7 @@ export default function ApplicationForm({
 
           <FormField
             control={form.control}
-            name='appliedAt'
+            name="appliedAt"
             render={({ field }) => {
               return (
                 <FormItem>
@@ -318,7 +319,7 @@ export default function ApplicationForm({
                           variant={'outline'}
                           className={cn(
                             'pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
+                            !field.value && 'text-muted-foreground',
                           )}
                         >
                           {field.value ? (
@@ -326,13 +327,13 @@ export default function ApplicationForm({
                           ) : (
                             <span>Pick a date</span>
                           )}
-                          <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className='w-auto p-0' align='start'>
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
-                        mode='single'
+                        mode="single"
                         selected={
                           field.value ? new Date(field.value) : undefined
                         }
@@ -340,7 +341,7 @@ export default function ApplicationForm({
                         disabled={(date) =>
                           date > new Date() || date < new Date('1900-01-01')
                         }
-                        captionLayout='dropdown'
+                        captionLayout="dropdown"
                       />
                     </PopoverContent>
                   </Popover>
@@ -353,32 +354,32 @@ export default function ApplicationForm({
 
         <FormField
           control={form.control}
-          name='referredBy'
+          name="referredBy"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Referred By</FormLabel>
               <FormControl>
-                <Input type='text' {...field} placeholder='e.g., John Doe' />
+                <Input type="text" {...field} placeholder="e.g., John Doe" />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <div className='flex justify-end space-x-4 pt-6'>
+        <div className="flex justify-end space-x-4 pt-6">
           <Button
             onClick={() => (isEdit ? cancelEdit?.() : router.back())}
-            variant='link'
-            className='text-blue-600 hover:text-blue-800 text-sm p-0 font-medium cursor-pointer'
+            variant="link"
+            className="cursor-pointer p-0 text-sm font-medium text-blue-600 hover:text-blue-800"
           >
             Cancel
           </Button>
-          <Button type='submit' disabled={form.formState.isSubmitting}>
+          <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting
               ? 'Creating...'
               : isEdit
-              ? 'Update Application'
-              : 'Create Application'}
+                ? 'Update Application'
+                : 'Create Application'}
           </Button>
         </div>
       </form>

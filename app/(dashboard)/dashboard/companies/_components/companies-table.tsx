@@ -81,14 +81,14 @@ interface CompaniesTableProps {
   initialSearch: string;
 }
 
-export function CompaniesTable({ 
-  companies, 
-  totalCount, 
-  currentPage, 
-  totalPages, 
-  hasNextPage, 
+export function CompaniesTable({
+  companies,
+  totalCount,
+  currentPage,
+  totalPages,
+  hasNextPage,
   hasPreviousPage,
-  initialSearch
+  initialSearch,
 }: CompaniesTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -105,16 +105,19 @@ export function CompaniesTable({
     router.push(`?${params.toString()}`);
   };
 
-  const updateSearchUrl = useCallback((value: string) => {
-    const params = new URLSearchParams(searchParams);
-    if (value.trim()) {
-      params.set('search', value);
-    } else {
-      params.delete('search');
-    }
-    params.delete('page'); // Reset to page 1 when searching
-    router.push(`?${params.toString()}`);
-  }, [searchParams, router]);
+  const updateSearchUrl = useCallback(
+    (value: string) => {
+      const params = new URLSearchParams(searchParams);
+      if (value.trim()) {
+        params.set('search', value);
+      } else {
+        params.delete('search');
+      }
+      params.delete('page'); // Reset to page 1 when searching
+      router.push(`?${params.toString()}`);
+    },
+    [searchParams, router],
+  );
 
   // Update previous search input when initialSearch prop changes (navigation)
   useEffect(() => {
@@ -148,10 +151,10 @@ export function CompaniesTable({
       cell: (info) => {
         const company = info.row.original;
         return (
-          <div className='flex items-center gap-3'>
+          <div className="flex items-center gap-3">
             <Link
               href={`/dashboard/companies/${company.id}`}
-              className='text-2xl'
+              className="text-2xl"
             >
               {company.logo ? (
                 <Image
@@ -159,17 +162,22 @@ export function CompaniesTable({
                   alt={company.name}
                   width={48}
                   height={48}
-                  className='rounded-full'
+                  className="rounded-full"
                 />
               ) : (
-                <div className='w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center'>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
                   🏢
                 </div>
               )}
             </Link>
             <div>
-              <div className='font-medium'>{company.name}</div>
-              <div className='text-sm text-muted-foreground'>
+              <Link
+                href={`/dashboard/companies/${company.id}`}
+                className="font-medium"
+              >
+                {company.name}
+              </Link>
+              <div className="text-muted-foreground text-sm">
                 {company.industry || '—'}
               </div>
             </div>
@@ -182,7 +190,7 @@ export function CompaniesTable({
       cell: (info) => {
         const description = info.getValue();
         return (
-          <div className='max-w-[300px] truncate' title={description || ''}>
+          <div className="max-w-[300px] truncate" title={description || ''}>
             {description || '—'}
           </div>
         );
@@ -192,15 +200,15 @@ export function CompaniesTable({
       header: 'Size',
       cell: (info) => {
         const size = info.getValue();
-        if (!size) return <span className='text-muted-foreground'>—</span>;
+        if (!size) return <span className="text-muted-foreground">—</span>;
 
         return (
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
               sizeColors[size as keyof typeof sizeColors]
             }`}
           >
-            <Users className='w-3 h-3 mr-1' />
+            <Users className="mr-1 h-3 w-3" />
             {sizeLabels[size as keyof typeof sizeLabels]}
           </span>
         );
@@ -210,11 +218,11 @@ export function CompaniesTable({
       header: 'Location',
       cell: (info) => {
         const location = info.getValue();
-        if (!location) return <span className='text-muted-foreground'>—</span>;
+        if (!location) return <span className="text-muted-foreground">—</span>;
 
         return (
-          <div className='flex items-center gap-1'>
-            <MapPin className='w-4 h-4 text-muted-foreground' />
+          <div className="flex items-center gap-1">
+            <MapPin className="text-muted-foreground h-4 w-4" />
             <span>{location}</span>
           </div>
         );
@@ -225,23 +233,23 @@ export function CompaniesTable({
       cell: (info) => {
         const website = info.getValue();
         return website ? (
-          <Button variant='ghost' size='sm' asChild>
-            <a href={website} target='_blank' rel='noopener noreferrer'>
-              <Globe className='w-4 h-4 mr-1' />
+          <Button variant="ghost" size="sm" asChild>
+            <a href={website} target="_blank" rel="noopener noreferrer">
+              <Globe className="mr-1 h-4 w-4" />
               Visit
             </a>
           </Button>
         ) : (
-          <span className='text-muted-foreground'>—</span>
+          <span className="text-muted-foreground">—</span>
         );
       },
     }),
     columnHelper.accessor('applicationCount', {
       header: 'Applications',
       cell: (info) => (
-        <div className='flex items-center gap-1'>
-          <TrendingUp className='w-4 h-4 text-muted-foreground' />
-          <span className='font-medium'>{info.getValue()}</span>
+        <div className="flex items-center gap-1">
+          <TrendingUp className="text-muted-foreground h-4 w-4" />
+          <span className="font-medium">{info.getValue()}</span>
         </div>
       ),
     }),
@@ -250,8 +258,8 @@ export function CompaniesTable({
       cell: (info) => {
         const date = info.getValue();
         return (
-          <div className='flex items-center gap-1'>
-            <Calendar className='w-4 h-4 text-muted-foreground' />
+          <div className="flex items-center gap-1">
+            <Calendar className="text-muted-foreground h-4 w-4" />
             <span>{date.toLocaleDateString()}</span>
           </div>
         );
@@ -280,26 +288,26 @@ export function CompaniesTable({
   });
 
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       {/* Filters and Search */}
-      <div className='flex items-center gap-4'>
-        <div className='flex items-center gap-2 flex-1'>
-          <Search className='w-4 h-4 text-muted-foreground' />
+      <div className="flex items-center gap-4">
+        <div className="flex flex-1 items-center gap-2">
+          <Search className="text-muted-foreground h-4 w-4" />
           <Input
-            placeholder='Search companies...'
+            placeholder="Search companies..."
             value={searchInput}
             onChange={(event) => setSearchInput(event.target.value)}
-            className='max-w-sm'
+            className="max-w-sm"
           />
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant='outline' className='ml-auto'>
-              <Filter className='w-4 h-4 mr-2' />
+            <Button variant="outline" className="ml-auto">
+              <Filter className="mr-2 h-4 w-4" />
               Columns
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
+          <DropdownMenuContent align="end">
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
@@ -307,7 +315,7 @@ export function CompaniesTable({
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
-                    className='capitalize'
+                    className="capitalize"
                     checked={column.getIsVisible()}
                     onCheckedChange={(value: boolean) =>
                       column.toggleVisibility(!!value)
@@ -322,7 +330,7 @@ export function CompaniesTable({
       </div>
 
       {/* Table */}
-      <div className='rounded-md border'>
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -334,7 +342,7 @@ export function CompaniesTable({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -353,7 +361,7 @@ export function CompaniesTable({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -363,17 +371,17 @@ export function CompaniesTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className='h-24 text-center'
+                  className="h-24 text-center"
                 >
-                  <div className='flex flex-col gap-2'>
-                    <span className='text-muted-foreground'>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-muted-foreground">
                       No companies found.
                     </span>
-                    <span className='text-muted-foreground'>
+                    <span className="text-muted-foreground">
                       Once you{' '}
                       <Link
-                        href='/dashboard/applications/new'
-                        className='underline text-blue-500'
+                        href="/dashboard/applications/new"
+                        className="text-blue-500 underline"
                       >
                         create an application
                       </Link>
@@ -388,29 +396,30 @@ export function CompaniesTable({
       </div>
 
       {/* Pagination */}
-      <div className='flex items-center justify-between space-x-2 py-4'>
-        <div className='flex items-center space-x-2'>
-          <div className='text-sm text-muted-foreground'>
-            Showing {((currentPage - 1) * 10) + 1} to {Math.min(currentPage * 10, totalCount)} of {totalCount} companies
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="flex items-center space-x-2">
+          <div className="text-muted-foreground text-sm">
+            Showing {(currentPage - 1) * 10 + 1} to{' '}
+            {Math.min(currentPage * 10, totalCount)} of {totalCount} companies
             {initialSearch && ` matching "${initialSearch}"`}
           </div>
         </div>
-        <div className='flex items-center space-x-2'>
-          <div className='text-sm text-muted-foreground'>
+        <div className="flex items-center space-x-2">
+          <div className="text-muted-foreground text-sm">
             Page {currentPage} of {totalPages}
           </div>
-          <div className='space-x-2'>
+          <div className="space-x-2">
             <Button
-              variant='outline'
-              size='sm'
+              variant="outline"
+              size="sm"
               onClick={() => navigateToPage(currentPage - 1)}
               disabled={!hasPreviousPage}
             >
               Previous
             </Button>
             <Button
-              variant='outline'
-              size='sm'
+              variant="outline"
+              size="sm"
               onClick={() => navigateToPage(currentPage + 1)}
               disabled={!hasNextPage}
             >

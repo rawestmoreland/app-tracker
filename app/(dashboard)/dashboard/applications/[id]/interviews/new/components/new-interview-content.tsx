@@ -1,5 +1,6 @@
 'use client';
 
+import TiptapEditor from '@/components/tiptap-editor';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import {
@@ -91,33 +92,33 @@ export function NewInterviewContent({ application }: PageProps) {
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
-      <div className='max-w-2xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='mb-8'>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
           <Link
             href={`/dashboard/applications/${routeParams.id}`}
-            className='text-blue-600 hover:text-blue-800 text-sm font-medium'
+            className="text-sm font-medium text-blue-600 hover:text-blue-800"
           >
             ← Back to Application
           </Link>
-          <h1 className='text-3xl font-bold text-gray-900 mt-2'>
+          <h1 className="mt-2 text-3xl font-bold text-gray-900">
             Schedule Interview
           </h1>
-          <p className='text-gray-600 mt-1'>
+          <p className="mt-1 text-gray-600">
             {application.title} at {application.company.name}
           </p>
         </div>
 
-        <div className='bg-white rounded-lg shadow p-6'>
+        <div className="rounded-lg bg-white p-6 shadow">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleSubmit)}
-              className='space-y-4'
+              className="space-y-4"
             >
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name='type'
+                  name="type"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Interview Type</FormLabel>
@@ -126,8 +127,8 @@ export function NewInterviewContent({ application }: PageProps) {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className='w-full'>
-                            <SelectValue placeholder='Select an interview type' />
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select an interview type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -170,7 +171,7 @@ export function NewInterviewContent({ application }: PageProps) {
 
                 <FormField
                   control={form.control}
-                  name='format'
+                  name="format"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Interview Format</FormLabel>
@@ -179,8 +180,8 @@ export function NewInterviewContent({ application }: PageProps) {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className='w-full'>
-                            <SelectValue placeholder='Select an interview format' />
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select an interview format" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -210,10 +211,10 @@ export function NewInterviewContent({ application }: PageProps) {
                 />
               </div>
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name='scheduledAt'
+                  name="scheduledAt"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Scheduled Date *</FormLabel>
@@ -224,7 +225,7 @@ export function NewInterviewContent({ application }: PageProps) {
                               variant={'outline'}
                               className={cn(
                                 'pl-3 text-left font-normal',
-                                !field.value && 'text-muted-foreground'
+                                !field.value && 'text-muted-foreground',
                               )}
                             >
                               {field.value ? (
@@ -232,18 +233,18 @@ export function NewInterviewContent({ application }: PageProps) {
                               ) : (
                                 <span>Pick a date</span>
                               )}
-                              <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className='w-auto p-0' align='start'>
+                        <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
-                            mode='single'
+                            mode="single"
                             selected={
                               field.value ? new Date(field.value) : undefined
                             }
                             onSelect={field.onChange}
-                            captionLayout='dropdown'
+                            captionLayout="dropdown"
                           />
                         </PopoverContent>
                       </Popover>
@@ -254,19 +255,19 @@ export function NewInterviewContent({ application }: PageProps) {
 
                 <FormField
                   control={form.control}
-                  name='duration'
+                  name="duration"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Duration (minutes)</FormLabel>
                       <FormControl>
                         <Input
-                          type='number'
-                          id='duration'
-                          name='duration'
+                          type="number"
+                          id="duration"
+                          name="duration"
                           value={field.value}
                           onChange={field.onChange}
-                          min='15'
-                          step='15'
+                          min="15"
+                          step="15"
                         />
                       </FormControl>
                       <FormMessage />
@@ -277,7 +278,7 @@ export function NewInterviewContent({ application }: PageProps) {
 
               <FormField
                 control={form.control}
-                name='outcome'
+                name="outcome"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Outcome</FormLabel>
@@ -286,8 +287,8 @@ export function NewInterviewContent({ application }: PageProps) {
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='Select an outcome' />
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select an outcome" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -315,16 +316,15 @@ export function NewInterviewContent({ application }: PageProps) {
 
               <FormField
                 control={form.control}
-                name='feedback'
+                name="feedback"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Feedback</FormLabel>
                     <FormControl>
-                      <Textarea
-                        rows={12}
+                      <TiptapEditor
                         value={field.value}
                         onChange={field.onChange}
-                        placeholder='Interview feedback, notes, or observations with line breaks as needed...'
+                        placeholder="Interview feedback, notes, or observations with line breaks as needed..."
                       />
                     </FormControl>
                     <FormMessage />
@@ -332,11 +332,11 @@ export function NewInterviewContent({ application }: PageProps) {
                 )}
               />
 
-              <div className='flex justify-end space-x-4 pt-6'>
+              <div className="flex justify-end space-x-4 pt-6">
                 <Button
-                  variant='link'
-                  type='button'
-                  className='text-blue-600 hover:text-blue-800 text-sm p-0 font-medium cursor-pointer'
+                  variant="link"
+                  type="button"
+                  className="cursor-pointer p-0 text-sm font-medium text-blue-600 hover:text-blue-800"
                   asChild
                 >
                   <Link href={`/dashboard/applications/${routeParams.id}`}>
@@ -344,9 +344,9 @@ export function NewInterviewContent({ application }: PageProps) {
                   </Link>
                 </Button>
                 <Button
-                  type='submit'
+                  type="submit"
                   disabled={form.formState.isSubmitting}
-                  className='cursor-pointer'
+                  className="cursor-pointer"
                 >
                   {form.formState.isSubmitting
                     ? 'Creating...'

@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import TiptapEditor from '@/components/tiptap-editor';
 
 export default function NewCompanyForm({
   form,
@@ -77,12 +78,12 @@ export default function NewCompanyForm({
   }, [watchName]);
 
   return (
-    <div className='bg-white rounded-lg shadow p-6'>
+    <div className="rounded-lg bg-white p-6 shadow">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-4'>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <FormField
             control={form.control}
-            name='name'
+            name="name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Company Name *</FormLabel>
@@ -91,27 +92,27 @@ export default function NewCompanyForm({
                 </FormControl>
                 <FormMessage />
                 {isCheckingDuplicates && (
-                  <FormDescription className='text-blue-600'>
+                  <FormDescription className="text-blue-600">
                     Checking for similar companies...
                   </FormDescription>
                 )}
                 {duplicates.length > 0 && !isCheckingDuplicates && (
-                  <div className='space-y-2'>
+                  <div className="space-y-2">
                     {hasPublicDuplicates && (
-                      <FormDescription className='text-red-600'>
+                      <FormDescription className="text-red-600">
                         ⚠️ Found{' '}
                         {
                           duplicates.filter(
                             (c) =>
                               c.visibility === 'PUBLIC' ||
-                              c.visibility === 'GLOBAL'
+                              c.visibility === 'GLOBAL',
                           ).length
                         }{' '}
                         public compan
                         {duplicates.filter(
                           (c) =>
                             c.visibility === 'PUBLIC' ||
-                            c.visibility === 'GLOBAL'
+                            c.visibility === 'GLOBAL',
                         ).length > 1
                           ? 'ies'
                           : 'y'}{' '}
@@ -120,7 +121,7 @@ export default function NewCompanyForm({
                       </FormDescription>
                     )}
                     {hasPrivateDuplicates && (
-                      <FormDescription className='text-orange-600'>
+                      <FormDescription className="text-orange-600">
                         ℹ️ Found{' '}
                         {
                           duplicates.filter((c) => c.visibility === 'PRIVATE')
@@ -136,7 +137,7 @@ export default function NewCompanyForm({
                       </FormDescription>
                     )}
                     {watchVisibility === 'PUBLIC' && hasPublicDuplicates && (
-                      <FormDescription className='text-red-600 font-medium'>
+                      <FormDescription className="font-medium text-red-600">
                         Please select &quot;Private&quot; visibility or use an
                         existing company.
                       </FormDescription>
@@ -149,12 +150,12 @@ export default function NewCompanyForm({
 
           <FormField
             control={form.control}
-            name='website'
+            name="website"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Website</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder='https://...' />
+                  <Input {...field} placeholder="https://..." />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -163,15 +164,15 @@ export default function NewCompanyForm({
 
           <FormField
             control={form.control}
-            name='description'
+            name="description"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Description</FormLabel>
                 <FormControl>
-                  <Textarea
-                    {...field}
-                    rows={4}
-                    placeholder='Brief description of the company...'
+                  <TiptapEditor
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Brief description of the company..."
                   />
                 </FormControl>
                 <FormMessage />
@@ -179,15 +180,15 @@ export default function NewCompanyForm({
             )}
           />
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <FormField
               control={form.control}
-              name='industry'
+              name="industry"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Industry</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder='e.g., Technology' />
+                    <Input {...field} placeholder="e.g., Technology" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,7 +197,7 @@ export default function NewCompanyForm({
 
             <FormField
               control={form.control}
-              name='size'
+              name="size"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Company Size</FormLabel>
@@ -205,8 +206,8 @@ export default function NewCompanyForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className='w-full'>
-                        <SelectValue placeholder='Select a size' />
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a size" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -235,12 +236,12 @@ export default function NewCompanyForm({
 
           <FormField
             control={form.control}
-            name='location'
+            name="location"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Location</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder='e.g., San Francisco, CA' />
+                  <Input {...field} placeholder="e.g., San Francisco, CA" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -249,12 +250,12 @@ export default function NewCompanyForm({
 
           <FormField
             control={form.control}
-            name='logo'
+            name="logo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Logo URL</FormLabel>
                 <FormControl>
-                  <Input {...field} placeholder='https://...' />
+                  <Input {...field} placeholder="https://..." />
                 </FormControl>
                 <FormMessage />
                 <FormDescription>
@@ -266,13 +267,13 @@ export default function NewCompanyForm({
           />
 
           {/* Visibility Settings */}
-          <div className='border-t pt-6'>
-            <h3 className='text-lg font-medium text-gray-900 mb-4'>
+          <div className="border-t pt-6">
+            <h3 className="mb-4 text-lg font-medium text-gray-900">
               Visibility Settings
             </h3>
 
-            <div className='mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg'>
-              <p className='text-sm text-blue-800'>
+            <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
+              <p className="text-sm text-blue-800">
                 <strong>Duplicate Policy:</strong> Public companies cannot be
                 duplicated. If a company with the same name already exists
                 publicly, you must use the existing company or create a private
@@ -282,7 +283,7 @@ export default function NewCompanyForm({
 
             <FormField
               control={form.control}
-              name='visibility'
+              name="visibility"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Company Visibility</FormLabel>
@@ -291,21 +292,21 @@ export default function NewCompanyForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className='w-full'>
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value='PRIVATE'>
-                        <div className='flex items-center gap-2'>
-                          <Badge variant='outline'>Private</Badge>
+                      <SelectItem value="PRIVATE">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline">Private</Badge>
                           <span>Only visible to you (duplicates allowed)</span>
                         </div>
                       </SelectItem>
                       {isAdmin && (
-                        <SelectItem value='PUBLIC'>
-                          <div className='flex items-center gap-2'>
-                            <Badge variant='secondary'>Public</Badge>
+                        <SelectItem value="PUBLIC">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">Public</Badge>
                             <span>
                               Visible to all users (no duplicates allowed)
                             </span>
@@ -328,20 +329,20 @@ export default function NewCompanyForm({
             {isAdmin && (
               <FormField
                 control={form.control}
-                name='isGlobal'
+                name="isGlobal"
                 render={({ field }) => (
-                  <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4'>
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <div className='space-y-1 leading-none'>
-                      <FormLabel className='text-sm font-medium'>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-medium">
                         Mark as Global Company
                       </FormLabel>
-                      <FormDescription className='text-sm text-gray-600'>
+                      <FormDescription className="text-sm text-gray-600">
                         Global companies are visible to all users and cannot be
                         duplicated. This should only be used for well-known,
                         established companies.
@@ -353,16 +354,16 @@ export default function NewCompanyForm({
             )}
           </div>
 
-          <div className='flex justify-end space-x-4 pt-6'>
+          <div className="flex justify-end space-x-4 pt-6">
             <Button
-              type='button'
-              variant='outline'
+              type="button"
+              variant="outline"
               onClick={() => router.back()}
             >
               Cancel
             </Button>
             <Button
-              type='submit'
+              type="submit"
               disabled={
                 form.formState.isSubmitting ||
                 isCheckingDuplicates ||
@@ -372,8 +373,8 @@ export default function NewCompanyForm({
               {form.formState.isSubmitting
                 ? 'Creating...'
                 : watchVisibility === 'PUBLIC' && hasPublicDuplicates
-                ? 'Cannot Create Public Company'
-                : 'Create Company'}
+                  ? 'Cannot Create Public Company'
+                  : 'Create Company'}
             </Button>
           </div>
         </form>
