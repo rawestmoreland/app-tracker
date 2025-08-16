@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
-"use client";
+'use client';
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ApplicationStatus,
   Interview,
@@ -12,28 +12,28 @@ import {
   Note,
   NoteType,
   ApplicationEvent,
-} from "@prisma/client";
-import Link from "next/link";
-import { notFound, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { ApplicationFormData, schema } from "../../lib/new-application-schema";
-import ApplicationForm from "../../components/new-application-form";
-import { format } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { FileUpload } from "@/components/file-upload";
+} from '@prisma/client';
+import Link from 'next/link';
+import { notFound, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { ApplicationFormData, schema } from '../../lib/new-application-schema';
+import ApplicationForm from '../../components/new-application-form';
+import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { FileUpload } from '@/components/file-upload';
 import {
   getRemotePolicyColor,
   getSizeColor,
   getStatusColor,
-} from "@/lib/utils";
+} from '@/lib/utils';
 import {
   addNote,
   deleteApplication,
   deleteResume,
   updateApplication,
-} from "@/lib/actions/application-actions";
-import { NoteFormData, noteSchema } from "../../lib/new-note-schema";
+} from '@/lib/actions/application-actions';
+import { NoteFormData, noteSchema } from '../../lib/new-note-schema';
 import {
   Form,
   FormControl,
@@ -41,15 +41,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -57,10 +57,12 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { DollarSignIcon, GlobeIcon, LinkIcon, MapPinIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import ActivityLog from "./activity-log";
+} from '@/components/ui/breadcrumb';
+import { DollarSignIcon, GlobeIcon, LinkIcon, MapPinIcon } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import ActivityLog from './activity-log';
+import TiptapEditor, { TiptapDisplay } from '@/components/tiptap-editor';
+import { startCase } from 'lodash';
 
 type FullApplication = Application & {
   company: Company;
@@ -86,25 +88,25 @@ export default function ApplicationContent({
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      title: "",
-      description: "",
-      jobUrl: "",
+      title: '',
+      description: '',
+      jobUrl: '',
       lowSalary: undefined,
       highSalary: undefined,
-      currency: "USD",
-      location: "",
+      currency: 'USD',
+      location: '',
       remote: application?.remote || RemoteType.ON_SITE,
       status: application?.status || ApplicationStatus.APPLIED,
       appliedAt: application?.appliedAt || new Date(),
-      companyId: application?.company.id || "",
-      referredBy: application?.referredBy || "",
+      companyId: application?.company.id || '',
+      referredBy: application?.referredBy || '',
     },
   });
 
   const noteForm = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
     defaultValues: {
-      content: "",
+      content: '',
       type: NoteType.GENERAL,
       interviewId: undefined,
       applicationId: application.id,
@@ -114,17 +116,17 @@ export default function ApplicationContent({
   useEffect(() => {
     if (editing) {
       form.reset({
-        title: application?.title || "",
-        description: application?.description || "",
-        jobUrl: application?.jobUrl || "",
+        title: application?.title || '',
+        description: application?.description || '',
+        jobUrl: application?.jobUrl || '',
         lowSalary: application?.lowSalary || 0,
         highSalary: application?.highSalary || 0,
-        currency: application?.currency || "USD",
-        location: application?.location || "",
+        currency: application?.currency || 'USD',
+        location: application?.location || '',
         remote: application?.remote || RemoteType.ON_SITE,
         status: application?.status || ApplicationStatus.APPLIED,
         appliedAt: application?.appliedAt || new Date(),
-        companyId: application?.company.id || "",
+        companyId: application?.company.id || '',
       });
     }
   }, [editing]);
@@ -135,21 +137,21 @@ export default function ApplicationContent({
     if (result.success) {
       setEditing(false);
     } else {
-      alert(result.error || "Failed to update application");
+      alert(result.error || 'Failed to update application');
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this application?")) {
+    if (!confirm('Are you sure you want to delete this application?')) {
       return;
     }
 
     const result = await deleteApplication(application.id);
 
     if (result.success) {
-      router.push("/dashboard");
+      router.push('/dashboard');
     } else {
-      alert(result.error || "Failed to delete application");
+      alert(result.error || 'Failed to delete application');
     }
   };
 
@@ -159,7 +161,7 @@ export default function ApplicationContent({
     if (result.success) {
       noteForm.reset();
     } else {
-      alert(result.error || "Failed to add note");
+      alert(result.error || 'Failed to add note');
     }
   };
 
@@ -175,9 +177,9 @@ export default function ApplicationContent({
     const result = await deleteResume(application.id);
 
     if (result.success) {
-      alert("Resume deleted successfully");
+      alert('Resume deleted successfully');
     } else {
-      alert(result.error || "Failed to delete resume");
+      alert(result.error || 'Failed to delete resume');
     }
   };
 
@@ -185,27 +187,27 @@ export default function ApplicationContent({
     lowSalary: number | undefined,
     highSalary: number | undefined,
   ) => {
-    let salaryString = "";
+    let salaryString = '';
     if (lowSalary && highSalary) {
-      salaryString = `${new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
+      salaryString = `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
         maximumFractionDigits: 0,
-      }).format(lowSalary)} - ${new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
+      }).format(lowSalary)} - ${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     } else if (lowSalary) {
-      salaryString = `${new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
+      salaryString = `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
         maximumFractionDigits: 0,
       }).format(lowSalary)}`;
     } else if (highSalary) {
-      salaryString = `${new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
+      salaryString = `${new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     }
@@ -259,7 +261,7 @@ export default function ApplicationContent({
                 onClick={() => setEditing(!editing)}
                 className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
-                {editing ? "Cancel" : "Edit"}
+                {editing ? 'Cancel' : 'Edit'}
               </button>
               <button
                 onClick={handleDelete}
@@ -296,10 +298,10 @@ export default function ApplicationContent({
                         application.status,
                       )}`}
                     >
-                      {application.status.replace("_", " ")}
+                      {application.status.replace('_', ' ')}
                     </span>
                     <span className="text-sm text-gray-500">
-                      Applied: {format(application.appliedAt, "MM/dd/yyyy")}
+                      Applied: {format(application.appliedAt, 'MM/dd/yyyy')}
                     </span>
                   </div>
 
@@ -309,7 +311,7 @@ export default function ApplicationContent({
                         Description
                       </h3>
                       <div className="mt-1 text-sm whitespace-pre-wrap text-gray-900">
-                        {application.description}
+                        <TiptapDisplay content={application.description} />
                       </div>
                     </div>
                   )}
@@ -376,7 +378,7 @@ export default function ApplicationContent({
                         <Badge
                           className={getRemotePolicyColor(application.remote)}
                         >
-                          {application.remote.replace("_", " ")}
+                          {application.remote.replace('_', ' ')}
                         </Badge>
                       </div>
                     )}
@@ -415,14 +417,14 @@ export default function ApplicationContent({
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-medium text-gray-900">
-                            {interview.type.replace("_", " ")}
+                            {interview.type.replace('_', ' ')}
                           </h3>
                           <p className="text-sm text-gray-600">
-                            {interview.format.replace("_", " ")}
+                            {interview.format.replace('_', ' ')}
                             {interview.scheduledAt &&
                               ` • ${format(
                                 interview.scheduledAt,
-                                "MM/dd/yyyy",
+                                'MM/dd/yyyy',
                               )}`}
                             {interview.duration &&
                               ` • ${interview.duration} minutes`}
@@ -431,11 +433,11 @@ export default function ApplicationContent({
                         {interview.outcome && (
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                              interview.outcome === "PASSED"
-                                ? "bg-green-100 text-green-800"
-                                : interview.outcome === "FAILED"
-                                  ? "bg-red-100 text-red-800"
-                                  : "bg-yellow-100 text-yellow-800"
+                              interview.outcome === 'PASSED'
+                                ? 'bg-green-100 text-green-800'
+                                : interview.outcome === 'FAILED'
+                                  ? 'bg-red-100 text-red-800'
+                                  : 'bg-yellow-100 text-yellow-800'
                             }`}
                           >
                             {interview.outcome}
@@ -492,7 +494,7 @@ export default function ApplicationContent({
                         <FormItem>
                           <FormLabel>Add Note</FormLabel>
                           <FormControl>
-                            <Textarea {...field} />
+                            <TiptapEditor {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -515,21 +517,13 @@ export default function ApplicationContent({
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value={NoteType.GENERAL}>
-                                  General
-                                </SelectItem>
-                                <SelectItem value={NoteType.INTERVIEW_PREP}>
-                                  Interview Prep
-                                </SelectItem>
-                                <SelectItem value={NoteType.FEEDBACK}>
-                                  Feedback
-                                </SelectItem>
-                                <SelectItem value={NoteType.FOLLOW_UP}>
-                                  Follow Up
-                                </SelectItem>
-                                <SelectItem value={NoteType.SALARY_NEGOTIATION}>
-                                  Salary Negotiation
-                                </SelectItem>
+                                {Object.values(NoteType).map((type) => (
+                                  <SelectItem key={type} value={type}>
+                                    {startCase(
+                                      type.replace('_', ' ').toLowerCase(),
+                                    )}
+                                  </SelectItem>
+                                ))}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -553,14 +547,14 @@ export default function ApplicationContent({
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1 text-sm whitespace-pre-wrap text-gray-900">
-                          {note.content}
+                          <TiptapDisplay content={note.content} />
                         </div>
                         <span className="ml-2 flex-shrink-0 text-xs text-gray-500">
-                          {format(note.createdAt, "MM/dd/yyyy")}
+                          {format(note.createdAt, 'MM/dd/yyyy')}
                         </span>
                       </div>
                       <span className="mt-1 inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
-                        {note.type.replace("_", " ")}
+                        {note.type.replace('_', ' ')}
                       </span>
                     </div>
                   ))}
@@ -652,7 +646,7 @@ export default function ApplicationContent({
                   <div>
                     <h3 className="text-sm font-medium text-gray-700">Size</h3>
                     <Badge className={getSizeColor(application.company.size)}>
-                      {application.company.size.replace("_", " ")}
+                      {application.company.size.replace('_', ' ')}
                     </Badge>
                   </div>
                 )}

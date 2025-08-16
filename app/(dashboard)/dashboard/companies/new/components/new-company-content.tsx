@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Breadcrumb,
@@ -7,19 +7,19 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import NewCompanyForm from "../../_components/new-company-form";
-import DuplicateCompanyDialog from "./duplicate-company-dialog";
-import Link from "next/link";
-import { CompanyFormData, companySchema } from "../../lib/new-company-schema";
-import { Company, CompanySize, User } from "@prisma/client";
+} from '@/components/ui/breadcrumb';
+import NewCompanyForm from '../../_components/new-company-form';
+import DuplicateCompanyDialog from './duplicate-company-dialog';
+import Link from 'next/link';
+import { CompanyFormData, companySchema } from '../../lib/new-company-schema';
+import { Company, CompanySize, User } from '@prisma/client';
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { createCompany } from "@/lib/actions/company-actions";
-import { toast } from "sonner";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createCompany } from '@/lib/actions/company-actions';
+import { toast } from 'sonner';
 
 export default function NewCompanyContent() {
   const searchParams = useSearchParams();
@@ -29,19 +29,19 @@ export default function NewCompanyContent() {
   const [showDuplicateDialog, setShowDuplicateDialog] = useState(false);
   const [isPublicDuplicate, setIsPublicDuplicate] = useState(false);
 
-  const fromUrl = searchParams.get("from");
+  const fromUrl = searchParams.get('from');
 
   // Fetch user data on component mount
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("/api/user");
+        const response = await fetch('/api/user');
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
         }
       } catch (error) {
-        console.error("Error fetching user:", error);
+        console.error('Error fetching user:', error);
       }
     };
     fetchUser();
@@ -50,19 +50,19 @@ export default function NewCompanyContent() {
   const form = useForm<CompanyFormData>({
     resolver: zodResolver(companySchema),
     defaultValues: {
-      name: "",
-      website: "",
-      description: "",
-      industry: "",
+      name: '',
+      website: '',
+      description: '',
+      industry: '',
       size: CompanySize.MEDIUM,
-      location: "",
-      logo: "",
-      visibility: "PRIVATE",
+      location: '',
+      logo: '',
+      visibility: 'PRIVATE',
       isGlobal: false,
     },
   });
 
-  const isAdmin = user?.role === "ADMIN";
+  const isAdmin = user?.role === 'ADMIN';
 
   const handleSubmit = async (data: CompanyFormData) => {
     try {
@@ -70,7 +70,7 @@ export default function NewCompanyContent() {
 
       if (response.success && response.company) {
         const { company } = response;
-        if (fromUrl === "applications/new") {
+        if (fromUrl === 'applications/new') {
           router.push(`/dashboard/applications/new?companyId=${company.id}`);
         } else {
           router.push(`/dashboard/companies/${company.id}`);
@@ -81,11 +81,11 @@ export default function NewCompanyContent() {
         setIsPublicDuplicate(response.isPublicDuplicate || false);
         setShowDuplicateDialog(true);
       } else {
-        toast(response.error || "Failed to create company");
+        toast(response.error || 'Failed to create company');
       }
     } catch (error) {
-      console.error("Error creating company:", error);
-      toast("Failed to create company");
+      console.error('Error creating company:', error);
+      toast('Failed to create company');
     }
   };
 
@@ -97,18 +97,18 @@ export default function NewCompanyContent() {
 
       if (response.success && response.company) {
         const { company } = response;
-        if (fromUrl === "applications/new") {
+        if (fromUrl === 'applications/new') {
           router.push(`/dashboard/applications/new?companyId=${company.id}`);
         } else {
           router.push(`/dashboard/companies/${company.id}`);
         }
       } else {
         const { error } = response;
-        toast(error || "Failed to use existing company");
+        toast(error || 'Failed to use existing company');
       }
     } catch (error) {
-      console.error("Error using existing company:", error);
-      toast("Failed to use existing company");
+      console.error('Error using existing company:', error);
+      toast('Failed to use existing company');
     }
     setShowDuplicateDialog(false);
   };
@@ -142,7 +142,7 @@ export default function NewCompanyContent() {
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              {fromUrl === "applications/new" && (
+              {fromUrl === 'applications/new' && (
                 <>
                   <BreadcrumbItem>
                     <BreadcrumbLink asChild>

@@ -25,6 +25,7 @@ import { getCompanySizeLabel, getStatusColor } from '@/lib/utils';
 import { UserRole } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getSignedInUser } from '@/app/lib/auth';
+import { TiptapDisplay } from '@/components/tiptap-editor';
 
 // Type for the Prisma result
 type PrismaCompany = {
@@ -218,19 +219,19 @@ export default async function CompanyDetail({ params }: PageProps) {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8'>
+    <div className="container mx-auto px-4 py-8">
       {/* Breadcrumb */}
-      <Breadcrumb className='mb-6'>
+      <Breadcrumb className="mb-6">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard'>Dashboard</Link>
+              <Link href="/dashboard">Dashboard</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
             <BreadcrumbLink asChild>
-              <Link href='/dashboard/companies'>Companies</Link>
+              <Link href="/dashboard/companies">Companies</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
@@ -241,41 +242,41 @@ export default async function CompanyDetail({ params }: PageProps) {
       </Breadcrumb>
 
       {/* Header */}
-      <div className='flex justify-between items-start mb-8'>
+      <div className="mb-8 flex items-start justify-between">
         <div>
-          <div className='flex items-center gap-4 mb-2'>
-            <h1 className='text-3xl font-bold text-gray-900'>{company.name}</h1>
+          <div className="mb-2 flex items-center gap-4">
+            <h1 className="text-3xl font-bold text-gray-900">{company.name}</h1>
             {company.logo && (
               <img
                 src={company.logo}
                 alt={`${company.name} logo`}
                 width={48}
                 height={48}
-                className='w-12 h-12 rounded-lg object-cover'
+                className="h-12 w-12 rounded-lg object-cover"
               />
             )}
           </div>
-          <div className='flex items-center gap-4 text-gray-600'>
+          <div className="flex items-center gap-4 text-gray-600">
             {company.website && (
               <a
                 href={company.website}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='text-blue-600 hover:text-blue-800'
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800"
               >
                 {company.website}
               </a>
             )}
             {company.location && <span>{company.location}</span>}
             {company.industry && (
-              <span className='bg-gray-100 px-2 py-1 rounded text-sm'>
+              <span className="rounded bg-gray-100 px-2 py-1 text-sm">
                 {company.industry}
               </span>
             )}
           </div>
         </div>
         {dbUser.role === UserRole.ADMIN && (
-          <div className='flex gap-2'>
+          <div className="flex gap-2">
             <CompanyEditForm company={company} />
             <CompanyDeleteButton companyId={company.id} />
           </div>
@@ -283,33 +284,33 @@ export default async function CompanyDetail({ params }: PageProps) {
       </div>
 
       {/* Company Information */}
-      <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8'>
-        <div className='lg:col-span-2'>
-          <div className='bg-white p-6 rounded-lg shadow'>
-            <h2 className='text-xl font-semibold mb-4'>Company Information</h2>
-            <div className='space-y-4'>
+      <div className="mb-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <div className="rounded-lg bg-white p-6 shadow">
+            <h2 className="mb-4 text-xl font-semibold">Company Information</h2>
+            <div className="space-y-4">
               {company.description && (
                 <div>
-                  <h3 className='font-medium text-gray-900 mb-2'>
+                  <h3 className="mb-2 font-medium text-gray-900">
                     Description
                   </h3>
-                  <p className='text-gray-600'>{company.description}</p>
+                  <TiptapDisplay content={company.description} />
                 </div>
               )}
-              <div className='grid grid-cols-2 gap-4'>
+              <div className="grid grid-cols-2 gap-4">
                 {company.size && (
                   <div>
-                    <h3 className='font-medium text-gray-900 mb-1'>
+                    <h3 className="mb-1 font-medium text-gray-900">
                       Company Size
                     </h3>
-                    <p className='text-gray-600'>
+                    <p className="text-gray-600">
                       {getCompanySizeLabel(company.size)}
                     </p>
                   </div>
                 )}
                 <div>
-                  <h3 className='font-medium text-gray-900 mb-1'>Created</h3>
-                  <p className='text-gray-600'>
+                  <h3 className="mb-1 font-medium text-gray-900">Created</h3>
+                  <p className="text-gray-600">
                     {formatDate(company.createdAt)}
                   </p>
                 </div>
@@ -319,27 +320,27 @@ export default async function CompanyDetail({ params }: PageProps) {
         </div>
 
         {/* Quick Stats */}
-        <div className='bg-white p-6 rounded-lg shadow'>
-          <h2 className='text-xl font-semibold mb-4'>Quick Stats</h2>
-          <div className='space-y-4'>
+        <div className="rounded-lg bg-white p-6 shadow">
+          <h2 className="mb-4 text-xl font-semibold">Quick Stats</h2>
+          <div className="space-y-4">
             <div>
-              <h3 className='font-medium text-gray-900 mb-1'>Applications</h3>
-              <p className='text-2xl font-bold text-blue-600'>
+              <h3 className="mb-1 font-medium text-gray-900">Applications</h3>
+              <p className="text-2xl font-bold text-blue-600">
                 {company.applications.length}
               </p>
             </div>
             <div>
-              <h3 className='font-medium text-gray-900 mb-1'>Contacts</h3>
-              <p className='text-2xl font-bold text-green-600'>
+              <h3 className="mb-1 font-medium text-gray-900">Contacts</h3>
+              <p className="text-2xl font-bold text-green-600">
                 {company.contacts.length}
               </p>
             </div>
             <div>
-              <h3 className='font-medium text-gray-900 mb-1'>Interviews</h3>
-              <p className='text-2xl font-bold text-purple-600'>
+              <h3 className="mb-1 font-medium text-gray-900">Interviews</h3>
+              <p className="text-2xl font-bold text-purple-600">
                 {company.applications.reduce(
                   (total, app) => total + app.interviews.length,
-                  0
+                  0,
                 )}
               </p>
             </div>
@@ -348,10 +349,10 @@ export default async function CompanyDetail({ params }: PageProps) {
       </div>
 
       {/* Applications */}
-      <div className='bg-white rounded-lg shadow mb-8'>
-        <div className='p-6 border-b border-gray-200'>
-          <div className='flex justify-between items-center'>
-            <h2 className='text-xl font-semibold'>Applications</h2>
+      <div className="mb-8 rounded-lg bg-white shadow">
+        <div className="border-b border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Applications</h2>
             <Link href={`/dashboard/applications/new?companyId=${company.id}`}>
               <Button>New Application</Button>
             </Link>
@@ -375,15 +376,15 @@ export default async function CompanyDetail({ params }: PageProps) {
                   <TableCell>
                     <Link
                       href={`/dashboard/applications/${application.id}`}
-                      className='font-medium text-blue-600 hover:text-blue-800'
+                      className="font-medium text-blue-600 hover:text-blue-800"
                     >
                       {application.title}
                     </Link>
                   </TableCell>
                   <TableCell>
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                        application.status
+                      className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
+                        application.status,
                       )}`}
                     >
                       {application.status.replace('_', ' ')}
@@ -395,7 +396,7 @@ export default async function CompanyDetail({ params }: PageProps) {
                       <div>
                         <span>{application.location}</span>
                         {application.remote && (
-                          <span className='text-gray-500 ml-1'>
+                          <span className="ml-1 text-gray-500">
                             ({application.remote.replace('_', ' ')})
                           </span>
                         )}
@@ -405,7 +406,7 @@ export default async function CompanyDetail({ params }: PageProps) {
                   <TableCell>{application.interviews.length}</TableCell>
                   <TableCell>
                     <Link href={`/dashboard/applications/${application.id}`}>
-                      <Button variant='outline' size='sm'>
+                      <Button variant="outline" size="sm">
                         View
                       </Button>
                     </Link>
@@ -415,11 +416,11 @@ export default async function CompanyDetail({ params }: PageProps) {
             </TableBody>
           </Table>
         ) : (
-          <div className='p-6 text-center text-gray-500'>
+          <div className="p-6 text-center text-gray-500">
             No applications yet.
             <Link
-              href='/dashboard/applications/new'
-              className='text-blue-600 hover:text-blue-800 ml-1'
+              href="/dashboard/applications/new"
+              className="ml-1 text-blue-600 hover:text-blue-800"
             >
               Create your first application
             </Link>
@@ -428,10 +429,10 @@ export default async function CompanyDetail({ params }: PageProps) {
       </div>
 
       {/* Contacts */}
-      <div className='bg-white rounded-lg shadow'>
-        <div className='p-6 border-b border-gray-200'>
-          <div className='flex justify-between items-center'>
-            <h2 className='text-xl font-semibold'>Contacts</h2>
+      <div className="rounded-lg bg-white shadow">
+        <div className="border-b border-gray-200 p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Contacts</h2>
             <Link href={`/dashboard/contacts/new?companyId=${company.id}`}>
               <Button>New Contact</Button>
             </Link>
@@ -451,13 +452,13 @@ export default async function CompanyDetail({ params }: PageProps) {
             <TableBody>
               {company.contacts.map((contact) => (
                 <TableRow key={contact.id}>
-                  <TableCell className='font-medium'>{contact.name}</TableCell>
+                  <TableCell className="font-medium">{contact.name}</TableCell>
                   <TableCell>{contact.title || '-'}</TableCell>
                   <TableCell>
                     {contact.email ? (
                       <a
                         href={`mailto:${contact.email}`}
-                        className='text-blue-600 hover:text-blue-800'
+                        className="text-blue-600 hover:text-blue-800"
                       >
                         {contact.email}
                       </a>
@@ -469,7 +470,7 @@ export default async function CompanyDetail({ params }: PageProps) {
                     {contact.phone ? (
                       <a
                         href={`tel:${contact.phone}`}
-                        className='text-blue-600 hover:text-blue-800'
+                        className="text-blue-600 hover:text-blue-800"
                       >
                         {contact.phone}
                       </a>
@@ -481,9 +482,9 @@ export default async function CompanyDetail({ params }: PageProps) {
                     {contact.linkedin ? (
                       <a
                         href={contact.linkedin}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='text-blue-600 hover:text-blue-800'
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-800"
                       >
                         View Profile
                       </a>
@@ -496,11 +497,11 @@ export default async function CompanyDetail({ params }: PageProps) {
             </TableBody>
           </Table>
         ) : (
-          <div className='p-6 text-center text-gray-500'>
+          <div className="p-6 text-center text-gray-500">
             No contacts yet.
             <Link
               href={`/dashboard/contacts/new?companyId=${company.id}`}
-              className='text-blue-600 hover:text-blue-800 ml-1'
+              className="ml-1 text-blue-600 hover:text-blue-800"
             >
               Add your first contact
             </Link>
