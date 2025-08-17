@@ -500,7 +500,7 @@ TiptapEditor.displayName = 'TiptapEditor';
 // Utility function to wrap TipTap content for display
 export const wrapTiptapContent = (htmlContent: string): string => {
   if (!htmlContent) return '';
-  return `<div class="prose prose-sm mx-auto">${htmlContent}</div>`;
+  return `<div class="prose prose-sm">${htmlContent}</div>`;
 };
 
 // React component for displaying TipTap content
@@ -512,7 +512,7 @@ export const TiptapDisplay = ({
   className?: string;
 }) => (
   <div
-    className={cn('prose prose-sm mx-auto', className)}
+    className={cn('prose prose-sm', className)}
     dangerouslySetInnerHTML={{ __html: content }}
   />
 );
