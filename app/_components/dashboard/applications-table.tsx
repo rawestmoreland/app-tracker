@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -8,15 +8,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { DashboardApplication } from "@/lib/types/dashboard";
-import { getRemotePolicyColor } from "@/lib/utils";
-import { StatusDropdown } from "./status-dropdown";
-import { DataTableToolbar } from "@/components/ui/data-table-toolbar";
+} from '@/components/ui/table';
+import { DashboardApplication } from '@/lib/types/dashboard';
+import { getRemotePolicyColor } from '@/lib/utils';
+import { StatusDropdown } from './status-dropdown';
+import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
 import {
   applicationStatusOptions,
   remoteTypeOptions,
-} from "@/lib/filter-options";
+} from '@/lib/filter-options';
 import {
   ColumnFiltersState,
   createColumnHelper,
@@ -30,11 +30,12 @@ import {
   SortingState,
   useReactTable,
   PaginationState,
-} from "@tanstack/react-table";
-import { format } from "date-fns";
-import { ChevronDown, ChevronsUpDown, ChevronUp, PlusIcon } from "lucide-react";
-import Link from "next/link";
-import { useMemo, useState } from "react";
+} from '@tanstack/react-table';
+import { format } from 'date-fns';
+import { ChevronDown, ChevronsUpDown, ChevronUp, PlusIcon } from 'lucide-react';
+import Link from 'next/link';
+import { useMemo, useState } from 'react';
+import Image from 'next/image';
 
 export default function ApplicationsTable({
   applications,
@@ -52,8 +53,8 @@ export default function ApplicationsTable({
 
   const columns = useMemo(
     () => [
-      columnHelper.accessor("title", {
-        header: "Position",
+      columnHelper.accessor('title', {
+        header: 'Position',
         cell: (info) => (
           <Link
             href={`/dashboard/applications/${info.row.original.id}`}
@@ -63,28 +64,43 @@ export default function ApplicationsTable({
           </Link>
         ),
       }),
-      columnHelper.accessor("company.name", {
-        header: "Company",
+      columnHelper.accessor('company.name', {
+        header: 'Company',
         cell: (info) => (
           <Link
             href={`/dashboard/companies/${info.row.original.company.id}`}
             className="font-medium text-blue-600 hover:text-blue-900"
           >
-            {info.row.original.company.name}
+            <div className="flex items-center gap-2">
+              {info.row.original.company.logo ? (
+                <Image
+                  src={info.row.original.company.logo}
+                  alt={info.row.original.company.name}
+                  width={24}
+                  height={24}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
+                  🏢
+                </div>
+              )}
+              {info.row.original.company.name}
+            </div>
           </Link>
         ),
       }),
-      columnHelper.accessor("status", {
+      columnHelper.accessor('status', {
         header: ({ column }) => (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="h-auto p-0 font-medium tracking-wider text-gray-500 uppercase hover:bg-transparent"
           >
             Status
-            {column.getIsSorted() === "asc" ? (
+            {column.getIsSorted() === 'asc' ? (
               <ChevronUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
+            ) : column.getIsSorted() === 'desc' ? (
               <ChevronDown className="ml-2 h-4 w-4" />
             ) : (
               <ChevronsUpDown className="ml-2 h-4 w-4" />
@@ -104,17 +120,17 @@ export default function ApplicationsTable({
           return value.includes(row.getValue(id));
         },
       }),
-      columnHelper.accessor("remote", {
+      columnHelper.accessor('remote', {
         header: ({ column }) => (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="h-auto p-0 font-medium tracking-wider text-gray-500 uppercase hover:bg-transparent"
           >
             Remote Policy
-            {column.getIsSorted() === "asc" ? (
+            {column.getIsSorted() === 'asc' ? (
               <ChevronUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
+            ) : column.getIsSorted() === 'desc' ? (
               <ChevronDown className="ml-2 h-4 w-4" />
             ) : (
               <ChevronsUpDown className="ml-2 h-4 w-4" />
@@ -126,10 +142,10 @@ export default function ApplicationsTable({
           return (
             <span
               className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${getRemotePolicyColor(
-                remote ?? "",
+                remote ?? '',
               )}`}
             >
-              {remote?.replace("_", " ")}
+              {remote?.replace('_', ' ')}
             </span>
           );
         },
@@ -137,17 +153,17 @@ export default function ApplicationsTable({
           return value.includes(row.getValue(id));
         },
       }),
-      columnHelper.accessor("appliedAt", {
+      columnHelper.accessor('appliedAt', {
         header: ({ column }) => (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
             className="h-auto p-0 font-medium tracking-wider text-gray-500 uppercase hover:bg-transparent"
           >
             Applied
-            {column.getIsSorted() === "asc" ? (
+            {column.getIsSorted() === 'asc' ? (
               <ChevronUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === "desc" ? (
+            ) : column.getIsSorted() === 'desc' ? (
               <ChevronDown className="ml-2 h-4 w-4" />
             ) : (
               <ChevronsUpDown className="ml-2 h-4 w-4" />
@@ -156,7 +172,7 @@ export default function ApplicationsTable({
         ),
         cell: (info) => (
           <div className="text-gray-500">
-            {format(info.getValue(), "MMM d, yyyy")}
+            {format(info.getValue(), 'MMM d, yyyy')}
           </div>
         ),
         sortingFn: (rowA, rowB) => {
@@ -165,8 +181,8 @@ export default function ApplicationsTable({
           return dateA - dateB;
         },
       }),
-      columnHelper.accessor("interviews", {
-        header: "Interviews",
+      columnHelper.accessor('interviews', {
+        header: 'Interviews',
         cell: (info) => (
           <div className="text-gray-500">
             {info.row.original.interviews.length}
@@ -251,20 +267,20 @@ export default function ApplicationsTable({
           table={table}
           filterableColumns={[
             {
-              id: "status",
-              title: "Status",
+              id: 'status',
+              title: 'Status',
               options: applicationStatusOptions,
             },
             {
-              id: "remote",
-              title: "Remote Policy",
+              id: 'remote',
+              title: 'Remote Policy',
               options: remoteTypeOptions,
             },
           ]}
           searchableColumns={[
             {
-              id: "title",
-              title: "Position",
+              id: 'title',
+              title: 'Position',
             },
           ]}
         />
@@ -292,7 +308,7 @@ export default function ApplicationsTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() && 'selected'}
                   className="hover:bg-gray-50"
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -318,22 +334,26 @@ export default function ApplicationsTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between space-x-2 py-4 px-4 sm:px-6">
+      <div className="flex items-center justify-between space-x-2 px-4 py-4 sm:px-6">
         <div className="flex items-center space-x-2">
-          <div className="text-sm text-muted-foreground">
-            Showing{" "}
-            {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}{" "}
-            to{" "}
+          <div className="text-muted-foreground text-sm">
+            Showing{' '}
+            {table.getState().pagination.pageIndex *
+              table.getState().pagination.pageSize +
+              1}{' '}
+            to{' '}
             {Math.min(
-              (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-              table.getFilteredRowModel().rows.length
-            )}{" "}
+              (table.getState().pagination.pageIndex + 1) *
+                table.getState().pagination.pageSize,
+              table.getFilteredRowModel().rows.length,
+            )}{' '}
             of {table.getFilteredRowModel().rows.length} applications
           </div>
         </div>
         <div className="flex items-center space-x-2">
-          <div className="text-sm text-muted-foreground">
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+          <div className="text-muted-foreground text-sm">
+            Page {table.getState().pagination.pageIndex + 1} of{' '}
+            {table.getPageCount()}
           </div>
           <div className="space-x-2">
             <Button
