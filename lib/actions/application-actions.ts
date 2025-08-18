@@ -216,11 +216,50 @@ export async function updateApplication(id: string, data: ApplicationFormData) {
     return { success: false, error: 'Unauthorized' };
   }
 
+  const existingApplication = await prisma.application.findFirst({
+    where: { id, userId: dbUser.id },
+  });
+
+  if (!existingApplication) {
+    return { success: false, error: 'Application not found' };
+  }
+
+  const statusChanged = existingApplication.status !== data.status;
+
   try {
     await prisma.application.update({
-      where: { id, userId: dbUser.id },
+      where: { id },
       data,
     });
+
+    if (statusChanged) {
+      const transitionTime = new Date();
+
+      // Create traditional activity log entry
+      await prisma.applicationEvent.create({
+        data: {
+          type: getEventTypeFromStatus(data.status!),
+          title: getEventTitleFromStatus(data.status!),
+          content: `Status changed from ${existingApplication.status.replace(
+            /_/g,
+            ' ',
+          )} to ${data.status!.replace(/_/g, ' ') ?? ''}`,
+          occurredAt: transitionTime,
+          source: EventSource.OTHER,
+          applicationId: id,
+          userId: dbUser.id,
+        },
+      });
+
+      // Create the activity entry
+      await ActivityTracker.trackApplicationStatusChanged(
+        id,
+        data.title,
+        existingApplication.status,
+        data.status!,
+        `Status update via application interface`,
+      );
+    }
 
     revalidatePath(`/dashboard/applications/${id}`);
     return { success: true };
