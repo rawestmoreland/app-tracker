@@ -170,6 +170,7 @@ export default function ApplicationContent({
 
   const handleResumeUploadComplete = () => {
     setUploadError(null);
+    router.refresh(); // Refresh the page to show updated resume state
   };
 
   const handleResumeUploadError = (error: string) => {
