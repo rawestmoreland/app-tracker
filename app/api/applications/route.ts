@@ -38,7 +38,7 @@ export async function GET() {
     console.error('Error fetching applications:', error);
     return NextResponse.json(
       { error: 'Failed to fetch applications' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -70,18 +70,43 @@ export async function POST(request: NextRequest) {
       status,
       appliedAt,
       companyId,
+      companyName,
+      companyUrl,
     } = body;
 
     // Validate required fields
-    if (!title || !companyId || !appliedAt) {
+    if (!title || !appliedAt) {
       return NextResponse.json(
         { error: 'Missing required fields' },
-        { status: 400 }
+        { status: 400 },
+      );
+    }
+
+    // Validate company information
+    if (!companyId && !companyName) {
+      return NextResponse.json(
+        { error: 'Either companyId or companyName must be provided' },
+        { status: 400 },
       );
     }
 
     // Create application in a transaction
     const result = await prisma.$transaction(async (tx) => {
+      let finalCompanyId = companyId;
+
+      // If no companyId provided, create a new company
+      if (!companyId && companyName) {
+        const newCompany = await tx.company.create({
+          data: {
+            name: companyName.trim(),
+            website: companyUrl || null,
+            visibility: 'PRIVATE',
+            createdBy: dbUser.id,
+          },
+        });
+        finalCompanyId = newCompany.id;
+      }
+
       const application = await tx.application.create({
         data: {
           title,
@@ -95,7 +120,7 @@ export async function POST(request: NextRequest) {
           status: status || 'APPLIED',
           appliedAt: new Date(appliedAt),
           userId: dbUser.id,
-          companyId,
+          companyId: finalCompanyId,
         },
         include: {
           company: true,
@@ -123,13 +148,13 @@ export async function POST(request: NextRequest) {
       ActivityTracker.trackApplicationCreated(
         result.id,
         result.title,
-        result.company.name
+        result.company.name,
       ),
       ActivityTracker.trackApplicationInitialStatus(
         result.id,
         result.title,
         status || 'APPLIED',
-        new Date(appliedAt)
+        new Date(appliedAt),
       ),
     ]);
 
@@ -138,7 +163,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating application:', error);
     return NextResponse.json(
       { error: 'Failed to create application' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

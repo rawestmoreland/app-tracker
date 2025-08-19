@@ -40,6 +40,8 @@ export default function NewApplicationContent({
       status: ApplicationStatus.APPLIED,
       appliedAt: new Date(),
       companyId: companyId || '',
+      companyName: '',
+      companyUrl: '',
     },
   });
 
@@ -74,14 +76,14 @@ export default function NewApplicationContent({
   };
 
   return (
-    <div className='min-h-screen bg-gray-50 py-8'>
-      <div className='max-w-2xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='mb-8'>
-          <Breadcrumb className='mb-4'>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <Breadcrumb className="mb-4">
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href='/dashboard'>Dashboard</Link>
+                  <Link href="/dashboard">Dashboard</Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
@@ -90,12 +92,12 @@ export default function NewApplicationContent({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <h1 className='text-3xl font-bold text-gray-900'>
+          <h1 className="text-3xl font-bold text-gray-900">
             Add New Application
           </h1>
         </div>
 
-        <div className='bg-white rounded-lg shadow p-6'>
+        <div className="rounded-lg bg-white p-6 shadow">
           <ApplicationForm
             form={form}
             handleSubmit={handleSubmit}

@@ -227,9 +227,28 @@ export async function updateApplication(id: string, data: ApplicationFormData) {
   const statusChanged = existingApplication.status !== data.status;
 
   try {
+    // Handle company creation if needed
+    let finalCompanyId = data.companyId;
+
+    if (!data.companyId && data.companyName) {
+      const newCompany = await prisma.company.create({
+        data: {
+          name: data.companyName.trim(),
+          website: data.companyUrl || null,
+          visibility: 'PRIVATE',
+          createdBy: dbUser.id,
+        },
+      });
+      finalCompanyId = newCompany.id;
+    }
+
+    // Prepare update data - exclude new company fields
+    const { companyName, companyUrl, ...updateData } = data;
+    updateData.companyId = finalCompanyId;
+
     await prisma.application.update({
       where: { id },
-      data,
+      data: updateData,
     });
 
     if (statusChanged) {
