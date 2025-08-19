@@ -98,6 +98,8 @@ export default function ApplicationContent({
       status: application?.status || ApplicationStatus.APPLIED,
       appliedAt: application?.appliedAt || new Date(),
       companyId: application?.company.id || '',
+      companyName: '',
+      companyUrl: '',
       referredBy: application?.referredBy || '',
     },
   });
@@ -126,6 +128,8 @@ export default function ApplicationContent({
         status: application?.status || ApplicationStatus.APPLIED,
         appliedAt: application?.appliedAt || new Date(),
         companyId: application?.company.id || '',
+        companyName: '',
+        companyUrl: '',
       });
     }
   }, [editing]);

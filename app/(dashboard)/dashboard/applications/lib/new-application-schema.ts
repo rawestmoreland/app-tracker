@@ -13,7 +13,10 @@ export const schema = z
     remote: z.enum(RemoteType).optional(),
     status: z.enum(ApplicationStatus).optional(),
     appliedAt: z.date(),
-    companyId: z.string().min(1),
+    // Company fields - either existing company or new company
+    companyId: z.string().optional(),
+    companyName: z.string().optional(),
+    companyUrl: z.url().optional().or(z.literal('')),
     referredBy: z.string().max(255).optional(),
   })
   .refine(
@@ -26,7 +29,23 @@ export const schema = z
     {
       message: 'High salary must be greater than or equal to low salary',
       path: ['highSalary'],
-    }
+    },
+  )
+  .refine(
+    (data) => {
+      // Either companyId must be provided OR both companyName and companyUrl must be provided
+      if (data.companyId) {
+        return true; // Existing company selected
+      }
+      if (data.companyName && data.companyName.trim()) {
+        return true; // New company being created
+      }
+      return false;
+    },
+    {
+      message: 'Please select an existing company or enter a new company name',
+      path: ['companyName'],
+    },
   );
 
 export type ApplicationFormData = z.infer<typeof schema>;

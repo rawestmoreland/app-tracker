@@ -34,6 +34,7 @@ import { ApplicationStatus, Company, RemoteType } from '@prisma/client';
 import { ApplicationFormData } from '../lib/new-application-schema';
 import { startCase } from 'lodash';
 import { TiptapEditor } from '@/components/tiptap-editor';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function ApplicationForm({
   form,
@@ -49,6 +50,75 @@ export default function ApplicationForm({
   cancelEdit?: () => void;
 }): React.ReactNode {
   const router = useRouter();
+  const [isNewCompany, setIsNewCompany] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Set initial state based on whether we have a companyId or not
+  useEffect(() => {
+    const currentCompanyId = form.getValues('companyId');
+    const currentCompanyName = form.getValues('companyName');
+
+    if (!currentCompanyId && currentCompanyName) {
+      setIsNewCompany(true);
+    } else if (currentCompanyId) {
+      setIsNewCompany(false);
+    }
+  }, [form]);
+
+  const handleCompanyTypeChange = (isNew: boolean) => {
+    setIsNewCompany(isNew);
+    if (isNew) {
+      // Clear existing company selection
+      form.setValue('companyId', '');
+      // Set the company name from the search query
+      form.setValue('companyName', searchQuery);
+    } else {
+      // Clear new company fields
+      form.setValue('companyName', '');
+      form.setValue('companyUrl', '');
+    }
+  };
+
+  const handleCompanySearch = (query: string) => {
+    setSearchQuery(query);
+    // Don't automatically switch to new company mode - let the user decide
+  };
+
+  // Create filtered options with "Create new" option when no matches
+  const comboboxOptions = useMemo(() => {
+    const filteredCompanies = companies.filter((company) =>
+      company.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    const options = filteredCompanies.map((company) => ({
+      value: company.id,
+      label: company.name,
+    }));
+
+    // Add "Create new" option if no matches and user has typed something
+    if (searchQuery && filteredCompanies.length === 0) {
+      options.push({
+        value: 'new-company',
+        label: `Create "${searchQuery}"`,
+      });
+    }
+
+    return options;
+  }, [companies, searchQuery]);
+
+  const handleCompanySelect = (value: string) => {
+    if (value === 'new-company') {
+      setIsNewCompany(true);
+      form.setValue('companyId', '');
+      form.setValue('companyName', searchQuery);
+    } else {
+      setIsNewCompany(false);
+      form.setValue('companyId', value);
+      form.setValue('companyName', '');
+      form.setValue('companyUrl', '');
+    }
+  };
+
   return (
     <Form {...form}>
       <form
@@ -72,39 +142,87 @@ export default function ApplicationForm({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="companyId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Company *</FormLabel>
-              <FormControl>
-                <Combobox
-                  options={companies.map((company) => ({
-                    value: company.id,
-                    label: company.name,
-                  }))}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder="Select a company"
-                  searchPlaceholder="Search companies..."
-                  emptyText="No company found."
-                  className="w-full"
-                />
-              </FormControl>
-              <FormDescription>
-                Don&apos;t see your company?{' '}
-                <Link
-                  href="/dashboard/companies/new?from=applications/new"
-                  className="text-blue-600 hover:text-blue-800"
+
+        {/* Company Selection Section */}
+        <div className="space-y-4">
+          {!isNewCompany ? (
+            <FormField
+              control={form.control}
+              name="companyId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company *</FormLabel>
+                  <FormControl>
+                    <Combobox
+                      options={comboboxOptions}
+                      value={field.value}
+                      onValueChange={handleCompanySelect}
+                      onSearchChange={handleCompanySearch}
+                      placeholder="Search for a company..."
+                      searchPlaceholder="Search companies..."
+                      emptyText="No company found."
+                      className="w-full"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <FormLabel>New Company</FormLabel>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCompanyTypeChange(false)}
                 >
-                  Add it here
-                </Link>
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
+                  Select Existing
+                </Button>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="companyName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Name *</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="text"
+                        {...field}
+                        placeholder="e.g., Acme Corporation"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="companyUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Company Website</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="url"
+                        {...field}
+                        placeholder="https://www.acme.com"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Optional: Company&apos;s website URL
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           )}
-        />
+        </div>
 
         <FormField
           control={form.control}

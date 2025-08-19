@@ -129,7 +129,7 @@ export default function ApplicationsTable({
                   className="rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-200">
+                <div className="flex size-6 items-center justify-center rounded-full bg-gray-200">
                   🏢
                 </div>
               )}
