@@ -6,6 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -45,6 +46,22 @@ interface PageProps {
   application: Application & { company: Company };
 }
 
+// Utility function to convert UTC datetime to local time string
+const utcToLocalTimeString = (utcDate: Date): string => {
+  const localDate = new Date(utcDate);
+  const hours = localDate.getHours().toString().padStart(2, '0');
+  const minutes = localDate.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
+// Utility function to get current local time as string
+const getCurrentLocalTimeString = (): string => {
+  const now = new Date();
+  const hours = now.getHours().toString().padStart(2, '0');
+  const minutes = now.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+};
+
 export function NewInterviewContent({ application }: PageProps) {
   const router = useRouter();
   const routeParams = useParams();
@@ -52,7 +69,10 @@ export function NewInterviewContent({ application }: PageProps) {
   const schema = z.object({
     type: z.enum(InterviewType),
     format: z.enum(InterviewFormat),
-    scheduledAt: z.date(),
+    scheduledDate: z.date(),
+    scheduledTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, {
+      message: 'Please enter a valid time in HH:MM format (24-hour)',
+    }),
     duration: z.number().min(1),
     feedback: z.string().optional(),
     outcome: z.enum(InterviewOutcome),
@@ -63,7 +83,8 @@ export function NewInterviewContent({ application }: PageProps) {
     defaultValues: {
       type: InterviewType.PHONE_SCREEN,
       format: InterviewFormat.PHONE,
-      scheduledAt: new Date(),
+      scheduledDate: new Date(),
+      scheduledTime: getCurrentLocalTimeString(),
       duration: 60,
       feedback: '',
       outcome: InterviewOutcome.PENDING,
@@ -72,12 +93,24 @@ export function NewInterviewContent({ application }: PageProps) {
 
   const handleSubmit = async (data: z.infer<typeof schema>) => {
     try {
+      // Combine date and time into a single timestamp in user's local timezone
+      const [hours, minutes] = data.scheduledTime.split(':').map(Number);
+      const localDateTime = new Date(data.scheduledDate);
+      localDateTime.setHours(hours, minutes, 0, 0);
+
+      // Convert to UTC/Zulu time for storage
+      const scheduledAt = new Date(localDateTime.toISOString());
+
       const response = await fetch(`/api/interviews`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...data, applicationId: application.id }),
+        body: JSON.stringify({
+          ...data,
+          scheduledAt,
+          applicationId: application.id,
+        }),
       });
 
       if (!response.ok) {
@@ -214,7 +247,7 @@ export function NewInterviewContent({ application }: PageProps) {
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="scheduledAt"
+                  name="scheduledDate"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Scheduled Date *</FormLabel>
@@ -255,26 +288,50 @@ export function NewInterviewContent({ application }: PageProps) {
 
                 <FormField
                   control={form.control}
-                  name="duration"
+                  name="scheduledTime"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duration (minutes)</FormLabel>
+                      <FormLabel>Scheduled Time *</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          id="duration"
-                          name="duration"
+                          type="time"
+                          id="scheduledTime"
+                          name="scheduledTime"
                           value={field.value}
                           onChange={field.onChange}
-                          min="15"
-                          step="15"
+                          className="w-full"
                         />
                       </FormControl>
+                      <FormDescription className="text-muted-foreground text-xs">
+                        Times are stored in your local timezone
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Duration (minutes)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        id="duration"
+                        name="duration"
+                        value={field.value}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                        min="15"
+                        step="15"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}
