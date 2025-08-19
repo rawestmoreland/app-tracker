@@ -1,18 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 generator json {
   provider = "prisma-json-types-generator"
-  // namespace = "PrismaJson"
-  // clientOutput = "<finds it automatically>"
-  // (./ -> relative to schema, or an importable path to require() it)
 }
 
 datasource db {
@@ -21,333 +12,280 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(cuid())
-  clerkId      String        @unique
-  email        String        @unique
-  name         String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  role         UserRole      @default(USER)
-  isDonor      Boolean       @default(false)
-  signupReason SignupReason? @default(OTHER)
+  id              String             @id @default(cuid())
+  clerkId         String             @unique
+  email           String             @unique
+  name            String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  role            UserRole           @default(USER)
+  isDonor         Boolean            @default(false)
+  signupReason    SignupReason?      @default(OTHER)
+  activities      Activity[]
+  events          ApplicationEvent[]
+  applications    Application[]
+  Company         Company[]          @relation("CreatedCompanies")
+  contacts        Contact[]
+  FeatureRequest  FeatureRequest[]
+  interviews      Interview[]
+  notes           Note[]
+  Offer           Offer[]
+  UserPreferences UserPreference[]
+}
 
-  // Relations
-  applications Application[]
-  contacts     Contact[]
-  notes        Note[]
-  interviews   Interview[]
-  events       ApplicationEvent[]
-  activities   Activity[]
+model UserPreference {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  configName  String
+  configValue Json
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  Offer Offer[]
-
-  Company Company[] @relation("CreatedCompanies")
-
-  FeatureRequest FeatureRequest[]
+  @@unique([userId, configName])
+  @@map("user_preferences")
 }
 
 model Company {
-  id          String       @id @default(cuid())
-  name        String
-  website     String?
-  description String?
-  industry    String?
-  size        CompanySize?
-  location    String?
-  logo        String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  isGlobal   Boolean           @default(false)
-  createdBy  String?
-  visibility CompanyVisibility @default(PRIVATE)
-
-  // Relations
-  applications Application[]
-  contacts     Contact[]
+  id           String            @id @default(cuid())
+  name         String
+  website      String?
+  description  String?
+  industry     String?
+  size         CompanySize?
+  location     String?
+  logo         String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  isGlobal     Boolean           @default(false)
+  createdBy    String?
+  visibility   CompanyVisibility @default(PRIVATE)
   activities   Activity[]
-  creator      User?         @relation("CreatedCompanies", fields: [createdBy], references: [id], onDelete: SetNull)
+  applications Application[]
+  creator      User?             @relation("CreatedCompanies", fields: [createdBy], references: [id])
+  contacts     Contact[]
 
   @@map("companies")
 }
 
 model FeatureRequest {
-  id String @id @default(cuid())
+  id          String               @id @default(cuid())
   description String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status    FeatureRequestStatus @default(PENDING)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  userId      String
+  status      FeatureRequestStatus @default(PENDING)
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("feature_requests")
 }
 
 model Application {
-  id          String            @id @default(cuid())
-  title       String
-  description String?
-  jobUrl      String?
-  lowSalary   Int? // Salary range minimum in dollars
-  highSalary  Int? // Salary range maximum in dollars
-  currency    String            @default("USD") // Currency code (USD, EUR, etc.)
-  location    String?
-  remote      RemoteType?
-  status      ApplicationStatus @default(APPLIED)
-  appliedAt   DateTime
-  resume      String? // R2 object key for the uploaded resume
-  resumeName  String? // Original filename of the resume
-  referredBy  String? // Who referred you to this job
-
-  // Response Timing Fields
-  firstResponseAt   DateTime? // When company first responded (any communication)
-  interviewInviteAt DateTime? // When first interview was offered
-  firstInterviewAt  DateTime? // When first interview was scheduled
-  finalDecisionAt   DateTime? // When final decision was communicated
-  lastContactAt     DateTime? // Most recent communication from company
-
-  // Metrics helpers (automatically calculated)
-  responseTimeHours  Int? // Hours between appliedAt and firstResponseAt
-  interviewTimeHours Int? // Hours between firstResponseAt and firstInterviewAt
-  totalProcessHours  Int? // Hours between appliedAt and finalDecisionAt
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign keys
-  userId    String
-  companyId String
-
-  // Relations
-  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company    Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  interviews Interview[]
-  notes      Note[]
-  activities Activity[]
-  Offer      Offer[]
-  events     ApplicationEvent[] // Track all communication events
+  id                 String             @id @default(cuid())
+  title              String
+  description        String?
+  jobUrl             String?
+  lowSalary          Int?
+  highSalary         Int?
+  currency           String             @default("USD")
+  location           String?
+  remote             RemoteType?
+  status             ApplicationStatus  @default(APPLIED)
+  appliedAt          DateTime
+  resume             String?
+  resumeName         String?
+  referredBy         String?
+  firstResponseAt    DateTime?
+  interviewInviteAt  DateTime?
+  firstInterviewAt   DateTime?
+  finalDecisionAt    DateTime?
+  lastContactAt      DateTime?
+  responseTimeHours  Int?
+  interviewTimeHours Int?
+  totalProcessHours  Int?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  userId             String
+  companyId          String
+  activities         Activity[]
+  events             ApplicationEvent[]
+  company            Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interviews         Interview[]
+  notes              Note[]
+  Offer              Offer[]
 
   @@map("applications")
 }
 
 model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  title     String?
-  linkedin  String?
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign keys
-  userId    String
-  companyId String?
-
-  // Relations
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company    Company?    @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  id         String      @id @default(cuid())
+  name       String
+  email      String?
+  phone      String?
+  title      String?
+  linkedin   String?
+  notes      String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  userId     String
+  companyId  String?
   activities Activity[]
-  interviews Interview[]
+  company    Company?    @relation(fields: [companyId], references: [id])
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interviews Interview[] @relation("ContactToInterview")
 
   @@map("contacts")
 }
 
 model Interview {
-  id          String            @id @default(cuid())
-  type        InterviewType
-  format      InterviewFormat
-  meetingLink String?
-  scheduledAt DateTime?
-  duration    Int? // in minutes
-  feedback    String?
-  outcome     InterviewOutcome?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-
-  // Foreign keys
+  id            String            @id @default(cuid())
+  type          InterviewType
+  format        InterviewFormat
+  meetingLink   String?
+  scheduledAt   DateTime?
+  duration      Int?
+  feedback      String?
+  outcome       InterviewOutcome?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
   applicationId String
   userId        String
-
-  // Relations
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  contacts    Contact[]
-  activities  Activity[]
-  notes       Note[]
+  activities    Activity[]
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes         Note[]
+  contacts      Contact[]         @relation("ContactToInterview")
 
   @@map("interviews")
 }
 
 model Note {
-  id        String   @id @default(cuid())
-  content   String
-  type      NoteType @default(GENERAL)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign keys
+  id            String       @id @default(cuid())
+  content       String
+  type          NoteType     @default(GENERAL)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   userId        String
   applicationId String?
   interviewId   String?
-
-  // Relations
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  application Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  interview   Interview?   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-  activities  Activity[]
+  activities    Activity[]
+  application   Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interview     Interview?   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notes")
 }
 
 model Offer {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  status      OfferStatus @default(PENDING)
-
-  // Compensation Details
-  baseSalary Int? // Annual base salary in cents to avoid floating point issues
-  currency   String     @default("USD")
-  salaryType SalaryType @default(ANNUAL) // Annual, hourly, contract, etc.
-
-  // Bonus Information
-  signingBonus Int? // One-time signing bonus in cents
-  annualBonus  Int? // Expected annual bonus in cents
-  bonusType    BonusType? // Fixed, performance-based, etc.
-  bonusDetails String? // Additional bonus information
-
-  // Equity/Stock Information
-  hasEquity     Boolean     @default(false)
-  equityType    EquityType? // Stock options, RSUs, etc.
-  equityAmount  Int? // Number of shares/units
-  equityValue   Int? // Estimated value in cents
-  equityVesting String? // Vesting schedule details
-  strikePrice   Int? // For stock options, in cents
-
-  // Work Details
-  location    String?
-  remote      RemoteType?
-  startDate   DateTime?
-  department  String?
-  reportingTo String? // Manager/supervisor name or title
-
-  // Benefits & Perks
-  healthInsurance         Boolean  @default(false)
-  dentalInsurance         Boolean  @default(false)
-  visionInsurance         Boolean  @default(false)
-  retirement401k          Boolean  @default(false)
-  retirementMatch         String? // e.g., "50% up to 6%"
-  paidTimeOff             String? // e.g., "20 days"
+  id                      String      @id @default(cuid())
+  title                   String
+  description             String?
+  status                  OfferStatus @default(PENDING)
+  baseSalary              Int?
+  currency                String      @default("USD")
+  salaryType              SalaryType  @default(ANNUAL)
+  signingBonus            Int?
+  annualBonus             Int?
+  bonusType               BonusType?
+  bonusDetails            String?
+  hasEquity               Boolean     @default(false)
+  equityType              EquityType?
+  equityAmount            Int?
+  equityValue             Int?
+  equityVesting           String?
+  strikePrice             Int?
+  location                String?
+  remote                  RemoteType?
+  startDate               DateTime?
+  department              String?
+  reportingTo             String?
+  healthInsurance         Boolean     @default(false)
+  dentalInsurance         Boolean     @default(false)
+  visionInsurance         Boolean     @default(false)
+  retirement401k          Boolean     @default(false)
+  retirementMatch         String?
+  paidTimeOff             String?
   sickLeave               String?
   parentalLeave           String?
-  lifeInsurance           Boolean  @default(false)
-  disabilityInsurance     Boolean  @default(false)
-  flexibleSchedule        Boolean  @default(false)
-  workFromHome            Boolean  @default(false)
-  professionalDevelopment String? // Training budget, conferences, etc.
-  gymMembership           Boolean  @default(false)
-  commuter                String? // Transit stipend, parking, etc.
-  meals                   String? // Free meals, stipend, etc.
-  equipment               String? // Laptop, monitor allowance, etc.
-  otherBenefits           String[] // Additional benefits as array
-
-  // Offer Timeline
-  receivedAt  DateTime?
-  expiresAt   DateTime?
-  respondedAt DateTime?
-  acceptedAt  DateTime?
-  declinedAt  DateTime?
-
-  // Additional Information
-  notes            String? // Any additional notes about the offer
-  negotiationNotes String? // Notes about salary negotiation
-  comparisonNotes  String? // Notes comparing to other offers
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign keys
-  userId        String
-  applicationId String
-
-  // Relations
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  activities  Activity[]
+  lifeInsurance           Boolean     @default(false)
+  disabilityInsurance     Boolean     @default(false)
+  flexibleSchedule        Boolean     @default(false)
+  workFromHome            Boolean     @default(false)
+  professionalDevelopment String?
+  gymMembership           Boolean     @default(false)
+  commuter                String?
+  meals                   String?
+  equipment               String?
+  otherBenefits           String[]
+  receivedAt              DateTime?
+  expiresAt               DateTime?
+  respondedAt             DateTime?
+  acceptedAt              DateTime?
+  declinedAt              DateTime?
+  notes                   String?
+  negotiationNotes        String?
+  comparisonNotes         String?
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+  userId                  String
+  applicationId           String
+  activities              Activity[]
+  application             Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user                    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("offers")
 }
 
 model ApplicationEvent {
-  id         String      @id @default(cuid())
-  type       EventType
-  title      String // e.g., "Phone screen invitation", "Rejection email"
-  content    String? // Email content, call notes, etc.
-  occurredAt DateTime // When this event happened
-  source     EventSource // How did you learn about this (email, call, portal, etc.)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-
-  // Foreign keys
+  id            String      @id @default(cuid())
+  type          EventType
+  title         String
+  content       String?
+  occurredAt    DateTime
+  source        EventSource
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   applicationId String
   userId        String
-
-  // Relations
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("application_events")
 }
 
-
 model Activity {
-  id          String       @id @default(cuid())
-  type        ActivityType
-  action      String       // "created", "updated", "deleted", "viewed", etc.
-  entityType  EntityType   // What was acted upon
-  entityId    String       // ID of the entity that was acted upon
-  entityName  String?      // Display name of the entity (for easier querying)
-  
-  // Metadata about the activity
-  description String       // Human-readable description: "Created application for Software Engineer at Google"
-  metadata    Json?        // Additional data about the activity (changes made, etc.)
-  
-  // Dedicated columns for status transitions (for fast querying)
-  fromStatus    ApplicationStatus? // Previous status (null for initial)
-  toStatus      ApplicationStatus? // New status (only for status change activities)
-  isProgression Boolean?           // Whether this represents forward progress
-  stageOrder    Int?               // Order in the application flow
-  
-  // Context
-  ipAddress   String?      // IP address where action occurred
-  userAgent   String?      // User agent string
-  platform    Platform?    // Web, mobile, etc.
-  
-  createdAt   DateTime     @default(now())
-  
-  // Foreign keys
-  userId      String
-  
-  // Optional relations to specific entities (for easier querying)
+  id            String             @id @default(cuid())
+  type          ActivityType
+  action        String
+  entityType    EntityType
+  entityId      String
+  entityName    String?
+  description   String
+  metadata      Json?
+  fromStatus    ApplicationStatus?
+  toStatus      ApplicationStatus?
+  isProgression Boolean?
+  stageOrder    Int?
+  ipAddress     String?
+  userAgent     String?
+  platform      Platform?
+  createdAt     DateTime           @default(now())
+  userId        String
   applicationId String?
   companyId     String?
   contactId     String?
   interviewId   String?
   noteId        String?
   offerId       String?
-  
-  // Relations
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  company     Company?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  contact     Contact?     @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  interview   Interview?   @relation(fields: [interviewId], references: [id], onDelete: SetNull)
-  note        Note?        @relation(fields: [noteId], references: [id], onDelete: SetNull)
-  offer       Offer?       @relation(fields: [offerId], references: [id], onDelete: SetNull)
-  
-  @@map("activities")
+  application   Application?       @relation(fields: [applicationId], references: [id])
+  company       Company?           @relation(fields: [companyId], references: [id])
+  contact       Contact?           @relation(fields: [contactId], references: [id])
+  interview     Interview?         @relation(fields: [interviewId], references: [id])
+  note          Note?              @relation(fields: [noteId], references: [id])
+  offer         Offer?             @relation(fields: [offerId], references: [id])
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId, createdAt])
   @@index([userId, entityType, createdAt])
   @@index([userId, type, createdAt])
@@ -355,9 +293,9 @@ model Activity {
   @@index([userId, toStatus, createdAt])
   @@index([applicationId, type, createdAt])
   @@index([type, fromStatus, toStatus])
+  @@map("activities")
 }
 
-// Enums
 enum UserRole {
   USER
   ADMIN
@@ -370,21 +308,21 @@ enum CompanyVisibility {
 }
 
 enum ApplicationStatus {
-  DRAFT // Application being prepared
-  APPLIED // Application submitted
-  CONFIRMATION_RECEIVED // Auto-confirmation received
-  UNDER_REVIEW // Application under review
-  PHONE_SCREEN // Phone screening stage
-  TECHNICAL_INTERVIEW // Technical interview stage
-  ONSITE_INTERVIEW // Final/onsite interview stage
-  REFERENCE_CHECK // Reference check in progress
-  OFFER_RECEIVED // Job offer received
-  OFFER_NEGOTIATING // Negotiating offer terms
-  ACCEPTED // Offer accepted
-  REJECTED // Application rejected
-  WITHDRAWN // Application withdrawn
-  GHOSTED // No response from company
-  POSITION_FILLED // Position filled by someone else
+  DRAFT
+  APPLIED
+  CONFIRMATION_RECEIVED
+  UNDER_REVIEW
+  PHONE_SCREEN
+  TECHNICAL_INTERVIEW
+  ONSITE_INTERVIEW
+  REFERENCE_CHECK
+  OFFER_RECEIVED
+  OFFER_NEGOTIATING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  GHOSTED
+  POSITION_FILLED
 }
 
 enum CompanySize {
@@ -442,67 +380,67 @@ enum NoteType {
 }
 
 enum OfferStatus {
-  PENDING // Offer received, no response yet
-  ACCEPTED // Offer accepted
-  DECLINED // Offer declined
-  NEGOTIATING // Currently negotiating terms
-  EXPIRED // Offer expired
-  WITHDRAWN // Company withdrew the offer
-  COUNTERED // Candidate made a counter offer
+  PENDING
+  ACCEPTED
+  DECLINED
+  NEGOTIATING
+  EXPIRED
+  WITHDRAWN
+  COUNTERED
 }
 
 enum SalaryType {
-  ANNUAL // Annual salary
-  HOURLY // Hourly wage
-  CONTRACT // Contract/project-based
-  COMMISSION // Commission-based
-  MONTHLY // Monthly salary
-  WEEKLY // Weekly salary
-  DAILY // Daily rate
+  ANNUAL
+  HOURLY
+  CONTRACT
+  COMMISSION
+  MONTHLY
+  WEEKLY
+  DAILY
 }
 
 enum BonusType {
-  FIXED // Fixed amount bonus
-  PERFORMANCE // Performance-based bonus
-  TARGET // Target-based bonus
-  RETENTION // Retention bonus
-  RELOCATION // Relocation bonus
-  ANNUAL // Annual bonus
-  QUARTERLY // Quarterly bonus
+  FIXED
+  PERFORMANCE
+  TARGET
+  RETENTION
+  RELOCATION
+  ANNUAL
+  QUARTERLY
 }
 
 enum EquityType {
-  STOCK_OPTIONS // Stock options (ISO, NSO)
-  RSU // Restricted Stock Units
-  ESPP // Employee Stock Purchase Plan
-  PHANTOM_STOCK // Phantom stock
-  PROFIT_SHARING // Profit sharing
-  EQUITY_GRANT // Direct equity grant
-  WARRANTS // Stock warrants
-  CARRY // Carried interest
+  STOCK_OPTIONS
+  RSU
+  ESPP
+  PHANTOM_STOCK
+  PROFIT_SHARING
+  EQUITY_GRANT
+  WARRANTS
+  CARRY
 }
 
 enum EventType {
-  APPLICATION_SUBMITTED // Initial application sent
-  CONFIRMATION_RECEIVED // Auto-confirmation received
-  RESUME_REVIEWED // HR reviewed resume
-  PHONE_SCREEN_INVITE // Invitation to phone screen
-  PHONE_SCREEN_COMPLETED // Phone screen done
-  TECHNICAL_INVITE // Technical interview invitation
-  TECHNICAL_COMPLETED // Technical interview done
-  ONSITE_INVITE // Onsite/final interview invitation  
-  ONSITE_COMPLETED // Onsite interview completed
-  REFERENCE_CHECK // Reference check started
-  OFFER_RECEIVED // Job offer received
-  OFFER_ACCEPTED // Offer accepted
-  REJECTION_RECEIVED // Rejection notification
-  POSITION_FILLED // Position filled by someone else
-  WITHDRAWN // Application withdrawn
-  FOLLOW_UP_SENT // Follow-up message sent
-  FOLLOW_UP_RECEIVED // Follow-up response received
-  NEGOTIATION_STARTED // Salary negotiation started
-  CONTRACT_SENT // Employment contract sent
-  OTHER // Other communication
+  APPLICATION_SUBMITTED
+  CONFIRMATION_RECEIVED
+  RESUME_REVIEWED
+  PHONE_SCREEN_INVITE
+  PHONE_SCREEN_COMPLETED
+  TECHNICAL_INVITE
+  TECHNICAL_COMPLETED
+  ONSITE_INVITE
+  ONSITE_COMPLETED
+  REFERENCE_CHECK
+  OFFER_RECEIVED
+  OFFER_ACCEPTED
+  REJECTION_RECEIVED
+  POSITION_FILLED
+  WITHDRAWN
+  FOLLOW_UP_SENT
+  FOLLOW_UP_RECEIVED
+  NEGOTIATION_STARTED
+  CONTRACT_SENT
+  OTHER
 }
 
 enum FeatureRequestStatus {
@@ -513,16 +451,16 @@ enum FeatureRequestStatus {
 }
 
 enum EventSource {
-  EMAIL // Email communication
-  PHONE_CALL // Phone call
-  LINKEDIN // LinkedIn message
-  JOB_PORTAL // Company job portal/ATS
-  IN_PERSON // Face-to-face conversation
-  TEXT_MESSAGE // SMS/text
-  VIDEO_CALL // Video conference
-  RECRUITER // Through recruiter
-  REFERRAL // Through referral contact
-  OTHER // Other source
+  EMAIL
+  PHONE_CALL
+  LINKEDIN
+  JOB_PORTAL
+  IN_PERSON
+  TEXT_MESSAGE
+  VIDEO_CALL
+  RECRUITER
+  REFERRAL
+  OTHER
 }
 
 enum SignupReason {
@@ -533,33 +471,24 @@ enum SignupReason {
 }
 
 enum ActivityType {
-  // Account & Profile
   ACCOUNT_CREATED
   PROFILE_UPDATED
   SETTINGS_CHANGED
   PASSWORD_CHANGED
-  
-  // Application Management
   APPLICATION_CREATED
   APPLICATION_UPDATED
   APPLICATION_DELETED
   APPLICATION_VIEWED
   APPLICATION_STATUS_CHANGED
   APPLICATION_ARCHIVED
-  
-  // Company Management
   COMPANY_CREATED
   COMPANY_UPDATED
   COMPANY_DELETED
   COMPANY_VIEWED
-  
-  // Contact Management
   CONTACT_CREATED
   CONTACT_UPDATED
   CONTACT_DELETED
   CONTACT_VIEWED
-  
-  // Interview Management
   INTERVIEW_CREATED
   INTERVIEW_UPDATED
   INTERVIEW_DELETED
@@ -567,47 +496,31 @@ enum ActivityType {
   INTERVIEW_SCHEDULED
   INTERVIEW_RESCHEDULED
   INTERVIEW_CANCELLED
-  
-  // Note Management
   NOTE_CREATED
   NOTE_UPDATED
   NOTE_DELETED
   NOTE_VIEWED
-  
-  // Offer Management
   OFFER_CREATED
   OFFER_UPDATED
   OFFER_DELETED
   OFFER_ACCEPTED
   OFFER_DECLINED
   OFFER_NEGOTIATED
-  
-  // Document Management
   RESUME_UPLOADED
   RESUME_UPDATED
   RESUME_DELETED
   DOCUMENT_VIEWED
-  
-  // Dashboard & Analytics
   DASHBOARD_VIEWED
   ANALYTICS_VIEWED
   REPORT_GENERATED
   DATA_EXPORTED
-  
-  // Feature Requests
   FEATURE_REQUEST_CREATED
   FEATURE_REQUEST_UPDATED
-  
-  // System Events
   LOGIN
   LOGOUT
   SESSION_EXPIRED
-  
-  // Collaboration
   DATA_SHARED
   PERMISSIONS_CHANGED
-  
-  // Other
   OTHER
 }
 

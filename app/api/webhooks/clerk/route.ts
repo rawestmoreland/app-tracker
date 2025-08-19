@@ -1,6 +1,7 @@
 import { verifyWebhook } from '@clerk/nextjs/webhooks';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ApplicationStatus, RemoteType } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,12 +9,12 @@ export async function POST(req: NextRequest) {
     const { id } = evt.data;
     const eventType = evt.type;
     console.log(
-      `Received webhook with ID ${id} and event type of ${eventType}`
+      `Received webhook with ID ${id} and event type of ${eventType}`,
     );
 
     if (eventType === 'user.created') {
       const { id, email_addresses, first_name, last_name } = evt.data;
-      await prisma.user.upsert({
+      const newUser = await prisma.user.upsert({
         where: { clerkId: id },
         update: {},
         create: {
@@ -21,6 +22,30 @@ export async function POST(req: NextRequest) {
           email: email_addresses[0].email_address,
           name: `${first_name ?? ''} ${last_name ?? ''}`.trim(),
         },
+      });
+
+      await prisma.userPreference.createMany({
+        data: [
+          {
+            userId: newUser.id,
+            configName: 'app-table-columns-visibility',
+            configValue: {
+              title: true,
+              'company.name': true,
+              status: true,
+              remote: true,
+              appliedAt: true,
+              interviews: true,
+            },
+          },
+          {
+            userId: newUser.id,
+            configName: 'app-table-pagination-size',
+            configValue: {
+              pageSize: 10,
+            },
+          },
+        ],
       });
     }
 

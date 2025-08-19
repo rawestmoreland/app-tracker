@@ -1,17 +1,13 @@
-import { Suspense } from "react";
-import { AppTrackerLoading } from "@/components/ui/loading";
-import ApplicationsTable from "@/app/_components/dashboard/applications-table";
-import { getSignedInUser } from "@/app/lib/auth";
-import { prisma } from "@/lib/prisma";
-import StatsContent from "@/app/_components/dashboard/stats-content";
+import { Suspense } from 'react';
+import { AppTrackerLoading } from '@/components/ui/loading';
+import ApplicationsTable from '@/app/_components/dashboard/applications-table';
+import { getSignedInUser } from '@/app/lib/auth';
+import { prisma } from '@/lib/prisma';
+import StatsContent from '@/app/_components/dashboard/stats-content';
+import { notFound } from 'next/navigation';
+import { User } from '@prisma/client';
 
-async function fetchApplications() {
-  const { dbUser } = await getSignedInUser();
-
-  if (!dbUser) {
-    throw new Error("User not found");
-  }
-
+async function fetchApplications(dbUser: User) {
   const applications = await prisma.application.findMany({
     where: {
       userId: dbUser.id,
@@ -26,19 +22,13 @@ async function fetchApplications() {
       },
       notes: true,
     },
-    orderBy: { appliedAt: "desc" },
+    orderBy: { appliedAt: 'desc' },
   });
 
   return applications;
 }
 
-async function fetchAnalytics() {
-  const { dbUser } = await getSignedInUser();
-
-  if (!dbUser) {
-    throw new Error("User not found");
-  }
-
+async function fetchAnalytics(dbUser: User) {
   const applications = await prisma.application.findMany({
     where: { userId: dbUser.id },
     select: {
@@ -55,7 +45,7 @@ async function fetchAnalytics() {
   const stats = {
     totalApplications: applications.length,
     activeApplications: applications.filter(
-      (app) => !["REJECTED", "ACCEPTED", "WITHDRAWN"].includes(app.status),
+      (app) => !['REJECTED', 'ACCEPTED', 'WITHDRAWN'].includes(app.status),
     ).length,
     totalInterviews: applications.reduce(
       (sum, app) => sum + app.interviews.length,
@@ -64,20 +54,58 @@ async function fetchAnalytics() {
     averageResponseTime: 0, // TODO: Calculate based on first interview date
     successRate: 0, // TODO: Calculate based on offers vs total
     ghostRate:
-      (applications.filter((app) => app.status === "GHOSTED")?.length ??
+      (applications.filter((app) => app.status === 'GHOSTED')?.length ??
         0 / applications.length) * 100,
   };
 
   return stats;
 }
 
-async function DashboardContent() {
-  const applicationsPromise = fetchApplications();
-  const analyticsPromise = fetchAnalytics();
+const fetchUserPreference = async (dbUser: User) => {
+  const columnsVisibility = await prisma.userPreference.findUnique({
+    where: {
+      userId_configName: {
+        userId: dbUser.id,
+        configName: 'app-table-columns-visibility',
+      },
+    },
+  });
 
-  const [applications, analytics] = await Promise.all([
+  const paginationSize = await prisma.userPreference.findUnique({
+    where: {
+      userId_configName: {
+        userId: dbUser.id,
+        configName: 'app-table-pagination-size',
+      },
+    },
+  });
+
+  return {
+    columnsVisibility: columnsVisibility?.configValue as Record<
+      string,
+      boolean
+    >,
+    paginationSize: paginationSize?.configValue as {
+      pageSize: number;
+    },
+  };
+};
+
+async function DashboardContent() {
+  const { dbUser } = await getSignedInUser();
+
+  if (!dbUser) {
+    notFound();
+  }
+
+  const applicationsPromise = fetchApplications(dbUser);
+  const analyticsPromise = fetchAnalytics(dbUser);
+  const userPreferencePromise = fetchUserPreference(dbUser);
+
+  const [applications, analytics, userPreference] = await Promise.all([
     applicationsPromise,
     analyticsPromise,
+    userPreferencePromise,
   ]);
 
   return (
@@ -86,7 +114,10 @@ async function DashboardContent() {
       <StatsContent analytics={analytics} />
 
       {/* Applications Table */}
-      <ApplicationsTable applications={applications} />
+      <ApplicationsTable
+        applications={applications}
+        tableConfig={userPreference}
+      />
     </div>
   );
 }
