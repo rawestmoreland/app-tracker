@@ -5,16 +5,21 @@ import { getSignedInUser } from '../../../lib/auth';
 async function fetchCompanies(
   page: number = 1,
   limit: number = 10,
-  search?: string
+  search?: string,
 ) {
   const { dbUser } = await getSignedInUser();
   const skip = (page - 1) * limit;
 
   let where: object = {
     OR: [
-      { visibility: 'GLOBAL' as const },
-      { visibility: 'PUBLIC' as const },
       { createdBy: dbUser.id },
+      {
+        applications: {
+          some: {
+            userId: dbUser.id,
+          },
+        },
+      },
     ],
   };
 
@@ -86,9 +91,14 @@ async function fetchCompanyStats() {
 
   const where = {
     OR: [
-      { visibility: 'GLOBAL' as const },
-      { visibility: 'PUBLIC' as const },
       { createdBy: dbUser.id },
+      {
+        applications: {
+          some: {
+            userId: dbUser.id,
+          },
+        },
+      },
     ],
   };
 
@@ -153,12 +163,12 @@ export default async function CompaniesPage({
   ]);
 
   return (
-    <div className='space-y-6'>
+    <div className="space-y-6">
       {/* Header */}
-      <div className='flex items-center justify-between'>
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className='text-3xl font-bold tracking-tight'>Companies</h1>
-          <p className='text-muted-foreground'>
+          <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
+          <p className="text-muted-foreground">
             Manage and track all the companies you&apos;re interested in
           </p>
         </div>
@@ -171,42 +181,42 @@ export default async function CompaniesPage({
       </div>
 
       {/* Stats Cards */}
-      <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-        <div className='bg-card border rounded-lg p-4'>
-          <div className='flex items-center gap-2'>
-            <div className='w-5 h-5 text-blue-500'>🏢</div>
-            <span className='text-sm font-medium text-muted-foreground'>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="bg-card rounded-lg border p-4">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 text-blue-500">🏢</div>
+            <span className="text-muted-foreground text-sm font-medium">
               Total Companies
             </span>
           </div>
-          <p className='text-2xl font-bold'>{totalCount}</p>
+          <p className="text-2xl font-bold">{totalCount}</p>
         </div>
-        <div className='bg-card border rounded-lg p-4'>
-          <div className='flex items-center gap-2'>
-            <div className='w-5 h-5 text-green-500'>📈</div>
-            <span className='text-sm font-medium text-muted-foreground'>
+        <div className="bg-card rounded-lg border p-4">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 text-green-500">📈</div>
+            <span className="text-muted-foreground text-sm font-medium">
               Total Applications
             </span>
           </div>
-          <p className='text-2xl font-bold'>{totalApplications}</p>
+          <p className="text-2xl font-bold">{totalApplications}</p>
         </div>
-        <div className='bg-card border rounded-lg p-4'>
-          <div className='flex items-center gap-2'>
-            <div className='w-5 h-5 text-purple-500'>👥</div>
-            <span className='text-sm font-medium text-muted-foreground'>
+        <div className="bg-card rounded-lg border p-4">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 text-purple-500">👥</div>
+            <span className="text-muted-foreground text-sm font-medium">
               Large Companies
             </span>
           </div>
-          <p className='text-2xl font-bold'>{largeCompaniesCount}</p>
+          <p className="text-2xl font-bold">{largeCompaniesCount}</p>
         </div>
-        <div className='bg-card border rounded-lg p-4'>
-          <div className='flex items-center gap-2'>
-            <div className='w-5 h-5 text-orange-500'>🌐</div>
-            <span className='text-sm font-medium text-muted-foreground'>
+        <div className="bg-card rounded-lg border p-4">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 text-orange-500">🌐</div>
+            <span className="text-muted-foreground text-sm font-medium">
               With Websites
             </span>
           </div>
-          <p className='text-2xl font-bold'>{companiesWithWebsites}</p>
+          <p className="text-2xl font-bold">{companiesWithWebsites}</p>
         </div>
       </div>
 
