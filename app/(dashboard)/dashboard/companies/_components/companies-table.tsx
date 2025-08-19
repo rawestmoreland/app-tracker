@@ -191,7 +191,13 @@ export function CompaniesTable({
         const description = info.getValue();
         return (
           <div className="max-w-[300px] truncate" title={description || ''}>
-            {description || '—'}
+            {description ? (
+              <div className="truncate">
+                {description.replace(/<[^>]*>/g, '').trim()}
+              </div>
+            ) : (
+              '—'
+            )}
           </div>
         );
       },
