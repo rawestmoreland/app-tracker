@@ -6,6 +6,7 @@ export const noteSchema = z.object({
   type: z.enum(NoteType),
   interviewId: z.string().optional(),
   applicationId: z.string().optional(),
+  companyId: z.string().optional(),
 });
 
 export type NoteFormData = z.infer<typeof noteSchema>;

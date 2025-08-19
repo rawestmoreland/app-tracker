@@ -28,7 +28,6 @@ import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { UseFormReturn } from 'react-hook-form';
 import { ApplicationStatus, Company, RemoteType } from '@prisma/client';
 import { ApplicationFormData } from '../lib/new-application-schema';

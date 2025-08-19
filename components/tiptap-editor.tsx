@@ -433,7 +433,7 @@ const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(
       editorProps: {
         attributes: {
           class: cn(
-            'prose prose-sm mx-auto focus:outline-none',
+            'prose prose-sm focus:outline-none',
             'min-h-[120px] px-3 py-2',
             editorClassName,
           ),

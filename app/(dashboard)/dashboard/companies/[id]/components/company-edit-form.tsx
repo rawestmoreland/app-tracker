@@ -12,25 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { CompanySize } from '@prisma/client';
+import { Company } from '../page';
 
-interface Company {
-  id: string;
-  name: string;
-  website?: string;
-  description?: string;
-  industry?: string;
-  size?: string;
-  location?: string;
-  logo?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface CompanyEditFormProps {
-  company: Company;
-}
-
-export function CompanyEditForm({ company }: CompanyEditFormProps) {
+export function CompanyEditForm({ company }: { company: Company }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Company>>({
@@ -101,7 +86,7 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               </label>
               <Input
                 type="url"
-                value={formData.website}
+                value={formData.website || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, website: e.target.value })
                 }
@@ -113,7 +98,7 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               </label>
               <Input
                 type="text"
-                value={formData.industry}
+                value={formData.industry || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, industry: e.target.value })
                 }
@@ -124,9 +109,12 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
                 Company Size
               </label>
               <Select
-                value={formData.size}
+                value={formData.size || ''}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, size: value })
+                  setFormData({
+                    ...formData,
+                    size: value,
+                  })
                 }
               >
                 <SelectTrigger className="w-full">
@@ -147,7 +135,7 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               </label>
               <Input
                 type="text"
-                value={formData.location}
+                value={formData.location || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, location: e.target.value })
                 }
@@ -159,7 +147,7 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               </label>
               <Input
                 type="url"
-                value={formData.logo}
+                value={formData.logo || ''}
                 onChange={(e) =>
                   setFormData({ ...formData, logo: e.target.value })
                 }
@@ -170,7 +158,7 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
                 Description
               </label>
               <TiptapEditor
-                value={formData.description}
+                value={formData.description || ''}
                 onChange={(value) =>
                   setFormData({ ...formData, description: value })
                 }
