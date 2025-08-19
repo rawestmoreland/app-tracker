@@ -85,11 +85,12 @@ export default function ApplicationsTable({
       interviews: true,
     },
   );
-  const [optimisticPagination, setOptimisticPagination] =
-    useOptimistic<PaginationState>({
-      pageSize: tableConfig?.paginationSize?.pageSize || 10,
-      pageIndex: 0,
-    });
+
+  // Use regular useState for pagination to persist during re-renders
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageSize: tableConfig?.paginationSize?.pageSize || 10,
+    pageIndex: 0,
+  });
 
   // Refs to track the last update to prevent duplicate server calls
   const lastColumnVisibilityUpdate = useRef<string>('');
@@ -278,30 +279,37 @@ export default function ApplicationsTable({
 
   const handlePaginationChange = useCallback(
     async (updater: Updater<PaginationState>) => {
+      const previousPagination = pagination;
       let newPaginationConfigurationResult: PaginationState;
+
       if (updater instanceof Function) {
-        newPaginationConfigurationResult = updater(optimisticPagination);
-        startTransition(() => {
-          setOptimisticPagination(newPaginationConfigurationResult);
-        });
+        newPaginationConfigurationResult = updater(pagination);
       } else {
         newPaginationConfigurationResult = updater;
-        setOptimisticPagination(newPaginationConfigurationResult);
       }
 
-      // Check if this is a duplicate update
-      const newPaginationString = JSON.stringify(
-        newPaginationConfigurationResult,
-      );
-      if (lastPaginationUpdate.current === newPaginationString) {
-        return;
-      }
-      lastPaginationUpdate.current = newPaginationString;
+      // Always update the local state
+      setPagination(newPaginationConfigurationResult);
 
-      // Call server action immediately but only if it's a new configuration
-      updateApplicationTablePagination(newPaginationConfigurationResult);
+      // Only call server action if pageSize changed (not pageIndex)
+      if (
+        previousPagination.pageSize !==
+        newPaginationConfigurationResult.pageSize
+      ) {
+        // Check if this is a duplicate update
+        const newPageSizeString = JSON.stringify({
+          pageSize: newPaginationConfigurationResult.pageSize,
+        });
+        if (lastPaginationUpdate.current === newPageSizeString) {
+          return;
+        }
+        lastPaginationUpdate.current = newPageSizeString;
+
+        // Call server action only for pageSize changes
+        updateApplicationTablePagination(newPaginationConfigurationResult);
+      }
     },
-    [optimisticPagination],
+    [pagination],
   );
 
   const table = useReactTable({
@@ -320,7 +328,7 @@ export default function ApplicationsTable({
     state: {
       sorting,
       columnFilters,
-      pagination: optimisticPagination,
+      pagination: pagination,
       columnVisibility: optimisticColumnVisibility,
     },
   });

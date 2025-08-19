@@ -85,8 +85,9 @@ const fetchUserPreference = async (dbUser: User) => {
       string,
       boolean
     >,
-    paginationSize: paginationSize?.configValue as {
-      pageSize: number;
+    paginationSize: {
+      pageSize:
+        (paginationSize?.configValue as { pageSize?: number })?.pageSize || 10,
     },
   };
 };
