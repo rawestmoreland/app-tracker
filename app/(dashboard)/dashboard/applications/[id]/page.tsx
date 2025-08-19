@@ -1,28 +1,17 @@
-import { getSignedInUser } from "@/app/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getSignedInUser } from '@/app/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-import { notFound } from "next/navigation";
-import ApplicationContent from "./components/application-content";
+import { notFound } from 'next/navigation';
+import ApplicationContent from './components/application-content';
+import { User } from '@prisma/client';
 
 const fetchCompanies = async () => {
-  const { dbUser } = await getSignedInUser();
-
-  if (!dbUser) {
-    throw new Error("Unauthorized");
-  }
-
   const companies = await prisma.company.findMany();
 
   return companies;
 };
 
-const fetchApplication = async (id: string) => {
-  const { dbUser } = await getSignedInUser();
-
-  if (!dbUser) {
-    throw new Error("Unauthorized");
-  }
-
+const fetchApplication = async (dbUser: User, id: string) => {
   const application = await prisma.application.findUnique({
     where: { id, userId: dbUser.id },
     include: {
@@ -36,7 +25,7 @@ const fetchApplication = async (id: string) => {
       notes: true,
       events: {
         orderBy: {
-          occurredAt: "desc",
+          occurredAt: 'desc',
         },
       },
     },
@@ -55,12 +44,13 @@ export default async function ApplicationDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const { dbUser } = await getSignedInUser();
 
-  if (!id) {
+  if (!id || !dbUser) {
     notFound();
   }
 
-  const applicationPromise = fetchApplication(id);
+  const applicationPromise = fetchApplication(dbUser, id);
   const companiesPromise = fetchCompanies();
 
   const [application, companies] = await Promise.all([

@@ -1,10 +1,16 @@
-"use client";
+'use client';
 
-import { Table } from "@tanstack/react-table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { FacetedFilter, FacetOption } from "@/components/ui/faceted-filter";
-import { XIcon } from "lucide-react";
+import { Table } from '@tanstack/react-table';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { FacetedFilter, FacetOption } from '@/components/ui/faceted-filter';
+import { Filter, XIcon } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -39,7 +45,7 @@ export function DataTableToolbar<TData>({
                 value={
                   (table
                     .getColumn(searchableColumn.id)
-                    ?.getFilterValue() as string) ?? ""
+                    ?.getFilterValue() as string) ?? ''
                 }
                 onChange={(event) =>
                   table
@@ -48,7 +54,7 @@ export function DataTableToolbar<TData>({
                 }
                 className="h-8 w-full"
               />
-            )
+            ),
         )}
         <div className="flex flex-wrap gap-2">
           {filterableColumns.map(
@@ -60,7 +66,7 @@ export function DataTableToolbar<TData>({
                   title={filterableColumn.title}
                   options={filterableColumn.options}
                 />
-              )
+              ),
           )}
           {isFiltered && (
             <Button
@@ -87,7 +93,7 @@ export function DataTableToolbar<TData>({
                   value={
                     (table
                       .getColumn(searchableColumn.id)
-                      ?.getFilterValue() as string) ?? ""
+                      ?.getFilterValue() as string) ?? ''
                   }
                   onChange={(event) =>
                     table
@@ -96,7 +102,7 @@ export function DataTableToolbar<TData>({
                   }
                   className="h-8 w-[150px] lg:w-[250px]"
                 />
-              )
+              ),
           )}
           {filterableColumns.map(
             (filterableColumn) =>
@@ -107,7 +113,7 @@ export function DataTableToolbar<TData>({
                   title={filterableColumn.title}
                   options={filterableColumn.options}
                 />
-              )
+              ),
           )}
           {isFiltered && (
             <Button
@@ -120,6 +126,33 @@ export function DataTableToolbar<TData>({
             </Button>
           )}
         </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="ml-auto">
+              <Filter className="mr-2 h-4 w-4" />
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value: boolean) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id.replace('.', ' ')}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );

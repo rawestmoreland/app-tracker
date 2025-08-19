@@ -9,6 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DashboardApplication } from '@/lib/types/dashboard';
 import { getRemotePolicyColor } from '@/lib/utils';
 import { StatusDropdown } from './status-dropdown';
@@ -30,30 +37,70 @@ import {
   SortingState,
   useReactTable,
   PaginationState,
+  VisibilityState,
+  Updater,
 } from '@tanstack/react-table';
 import { format } from 'date-fns';
 import { ChevronDown, ChevronsUpDown, ChevronUp, PlusIcon } from 'lucide-react';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import {
+  startTransition,
+  useMemo,
+  useOptimistic,
+  useState,
+  useCallback,
+  useRef,
+} from 'react';
 import Image from 'next/image';
+import {
+  updateApplicationTableColumns,
+  updateApplicationTablePagination,
+} from '@/lib/actions/user-preferences-actions';
 
 export default function ApplicationsTable({
   applications,
+  tableConfig,
 }: {
   applications: DashboardApplication[];
+  tableConfig?: {
+    columnsVisibility: Record<string, boolean>;
+    paginationSize: {
+      pageSize: number;
+    };
+  };
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  });
+  const [optimisticColumnVisibility, setOptimisticColumnVisibility]: [
+    VisibilityState,
+    (arg: Record<string, boolean>) => void,
+  ] = useOptimistic<VisibilityState>(
+    // this sets the "default" values for the column visibility
+    tableConfig?.columnsVisibility || {
+      title: true,
+      'company.name': true,
+      status: true,
+      remote: true,
+      appliedAt: true,
+      interviews: true,
+    },
+  );
+  const [optimisticPagination, setOptimisticPagination] =
+    useOptimistic<PaginationState>({
+      pageSize: tableConfig?.paginationSize?.pageSize || 10,
+      pageIndex: 0,
+    });
+
+  // Refs to track the last update to prevent duplicate server calls
+  const lastColumnVisibilityUpdate = useRef<string>('');
+  const lastPaginationUpdate = useRef<string>('');
 
   const columnHelper = createColumnHelper<DashboardApplication>();
 
   const columns = useMemo(
     () => [
       columnHelper.accessor('title', {
+        id: 'title',
         header: 'Position',
         cell: (info) => (
           <Link
@@ -65,6 +112,7 @@ export default function ApplicationsTable({
         ),
       }),
       columnHelper.accessor('company.name', {
+        id: 'company.name',
         header: 'Company',
         cell: (info) => (
           <Link
@@ -91,6 +139,7 @@ export default function ApplicationsTable({
         ),
       }),
       columnHelper.accessor('status', {
+        id: 'status',
         header: ({ column }) => (
           <Button
             variant="ghost"
@@ -121,6 +170,7 @@ export default function ApplicationsTable({
         },
       }),
       columnHelper.accessor('remote', {
+        id: 'remote',
         header: ({ column }) => (
           <Button
             variant="ghost"
@@ -154,6 +204,7 @@ export default function ApplicationsTable({
         },
       }),
       columnHelper.accessor('appliedAt', {
+        id: 'appliedAt',
         header: ({ column }) => (
           <Button
             variant="ghost"
@@ -182,6 +233,7 @@ export default function ApplicationsTable({
         },
       }),
       columnHelper.accessor('interviews', {
+        id: 'interviews',
         header: 'Interviews',
         cell: (info) => (
           <div className="text-gray-500">
@@ -193,22 +245,83 @@ export default function ApplicationsTable({
     [columnHelper],
   );
 
+  // Memoize the handlers to prevent infinite loops
+  const handleColumnVisibilityChange = useCallback(
+    async (newColumnVisibilityConfiguration: Updater<VisibilityState>) => {
+      let newColumnVisibilityConfigurationResult: VisibilityState;
+      if (newColumnVisibilityConfiguration instanceof Function) {
+        newColumnVisibilityConfigurationResult =
+          newColumnVisibilityConfiguration(optimisticColumnVisibility);
+        startTransition(() => {
+          setOptimisticColumnVisibility(newColumnVisibilityConfigurationResult);
+        });
+      } else {
+        newColumnVisibilityConfigurationResult =
+          newColumnVisibilityConfiguration;
+        setOptimisticColumnVisibility(newColumnVisibilityConfiguration);
+      }
+
+      // Check if this is a duplicate update
+      const newConfigString = JSON.stringify(
+        newColumnVisibilityConfigurationResult,
+      );
+      if (lastColumnVisibilityUpdate.current === newConfigString) {
+        return;
+      }
+      lastColumnVisibilityUpdate.current = newConfigString;
+
+      // Call server action immediately but only if it's a new configuration
+      updateApplicationTableColumns(newColumnVisibilityConfigurationResult);
+    },
+    [optimisticColumnVisibility],
+  );
+
+  const handlePaginationChange = useCallback(
+    async (updater: Updater<PaginationState>) => {
+      let newPaginationConfigurationResult: PaginationState;
+      if (updater instanceof Function) {
+        newPaginationConfigurationResult = updater(optimisticPagination);
+        startTransition(() => {
+          setOptimisticPagination(newPaginationConfigurationResult);
+        });
+      } else {
+        newPaginationConfigurationResult = updater;
+        setOptimisticPagination(newPaginationConfigurationResult);
+      }
+
+      // Check if this is a duplicate update
+      const newPaginationString = JSON.stringify(
+        newPaginationConfigurationResult,
+      );
+      if (lastPaginationUpdate.current === newPaginationString) {
+        return;
+      }
+      lastPaginationUpdate.current = newPaginationString;
+
+      // Call server action immediately but only if it's a new configuration
+      updateApplicationTablePagination(newPaginationConfigurationResult);
+    },
+    [optimisticPagination],
+  );
+
   const table = useReactTable({
     data: applications,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: handleColumnVisibilityChange,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getPaginationRowModel: getPaginationRowModel(),
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     state: {
       sorting,
       columnFilters,
-      pagination,
+      pagination: optimisticPagination,
+      columnVisibility: optimisticColumnVisibility,
     },
   });
 
@@ -355,23 +468,47 @@ export default function ApplicationsTable({
             Page {table.getState().pagination.pageIndex + 1} of{' '}
             {table.getPageCount()}
           </div>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
+          <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-500">Show:</span>
+              <Select
+                value={table.getState().pagination.pageSize.toString()}
+                onValueChange={(value) => {
+                  table.setPageSize(Number(value));
+                }}
+              >
+                <SelectTrigger className="h-8 w-[70px]">
+                  <SelectValue
+                    placeholder={table.getState().pagination.pageSize}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {[10, 20, 30, 40, 50].map((pageSize) => (
+                    <SelectItem key={pageSize} value={pageSize.toString()}>
+                      {pageSize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       </div>
