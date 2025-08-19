@@ -4,6 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import TiptapEditor from '@/components/tiptap-editor';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Company {
   id: string;
@@ -70,16 +78,16 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
       {editing && (
         <form
           onSubmit={handleUpdate}
-          className='bg-white p-6 rounded-lg shadow mb-8'
+          className="mb-8 rounded-lg bg-white p-6 shadow"
         >
-          <h2 className='text-xl font-semibold mb-4'>Edit Company</h2>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <h2 className="mb-4 text-xl font-semibold">Edit Company</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Company Name *
               </label>
               <Input
-                type='text'
+                type="text"
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
@@ -88,11 +96,11 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               />
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Website
               </label>
               <Input
-                type='url'
+                type="url"
                 value={formData.website}
                 onChange={(e) =>
                   setFormData({ ...formData, website: e.target.value })
@@ -100,11 +108,11 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               />
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Industry
               </label>
               <Input
-                type='text'
+                type="text"
                 value={formData.industry}
                 onChange={(e) =>
                   setFormData({ ...formData, industry: e.target.value })
@@ -112,29 +120,33 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               />
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Company Size
               </label>
-              <select
+              <Select
                 value={formData.size}
-                onChange={(e) =>
-                  setFormData({ ...formData, size: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, size: value })
                 }
-                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
               >
-                <option value='STARTUP'>Startup</option>
-                <option value='SMALL'>Small (1-50)</option>
-                <option value='MEDIUM'>Medium (51-200)</option>
-                <option value='LARGE'>Large (201-1000)</option>
-                <option value='ENTERPRISE'>Enterprise (1000+)</option>
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a size" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="STARTUP">Startup</SelectItem>
+                  <SelectItem value="SMALL">Small (1-50)</SelectItem>
+                  <SelectItem value="MEDIUM">Medium (51-200)</SelectItem>
+                  <SelectItem value="LARGE">Large (201-1000)</SelectItem>
+                  <SelectItem value="ENTERPRISE">Enterprise (1000+)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Location
               </label>
               <Input
-                type='text'
+                type="text"
                 value={formData.location}
                 onChange={(e) =>
                   setFormData({ ...formData, location: e.target.value })
@@ -142,36 +154,34 @@ export function CompanyEditForm({ company }: CompanyEditFormProps) {
               />
             </div>
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Logo URL
               </label>
               <Input
-                type='url'
+                type="url"
                 value={formData.logo}
                 onChange={(e) =>
                   setFormData({ ...formData, logo: e.target.value })
                 }
               />
             </div>
-            <div className='md:col-span-2'>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <div className="md:col-span-2">
+              <label className="mb-1 block text-sm font-medium text-gray-700">
                 Description
               </label>
-              <textarea
+              <TiptapEditor
                 value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
+                onChange={(value) =>
+                  setFormData({ ...formData, description: value })
                 }
-                rows={3}
-                className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500'
               />
             </div>
           </div>
-          <div className='flex gap-2 mt-4'>
-            <Button type='submit'>Save Changes</Button>
+          <div className="mt-4 flex gap-2">
+            <Button type="submit">Save Changes</Button>
             <Button
-              type='button'
-              variant='outline'
+              type="button"
+              variant="outline"
               onClick={() => setEditing(false)}
             >
               Cancel
