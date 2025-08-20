@@ -2,6 +2,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator edge {
+  provider = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
 generator json {
   provider = "prisma-json-types-generator"
 }

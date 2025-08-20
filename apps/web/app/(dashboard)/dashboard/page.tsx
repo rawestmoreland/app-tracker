@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { AppTrackerLoading } from '@/components/ui/loading';
 import ApplicationsTable from '@/app/_components/dashboard/applications-table';
 import { getSignedInUser } from '@/app/lib/auth';

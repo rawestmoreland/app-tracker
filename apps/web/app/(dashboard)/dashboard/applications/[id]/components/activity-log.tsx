@@ -29,7 +29,6 @@ import {
   Globe,
   MessageSquare,
   User,
-  Building,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ApplicationEvent, EventType, EventSource } from '@prisma/client';
@@ -44,21 +43,21 @@ interface ActivityLogProps {
 function getEventSourceIcon(source: EventSource) {
   switch (source) {
     case 'EMAIL':
-      return <Mail className='h-4 w-4' />;
+      return <Mail className="h-4 w-4" />;
     case 'PHONE_CALL':
-      return <Phone className='h-4 w-4' />;
+      return <Phone className="h-4 w-4" />;
     case 'LINKEDIN':
-      return <MessageSquare className='h-4 w-4' />;
+      return <MessageSquare className="h-4 w-4" />;
     case 'JOB_PORTAL':
-      return <Globe className='h-4 w-4' />;
+      return <Globe className="h-4 w-4" />;
     case 'IN_PERSON':
-      return <User className='h-4 w-4' />;
+      return <User className="h-4 w-4" />;
     case 'RECRUITER':
-      return <User className='h-4 w-4' />;
+      return <User className="h-4 w-4" />;
     case 'REFERRAL':
-      return <User className='h-4 w-4' />;
+      return <User className="h-4 w-4" />;
     default:
-      return <MessageSquare className='h-4 w-4' />;
+      return <MessageSquare className="h-4 w-4" />;
   }
 }
 
@@ -125,19 +124,19 @@ export default function ActivityLog({
 
   return (
     <Card>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4'>
-        <CardTitle className='text-lg font-semibold'>Activity Log</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="text-lg font-semibold">Activity Log</CardTitle>
         <Dialog open={isAddingEvent} onOpenChange={setIsAddingEvent}>
           <DialogTrigger asChild>
-            <Button size='sm'>Add Event</Button>
+            <Button size="sm">Add Event</Button>
           </DialogTrigger>
-          <DialogContent className='sm:max-w-[500px]'>
+          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Add Activity Log Entry</DialogTitle>
             </DialogHeader>
-            <div className='grid gap-4 py-4'>
-              <div className='grid gap-2'>
-                <Label htmlFor='event-type'>Event Type</Label>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="event-type">Event Type</Label>
                 <Select
                   value={newEvent.type}
                   onValueChange={(value) =>
@@ -145,7 +144,7 @@ export default function ActivityLog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder='Select event type' />
+                    <SelectValue placeholder="Select event type" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(EventType).map((type) => (
@@ -156,41 +155,41 @@ export default function ActivityLog({
                   </SelectContent>
                 </Select>
               </div>
-              <div className='grid gap-2'>
-                <Label htmlFor='event-title'>Title</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="event-title">Title</Label>
                 <Input
-                  id='event-title'
+                  id="event-title"
                   value={newEvent.title}
                   onChange={(e) =>
                     setNewEvent({ ...newEvent, title: e.target.value })
                   }
-                  placeholder='e.g., Phone screen invitation'
+                  placeholder="e.g., Phone screen invitation"
                 />
               </div>
-              <div className='grid gap-2'>
-                <Label htmlFor='event-content'>Content (Optional)</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="event-content">Content (Optional)</Label>
                 <Textarea
-                  id='event-content'
+                  id="event-content"
                   value={newEvent.content}
                   onChange={(e) =>
                     setNewEvent({ ...newEvent, content: e.target.value })
                   }
-                  placeholder='Additional details about this event...'
+                  placeholder="Additional details about this event..."
                 />
               </div>
-              <div className='grid gap-2'>
-                <Label htmlFor='event-date'>Date & Time</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="event-date">Date & Time</Label>
                 <Input
-                  id='event-date'
-                  type='datetime-local'
+                  id="event-date"
+                  type="datetime-local"
                   value={newEvent.occurredAt}
                   onChange={(e) =>
                     setNewEvent({ ...newEvent, occurredAt: e.target.value })
                   }
                 />
               </div>
-              <div className='grid gap-2'>
-                <Label htmlFor='event-source'>Source</Label>
+              <div className="grid gap-2">
+                <Label htmlFor="event-source">Source</Label>
                 <Select
                   value={newEvent.source}
                   onValueChange={(value) =>
@@ -198,7 +197,7 @@ export default function ActivityLog({
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder='Select source' />
+                    <SelectValue placeholder="Select source" />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(EventSource).map((source) => (
@@ -210,8 +209,8 @@ export default function ActivityLog({
                 </Select>
               </div>
             </div>
-            <div className='flex justify-end space-x-2'>
-              <Button variant='outline' onClick={() => setIsAddingEvent(false)}>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setIsAddingEvent(false)}>
                 Cancel
               </Button>
               <Button onClick={handleAddEvent}>Add Event</Button>
@@ -221,49 +220,49 @@ export default function ActivityLog({
       </CardHeader>
       <CardContent>
         {events.length === 0 ? (
-          <div className='text-center py-8 text-muted-foreground'>
-            <CalendarIcon className='h-12 w-12 mx-auto mb-4 opacity-50' />
+          <div className="text-muted-foreground py-8 text-center">
+            <CalendarIcon className="mx-auto mb-4 h-12 w-12 opacity-50" />
             <p>No activity logged yet</p>
-            <p className='text-sm'>
+            <p className="text-sm">
               Add events to track your application journey
             </p>
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div className="space-y-4">
             {events.map((event) => (
               <div
                 key={event.id}
-                className='flex items-start space-x-3 p-3 rounded-lg border'
+                className="flex items-start space-x-3 rounded-lg border p-3"
               >
-                <div className='flex-shrink-0 mt-1'>
+                <div className="mt-1 flex-shrink-0">
                   {getEventSourceIcon(event.source)}
                 </div>
-                <div className='flex-1 min-w-0'>
-                  <div className='flex items-center space-x-2 mb-1'>
-                    <h4 className='text-sm font-medium'>{event.title}</h4>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center space-x-2">
+                    <h4 className="text-sm font-medium">{event.title}</h4>
                     <Badge
-                      variant='secondary'
+                      variant="secondary"
                       className={getEventTypeColor(event.type)}
                     >
                       {event.type.replace(/_/g, ' ')}
                     </Badge>
                   </div>
                   {event.content && (
-                    <p className='text-sm text-muted-foreground mb-2'>
+                    <p className="text-muted-foreground mb-2 text-sm">
                       {event.content}
                     </p>
                   )}
-                  <div className='flex items-center space-x-4 text-xs text-muted-foreground'>
-                    <div className='flex items-center space-x-1'>
-                      <Clock className='h-3 w-3' />
+                  <div className="text-muted-foreground flex items-center space-x-4 text-xs">
+                    <div className="flex items-center space-x-1">
+                      <Clock className="h-3 w-3" />
                       <span>
                         {format(
                           new Date(event.occurredAt),
-                          'MMM d, yyyy h:mm a'
+                          'MMM d, yyyy h:mm a',
                         )}
                       </span>
                     </div>
-                    <div className='flex items-center space-x-1'>
+                    <div className="flex items-center space-x-1">
                       <span>via {event.source.replace(/_/g, ' ')}</span>
                     </div>
                   </div>
