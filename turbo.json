@@ -4,7 +4,6 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build", "^db:generate", "^db:migrate:deploy"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "env": ["DATABASE_URL", "NODE_ENV"]
     },
