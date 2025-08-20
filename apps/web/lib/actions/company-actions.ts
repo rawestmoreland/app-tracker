@@ -1,10 +1,10 @@
-"use server";
+'use server';
 
-import { CompanyFormData } from "@/app/(dashboard)/dashboard/companies/lib/new-company-schema";
-import { getSignedInUser } from "@/app/lib/auth";
-import { prisma } from "../prisma";
-import { ActivityTracker } from "../services/activity-tracker";
-import { CompanyVisibility } from "@prisma/client";
+import { CompanyFormData } from '@/app/(dashboard)/dashboard/companies/lib/new-company-schema';
+import { getSignedInUser } from '@/app/lib/auth';
+import { prisma } from '../prisma';
+import { ActivityTracker } from '../services/activity-tracker';
+import { CompanyVisibility } from '@prisma/client';
 
 export async function createCompany({
   company,
@@ -16,7 +16,7 @@ export async function createCompany({
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
-    return { error: "Unauthorized" };
+    return { error: 'Unauthorized' };
   }
 
   const {
@@ -27,12 +27,12 @@ export async function createCompany({
     size,
     location,
     logo,
-    visibility = "PRIVATE",
+    visibility = 'PRIVATE',
     isGlobal = false,
   } = company ?? {};
 
   if (!name) {
-    return { error: "Company name is required" };
+    return { error: 'Company name is required' };
   }
 
   // If user wants to use an existing company, return that company
@@ -42,7 +42,7 @@ export async function createCompany({
     });
 
     if (!existingCompany) {
-      return { error: "Company not found" };
+      return { error: 'Company not found' };
     }
 
     return { success: true, company: existingCompany };
@@ -53,45 +53,49 @@ export async function createCompany({
   let finalIsGlobal = isGlobal;
 
   // Admin users can create global companies
-  if (dbUser.role === "ADMIN" && isGlobal) {
-    finalVisibility = "GLOBAL";
+  if (dbUser.role === 'ADMIN' && isGlobal) {
+    finalVisibility = 'GLOBAL';
     finalIsGlobal = true;
-  } else if (dbUser.role === "ADMIN" && visibility === "PUBLIC") {
-    finalVisibility = "PUBLIC";
+  } else if (dbUser.role === 'ADMIN' && visibility === 'PUBLIC') {
+    finalVisibility = 'PUBLIC';
     finalIsGlobal = false;
   } else {
     // Regular users can only create private companies
-    finalVisibility = "PRIVATE";
+    finalVisibility = 'PRIVATE';
     finalIsGlobal = false;
   }
 
   // Check for duplicates only if creating a PUBLIC or GLOBAL company
-  if (finalVisibility === "PUBLIC" || finalVisibility === "GLOBAL") {
+  if (finalVisibility === 'PUBLIC' || finalVisibility === 'GLOBAL') {
     const exactDuplicate = await prisma.company.findFirst({
       where: {
         name: {
           equals: name,
-          mode: "insensitive",
+          mode: 'insensitive',
         },
-        OR: [{ visibility: "GLOBAL" }, { visibility: "PUBLIC" }],
+        OR: [{ visibility: 'GLOBAL' }, { visibility: 'PUBLIC' }],
       },
     });
 
     if (exactDuplicate) {
       return {
         error:
-          "A company with this name already exists in the public database. Please use the existing company or create a private company instead.",
+          'A company with this name already exists in the public database. Please use the existing company or create a private company instead.',
         existingCompany: exactDuplicate,
         isPublicDuplicate: true,
       };
     }
   }
 
+  // Use the plain text description passed from the client (from Tiptap's getText())
+  const plainTextDescription = company.plainTextDescription || null;
+
   const newCompany = await prisma.company.create({
     data: {
       name,
       website,
       description,
+      plainTextDescription,
       industry,
       size,
       location,
@@ -111,13 +115,20 @@ export async function updateCompany(id: string, company: CompanyFormData) {
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
-    return { error: "Unauthorized" };
+    return { error: 'Unauthorized' };
   }
+
+  // Extract description and plain text description
+  const { description, plainTextDescription, ...otherFields } = company;
 
   try {
     const updatedCompany = await prisma.company.update({
       where: { id },
-      data: { ...company },
+      data: {
+        ...otherFields,
+        description,
+        plainTextDescription,
+      },
     });
 
     await ActivityTracker.trackCompanyUpdated(
@@ -128,8 +139,8 @@ export async function updateCompany(id: string, company: CompanyFormData) {
 
     return { success: true, company: updatedCompany };
   } catch (error) {
-    console.error("Error updating company:", error);
-    return { success: false, error: "Failed to update company" };
+    console.error('Error updating company:', error);
+    return { success: false, error: 'Failed to update company' };
   }
 }
 
@@ -137,7 +148,7 @@ export async function deleteCompany(id: string) {
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
-    return { error: "Unauthorized" };
+    return { error: 'Unauthorized' };
   }
 
   try {
@@ -147,7 +158,7 @@ export async function deleteCompany(id: string) {
 
     return { success: true };
   } catch (error) {
-    console.error("Error deleting company:", error);
-    return { success: false, error: "Failed to delete company" };
+    console.error('Error deleting company:', error);
+    return { success: false, error: 'Failed to delete company' };
   }
 }

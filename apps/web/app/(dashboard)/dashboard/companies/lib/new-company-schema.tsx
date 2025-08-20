@@ -2,9 +2,10 @@ import { CompanySize } from '@prisma/client';
 import z from 'zod';
 
 export const companySchema = z.object({
-  name: z.string().min(1, 'Company name is required').max(255),
+  name: z.string().min(1, 'Company name is required').max(10000),
   website: z.url('Please enter a valid URL').optional().or(z.literal('')),
   description: z.string().max(10000),
+  plainTextDescription: z.string().max(10000).optional(),
   industry: z.string().max(255),
   size: z.enum(CompanySize),
   location: z.string().max(255),

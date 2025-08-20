@@ -20,7 +20,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import TiptapEditor from '@/components/tiptap-editor';
+import TiptapEditor, { TiptapEditorRef } from '@/components/tiptap-editor';
+import { useRef } from 'react';
 
 export default function NewCompanyForm({
   form,
@@ -32,6 +33,7 @@ export default function NewCompanyForm({
   handleSubmit: (data: CompanyFormData) => void;
 }) {
   const router = useRouter();
+  const tiptapRef = useRef<TiptapEditorRef>(null);
   const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
   const [duplicates, setDuplicates] = useState<Company[]>([]);
   const [hasPublicDuplicates, setHasPublicDuplicates] = useState(false);
@@ -79,7 +81,17 @@ export default function NewCompanyForm({
   return (
     <div className="rounded-lg bg-white p-6 shadow">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form
+          onSubmit={form.handleSubmit((data) => {
+            // Get plain text from Tiptap editor
+            const plainText = tiptapRef.current?.getText() || '';
+            handleSubmit({
+              ...data,
+              plainTextDescription: plainText,
+            });
+          })}
+          className="space-y-4"
+        >
           <FormField
             control={form.control}
             name="name"
@@ -169,6 +181,7 @@ export default function NewCompanyForm({
                 <FormLabel>Description</FormLabel>
                 <FormControl>
                   <TiptapEditor
+                    ref={tiptapRef}
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Brief description of the company..."

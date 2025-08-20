@@ -4,9 +4,10 @@
     "schema": "packages/database/prisma/schema.prisma"
   },
   "scripts": {
+    "deploy": "turbo run hono:deploy",
     "build": "turbo run build",
     "db:migrate:deploy": "npm run -w database db:migrate:deploy",
-    "db:migrate:dev": "turbo run db:migrate:dev",
+    "db:migrate:dev": "npm run -w database db:migrate:dev",
     "db:push": "turbo run db:push",
     "db:seed": "turbo run db:seed",
     "dev": "turbo run dev",

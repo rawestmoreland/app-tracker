@@ -2,11 +2,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator edge {
-  provider = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
-}
-
 generator json {
   provider = "prisma-json-types-generator"
 }
@@ -56,6 +51,7 @@ model Company {
   name         String
   website      String?
   description  String?
+  plainTextDescription String?
   industry     String?
   size         CompanySize?
   location     String?

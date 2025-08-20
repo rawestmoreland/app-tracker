@@ -5,13 +5,10 @@
     "moduleResolution": "Bundler",
     "strict": true,
     "skipLibCheck": true,
-    "lib": ["ESNext"],
-    "types": ["vite/client"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "lib": [
+      "ESNext"
+    ],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
-  }
+  },
 }

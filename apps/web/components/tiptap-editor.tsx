@@ -31,6 +31,7 @@ import { forwardRef, useImperativeHandle, useEffect } from 'react';
 
 export interface TiptapEditorRef {
   getContent: () => string;
+  getText: () => string;
   setContent: (content: string) => void;
   focus: () => void;
   blur: () => void;
@@ -453,6 +454,7 @@ const TiptapEditor = forwardRef<TiptapEditorRef, TiptapEditorProps>(
       ref,
       () => ({
         getContent: () => editor?.getHTML() || '',
+        getText: () => editor?.getText() || '',
         setContent: (content: string) => editor?.commands.setContent(content),
         focus: () => editor?.commands.focus(),
         blur: () => editor?.commands.blur(),

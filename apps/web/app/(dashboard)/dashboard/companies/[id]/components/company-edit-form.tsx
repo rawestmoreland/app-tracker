@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import TiptapEditor from '@/components/tiptap-editor';
+import TiptapEditor, { TiptapEditorRef } from '@/components/tiptap-editor';
 import {
   Select,
   SelectContent,
@@ -17,6 +17,7 @@ import { Company } from '../page';
 
 export function CompanyEditForm({ company }: { company: Company }) {
   const router = useRouter();
+  const tiptapRef = useRef<TiptapEditorRef>(null);
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState<Partial<Company>>({
     name: company.name,
@@ -31,12 +32,18 @@ export function CompanyEditForm({ company }: { company: Company }) {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Get plain text from Tiptap editor
+      const plainText = tiptapRef.current?.getText() || '';
+
       const response = await fetch(`/api/companies/${company.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          plainTextDescription: plainText,
+        }),
       });
 
       if (response.ok) {
@@ -158,6 +165,7 @@ export function CompanyEditForm({ company }: { company: Company }) {
                 Description
               </label>
               <TiptapEditor
+                ref={tiptapRef}
                 value={formData.description || ''}
                 onChange={(value) =>
                   setFormData({ ...formData, description: value })
