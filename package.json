@@ -6,6 +6,7 @@
   "scripts": {
     "deploy": "npm run -w apps/api deploy",
     "build": "turbo run build",
+    "db:generate": "npm run -w database db:generate",
     "db:migrate:deploy": "npm run -w database db:migrate:deploy",
     "db:migrate:dev": "npm run -w database db:migrate:dev",
     "db:push": "turbo run db:push",
