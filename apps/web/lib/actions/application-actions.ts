@@ -366,3 +366,78 @@ export async function deleteResume(id: string) {
     return { success: false, error: 'Failed to delete resume' };
   }
 }
+
+export async function archiveApplications(applicationIds: string[]) {
+  try {
+    const { dbUser } = await getSignedInUser();
+
+    if (!dbUser) {
+      return { error: 'Unauthorized' };
+    }
+
+    if (!applicationIds || applicationIds.length === 0) {
+      return { error: 'No applications provided' };
+    }
+
+    // Verify all applications belong to the user
+    const applications = await prisma.application.findMany({
+      where: {
+        id: { in: applicationIds },
+        userId: dbUser.id,
+      },
+      include: {
+        company: true,
+      },
+    });
+
+    if (applications.length !== applicationIds.length) {
+      return { error: 'Some applications not found or unauthorized' };
+    }
+
+    // Archive all applications
+    await prisma.application.updateMany({
+      where: {
+        id: { in: applicationIds },
+        userId: dbUser.id,
+      },
+      data: {
+        archived: true,
+        updatedAt: new Date(),
+      },
+    });
+
+    // Create activity log entries for each archived application
+    const activityPromises = applications.map(async (application) => {
+      await prisma.applicationEvent.create({
+        data: {
+          type: EventType.OTHER,
+          title: 'Application archived',
+          content: `Application archived via bulk action`,
+          occurredAt: new Date(),
+          source: EventSource.OTHER,
+          applicationId: application.id,
+          userId: dbUser.id,
+        },
+      });
+
+      await ActivityTracker.trackApplicationArchived(
+        application.id,
+        application.title,
+        application.company.name,
+      );
+    });
+
+    await Promise.all(activityPromises);
+
+    // Revalidate the dashboard page
+    revalidatePath('/dashboard');
+
+    return { 
+      success: true, 
+      message: `Successfully archived ${applicationIds.length} application${applicationIds.length > 1 ? 's' : ''}` 
+    };
+  } catch (error) {
+    console.error('Error archiving applications:', error);
+    return { error: 'Failed to archive applications' };
+  }
+}

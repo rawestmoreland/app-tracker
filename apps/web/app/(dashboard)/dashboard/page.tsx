@@ -11,6 +11,7 @@ async function fetchApplications(dbUser: User) {
   const applications = await prisma.application.findMany({
     where: {
       userId: dbUser.id,
+      archived: false,
     },
     include: {
       company: true,

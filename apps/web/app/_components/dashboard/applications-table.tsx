@@ -19,7 +19,6 @@ import {
 import { DashboardApplication } from '@/lib/types/dashboard';
 import { getRemotePolicyColor } from '@/lib/utils';
 import { StatusDropdown } from './status-dropdown';
-import { DataTableToolbar } from '@/components/ui/data-table-toolbar';
 import {
   applicationStatusOptions,
   remoteTypeOptions,
@@ -41,8 +40,28 @@ import {
   Updater,
 } from '@tanstack/react-table';
 import { format } from 'date-fns';
-import { ChevronDown, ChevronsUpDown, ChevronUp, PlusIcon } from 'lucide-react';
+import {
+  ChevronDown,
+  ChevronsUpDown,
+  ChevronUp,
+  PlusIcon,
+  Search,
+  Filter,
+  X,
+  Archive,
+  HomeIcon,
+  ClipboardListIcon,
+} from 'lucide-react';
 import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import {
   startTransition,
   useMemo,
@@ -56,6 +75,14 @@ import {
   updateApplicationTableColumns,
   updateApplicationTablePagination,
 } from '@/lib/actions/user-preferences-actions';
+import { Checkbox } from '@/components/ui/checkbox';
+import { archiveApplications } from '@/lib/actions/application-actions';
+import { toast } from 'sonner';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 export default function ApplicationsTable({
   applications,
@@ -77,6 +104,7 @@ export default function ApplicationsTable({
   ] = useOptimistic<VisibilityState>(
     // this sets the "default" values for the column visibility
     tableConfig?.columnsVisibility || {
+      'select-col': true,
       title: true,
       'company.name': true,
       status: true,
@@ -85,6 +113,8 @@ export default function ApplicationsTable({
       interviews: true,
     },
   );
+
+  const [rowSelection, setRowSelection] = useState({});
 
   // Use regular useState for pagination to persist during re-renders
   const [pagination, setPagination] = useState<PaginationState>({
@@ -100,6 +130,32 @@ export default function ApplicationsTable({
 
   const columns = useMemo(
     () => [
+      columnHelper.display({
+        id: 'select-col',
+        enableHiding: false,
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() === true
+                ? true
+                : table.getIsSomePageRowsSelected() === true
+                  ? 'indeterminate'
+                  : false
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+      }),
       columnHelper.accessor('title', {
         id: 'title',
         header: 'Position',
@@ -325,12 +381,16 @@ export default function ApplicationsTable({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: handlePaginationChange,
+    getRowId: (row) => row.id, // Use application ID as row ID
     state: {
       sorting,
       columnFilters,
       pagination: pagination,
       columnVisibility: optimisticColumnVisibility,
+      rowSelection,
     },
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
   });
 
   if (!applications || applications.length === 0) {
@@ -368,51 +428,329 @@ export default function ApplicationsTable({
   }
 
   return (
-    <div className="rounded-lg bg-white shadow">
-      <div className="border-b border-gray-200 px-4 py-4 sm:px-6">
-        <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      {/* Header and Actions */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <h2 className="text-xl font-semibold text-gray-900">
             Recent Applications
           </h2>
-          <div>
-            <Button asChild>
+          {Object.keys(rowSelection).length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-muted-foreground text-sm">
+                {Object.keys(rowSelection).length} selected
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={async () => {
+                      const selectedIds = Object.keys(rowSelection);
+                      try {
+                        const result = await archiveApplications(selectedIds);
+                        if (result.success) {
+                          toast(
+                            result.message ||
+                              'Applications archived successfully',
+                          );
+                          setRowSelection({});
+                        } else {
+                          toast(
+                            result.error || 'Failed to archive applications',
+                          );
+                        }
+                      } catch (error) {
+                        console.error('Archive error:', error);
+                        toast('An unexpected error occurred');
+                      }
+                    }}
+                  >
+                    <Archive className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Archive selected applications</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
+        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button size="icon" asChild>
               <Link href="/dashboard/applications/new">
-                <PlusIcon />
+                <PlusIcon className="h-4 w-4" />
               </Link>
             </Button>
-          </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Add a new application</p>
+          </TooltipContent>
+        </Tooltip>
+      </div>
+
+      {/* Filters and Search */}
+      <div className="flex items-center gap-4">
+        <div className="flex flex-1 items-center gap-2">
+          <Search className="text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search positions..."
+            value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('title')?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
         </div>
+
+        {/* Status Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <ClipboardListIcon className="mr-2 h-4 w-4" />
+              Status
+              {(table.getColumn('status')?.getFilterValue() as string[])
+                ?.length > 0 && (
+                <Badge variant="secondary" className="ml-2 h-5 w-5 p-0">
+                  {
+                    (table.getColumn('status')?.getFilterValue() as string[])
+                      .length
+                  }
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px]">
+            {applicationStatusOptions.map((option) => {
+              const isSelected =
+                (
+                  table.getColumn('status')?.getFilterValue() as string[]
+                )?.includes(option.value) || false;
+              return (
+                <DropdownMenuCheckboxItem
+                  key={option.value}
+                  className="capitalize"
+                  checked={isSelected}
+                  onCheckedChange={(checked) => {
+                    const currentFilter =
+                      (table
+                        .getColumn('status')
+                        ?.getFilterValue() as string[]) || [];
+                    if (checked) {
+                      table
+                        .getColumn('status')
+                        ?.setFilterValue([...currentFilter, option.value]);
+                    } else {
+                      table
+                        .getColumn('status')
+                        ?.setFilterValue(
+                          currentFilter.filter(
+                            (value) => value !== option.value,
+                          ),
+                        );
+                    }
+                  }}
+                >
+                  {option.label}
+                </DropdownMenuCheckboxItem>
+              );
+            })}
+            {(table.getColumn('status')?.getFilterValue() as string[])?.length >
+              0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={false}
+                  onCheckedChange={() =>
+                    table.getColumn('status')?.setFilterValue([])
+                  }
+                  className="justify-center text-center"
+                >
+                  Clear filters
+                </DropdownMenuCheckboxItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Remote Policy Filter */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <HomeIcon className="mr-2 h-4 w-4" />
+              Remote
+              {(table.getColumn('remote')?.getFilterValue() as string[])
+                ?.length > 0 && (
+                <Badge variant="secondary" className="ml-2 h-5 w-5 p-0">
+                  {
+                    (table.getColumn('remote')?.getFilterValue() as string[])
+                      .length
+                  }
+                </Badge>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-[200px]">
+            {remoteTypeOptions.map((option) => {
+              const isSelected =
+                (
+                  table.getColumn('remote')?.getFilterValue() as string[]
+                )?.includes(option.value) || false;
+              return (
+                <DropdownMenuCheckboxItem
+                  key={option.value}
+                  className="capitalize"
+                  checked={isSelected}
+                  onCheckedChange={(checked) => {
+                    const currentFilter =
+                      (table
+                        .getColumn('remote')
+                        ?.getFilterValue() as string[]) || [];
+                    if (checked) {
+                      table
+                        .getColumn('remote')
+                        ?.setFilterValue([...currentFilter, option.value]);
+                    } else {
+                      table
+                        .getColumn('remote')
+                        ?.setFilterValue(
+                          currentFilter.filter(
+                            (value) => value !== option.value,
+                          ),
+                        );
+                    }
+                  }}
+                >
+                  {option.label}
+                </DropdownMenuCheckboxItem>
+              );
+            })}
+            {(table.getColumn('remote')?.getFilterValue() as string[])?.length >
+              0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuCheckboxItem
+                  checked={false}
+                  onCheckedChange={() =>
+                    table.getColumn('remote')?.setFilterValue([])
+                  }
+                  className="justify-center text-center"
+                >
+                  Clear filters
+                </DropdownMenuCheckboxItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Column Visibility */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm" className="ml-auto">
+              <Filter className="mr-2 h-4 w-4" />
+              Columns
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {table
+              .getAllColumns()
+              .filter((column) => column.getCanHide())
+              .map((column) => {
+                console.log('column', column);
+                return (
+                  <DropdownMenuCheckboxItem
+                    key={column.id}
+                    className="capitalize"
+                    checked={column.getIsVisible()}
+                    onCheckedChange={(value: boolean) =>
+                      column.toggleVisibility(!!value)
+                    }
+                  >
+                    {column.id === 'appliedAt'
+                      ? 'Applied Date'
+                      : column.id.replace('.', ' ')}
+                  </DropdownMenuCheckboxItem>
+                );
+              })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <div className="border-b border-gray-200 px-4 py-3 sm:px-6">
-        <DataTableToolbar
-          table={table}
-          filterableColumns={[
-            {
-              id: 'status',
-              title: 'Status',
-              options: applicationStatusOptions,
-            },
-            {
-              id: 'remote',
-              title: 'Remote Policy',
-              options: remoteTypeOptions,
-            },
-          ]}
-          searchableColumns={[
-            {
-              id: 'title',
-              title: 'Position',
-            },
-          ]}
-        />
-      </div>
-      <div className="overflow-x-auto">
+
+      {/* Active Filters */}
+      {(columnFilters.length > 0 ||
+        (table.getColumn('title')?.getFilterValue() as string)?.length > 0) && (
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground text-sm">Active filters:</span>
+          {(table.getColumn('title')?.getFilterValue() as string)?.length >
+            0 && (
+            <div className="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
+              Position: {table.getColumn('title')?.getFilterValue() as string}
+              <button
+                type="button"
+                className="hover:bg-secondary-foreground/20 ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full"
+                onClick={() => {
+                  table.getColumn('title')?.setFilterValue('');
+                }}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+          {columnFilters.map((filter) => {
+            const column = table.getColumn(filter.id);
+            const filterValue = filter.value;
+            if (!column || !filterValue) return null;
+
+            // Handle array filters (status, remote)
+            if (Array.isArray(filterValue)) {
+              const filterValues = filterValue as string[];
+              if (!filterValues.length) return null;
+
+              return filterValues.map((value) => (
+                <div
+                  key={`${filter.id}-${value}`}
+                  className="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
+                >
+                  {filter.id === 'status'
+                    ? applicationStatusOptions.find(
+                        (opt) => opt.value === value,
+                      )?.label
+                    : remoteTypeOptions.find((opt) => opt.value === value)
+                        ?.label}
+                  <button
+                    type="button"
+                    className="hover:bg-secondary-foreground/20 ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full"
+                    onClick={() => {
+                      const currentValues = column.getFilterValue() as string[];
+                      const newValues = currentValues.filter(
+                        (v) => v !== value,
+                      );
+                      column.setFilterValue(
+                        newValues.length > 0 ? newValues : undefined,
+                      );
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ));
+            }
+
+            // Handle string filters (search) - but these are handled separately above
+            return null;
+          })}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="px-3 py-3 sm:px-6">
+                  <TableHead key={header.id}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -430,10 +768,9 @@ export default function ApplicationsTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className="hover:bg-gray-50"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-3 py-4 sm:px-6">
+                    <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -448,14 +785,30 @@ export default function ApplicationsTable({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  <div className="flex flex-col gap-2">
+                    <span className="text-muted-foreground">
+                      No applications found.
+                    </span>
+                    <span className="text-muted-foreground">
+                      Get started by{' '}
+                      <Link
+                        href="/dashboard/applications/new"
+                        className="text-blue-500 underline"
+                      >
+                        adding your first application
+                      </Link>
+                      .
+                    </span>
+                  </div>
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between space-x-2 px-4 py-4 sm:px-6">
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between space-x-2 py-4">
         <div className="flex items-center space-x-2">
           <div className="text-muted-foreground text-sm">
             Showing{' '}

@@ -198,6 +198,22 @@ export class ActivityTracker {
     });
   }
 
+  static async trackApplicationArchived(
+    applicationId: string,
+    applicationTitle: string,
+    companyName: string,
+  ) {
+    await this.trackActivity({
+      type: ActivityType.APPLICATION_ARCHIVED,
+      action: "archived",
+      entityType: EntityType.APPLICATION,
+      entityId: applicationId,
+      entityName: applicationTitle,
+      description: `Archived application for ${applicationTitle} at ${companyName}`,
+      applicationId,
+    });
+  }
+
   // Specialized method for initial application status (when creating an application)
   static async trackApplicationInitialStatus(
     applicationId: string,
