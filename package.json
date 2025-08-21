@@ -28,6 +28,14 @@
   "name": "with-prisma",
   "dependencies": {
     "@prisma/client": "latest",
+    "@types/d3-sankey": "^0.12.4",
+    "@types/d3-selection": "^3.0.11",
+    "@types/d3-shape": "^3.1.7",
+    "@types/d3-transition": "^3.0.9",
+    "d3-sankey": "^0.12.3",
+    "d3-selection": "^3.0.0",
+    "d3-shape": "^3.2.0",
+    "d3-transition": "^3.0.1",
     "prisma-json-types-generator": "^3.5.2"
   },
   "packageManager": "npm@10.9.3",
