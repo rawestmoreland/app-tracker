@@ -53,6 +53,7 @@ export interface Company {
   name: string;
   website?: string;
   description?: string;
+  plainTextDescription?: string;
   industry?: string;
   size?: string;
   location?: string;

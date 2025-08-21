@@ -5,7 +5,7 @@ import { UserRole } from '@prisma/client';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   try {
@@ -53,14 +53,14 @@ export async function GET(
     console.error('Error fetching company:', error);
     return NextResponse.json(
       { error: 'Failed to fetch company' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -81,12 +81,21 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { name, website, description, industry, size, location, logo } = body;
+    const {
+      name,
+      website,
+      description,
+      plainTextDescription,
+      industry,
+      size,
+      location,
+      logo,
+    } = body;
 
     if (!name) {
       return NextResponse.json(
         { error: 'Company name is required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -96,6 +105,7 @@ export async function PUT(
         name,
         website,
         description,
+        plainTextDescription,
         industry,
         size,
         location,
@@ -108,14 +118,14 @@ export async function PUT(
     console.error('Error updating company:', error);
     return NextResponse.json(
       { error: 'Failed to update company' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -144,7 +154,7 @@ export async function DELETE(
     console.error('Error deleting company:', error);
     return NextResponse.json(
       { error: 'Failed to delete company' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

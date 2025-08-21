@@ -12,17 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { CompanySize } from '@prisma/client';
 import { Company } from '../page';
 
 export function CompanyEditForm({ company }: { company: Company }) {
   const router = useRouter();
   const tiptapRef = useRef<TiptapEditorRef>(null);
   const [editing, setEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<Company>>({
     name: company.name,
     website: company.website || '',
     description: company.description || '',
+    plainTextDescription: company.plainTextDescription || '',
     industry: company.industry || '',
     size: company.size || 'SMALL',
     location: company.location || '',
@@ -32,9 +33,7 @@ export function CompanyEditForm({ company }: { company: Company }) {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Get plain text from Tiptap editor
-      const plainText = tiptapRef.current?.getText() || '';
-
+      setIsSaving(true);
       const response = await fetch(`/api/companies/${company.id}`, {
         method: 'PUT',
         headers: {
@@ -42,7 +41,6 @@ export function CompanyEditForm({ company }: { company: Company }) {
         },
         body: JSON.stringify({
           ...formData,
-          plainTextDescription: plainText,
         }),
       });
 
@@ -54,6 +52,8 @@ export function CompanyEditForm({ company }: { company: Company }) {
       }
     } catch (error) {
       console.error('Error updating company:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -168,13 +168,23 @@ export function CompanyEditForm({ company }: { company: Company }) {
                 ref={tiptapRef}
                 value={formData.description || ''}
                 onChange={(value) =>
-                  setFormData({ ...formData, description: value })
+                  setFormData({
+                    ...formData,
+                    description: value,
+                    plainTextDescription: tiptapRef.current?.getText() || '',
+                  })
                 }
               />
             </div>
           </div>
           <div className="mt-4 flex gap-2">
-            <Button type="submit">Save Changes</Button>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="cursor-pointer"
+            >
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Button>
             <Button
               type="button"
               variant="outline"
