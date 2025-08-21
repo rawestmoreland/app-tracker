@@ -22,6 +22,6 @@ jobs:
         run: npm ci
 
       - name: Deploy the API
-        run: turbo run deploy
+        run: npm run deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

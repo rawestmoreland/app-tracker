@@ -4,7 +4,7 @@
     "schema": "packages/database/prisma/schema.prisma"
   },
   "scripts": {
-    "deploy": "turbo run deploy",
+    "deploy": "npm run -w apps/api deploy",
     "build": "turbo run build",
     "db:migrate:deploy": "npm run -w database db:migrate:deploy",
     "db:migrate:dev": "npm run -w database db:migrate:dev",
