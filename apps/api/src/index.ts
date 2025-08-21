@@ -44,13 +44,20 @@ app.get('/v1/companies', async (c) => {
       name: 'asc',
     },
   });
-  return c.json({
-    companies,
-    plain_text_description: companies.map(
-      (company) => company.plainTextDescription,
-    ),
-    html_description: companies.map((company) => company.description),
-  });
+
+  const returnedCompanies = companies.map((company) => ({
+    id: company.id,
+    name: company.name,
+    website: company.website,
+    plain_text_description: company.plainTextDescription,
+    html_description: company.description,
+    industry: company.industry,
+    size: company.size,
+    location: company.location,
+    logo: company.logo,
+  }));
+
+  return c.json(returnedCompanies);
 });
 
 app.get('/v1/companies/:id', async (c) => {
@@ -69,8 +76,19 @@ app.get('/v1/companies/:id', async (c) => {
       logo: true,
     },
   });
+
+  if (!company) {
+    return c.json({ error: 'Company not found' }, 404);
+  }
+
   return c.json({
-    ...company,
+    id: company?.id,
+    name: company?.name,
+    website: company?.website,
+    industry: company?.industry,
+    size: company?.size,
+    location: company?.location,
+    logo: company?.logo,
     plain_text_description: company?.plainTextDescription ?? '',
     html_description: company?.description ?? '',
   });

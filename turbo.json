@@ -48,7 +48,7 @@
       "dependsOn": ["^db:generate"],
       "cache": false
     },
-    "api:deploy": {
+    "deploy": {
       "dependsOn": ["^deploy", "^db:generate", "^db:migrate:deploy"],
       "cache": false,
       "persistent": true,
