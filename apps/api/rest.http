@@ -1,4 +1,4 @@
-GET https://api.westmorelandcreative.workers.dev/v1/companies HTTP/1.1
+GET https://api.apptrack.space/v1/companies HTTP/1.1
 
 ###
 
