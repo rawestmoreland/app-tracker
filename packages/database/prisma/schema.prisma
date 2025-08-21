@@ -116,6 +116,7 @@ model Application {
   interviews         Interview[]
   notes              Note[]
   Offer              Offer[]
+  archived           Boolean            @default(false)
 
   @@map("applications")
 }
