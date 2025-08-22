@@ -657,7 +657,6 @@ export default function ApplicationsTable({
               .getAllColumns()
               .filter((column) => column.getCanHide())
               .map((column) => {
-                console.log('column', column);
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}

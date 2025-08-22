@@ -16,7 +16,6 @@ export const completeOnboarding = async (data: {
       return { message: 'No Logged In User' };
     }
 
-    console.log('Updating user metadata for:', dbUser.clerkId);
     const client = await clerkClient();
 
     const res = await client.users.updateUser(dbUser.clerkId, {
@@ -25,8 +24,6 @@ export const completeOnboarding = async (data: {
         signupReason: data.signupReason,
       },
     });
-
-    console.log('Clerk user updated:', res.publicMetadata);
 
     const updatedUser = await prisma.user.update({
       where: {
@@ -37,8 +34,6 @@ export const completeOnboarding = async (data: {
         onboardingComplete: true,
       },
     });
-
-    console.log('Database user updated:', updatedUser.id);
 
     return { message: res.publicMetadata, updatedUser };
   } catch (err) {

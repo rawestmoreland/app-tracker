@@ -65,13 +65,8 @@ export default function OnboardingComponent() {
 
   // Debug logging for production
   React.useEffect(() => {
-    console.log('Onboarding component mounted');
-    console.log('User:', user?.id);
-    console.log('User metadata:', user?.publicMetadata);
-
     // If user has already completed onboarding, redirect them
     if (user?.publicMetadata?.onboardingComplete) {
-      console.log('User already completed onboarding, redirecting...');
       router.push('/dashboard');
     }
   }, [user, router]);
@@ -92,33 +87,25 @@ export default function OnboardingComponent() {
   const handleSubmit = async (data: z.infer<typeof schema>) => {
     setIsSubmitting(true);
     try {
-      console.log('Starting onboarding completion...', data);
       const res = await completeOnboarding(data);
-      console.log('Onboarding response:', res);
 
       if (
         (res?.message as { onboardingComplete: boolean })?.onboardingComplete
       ) {
-        console.log('Onboarding completed successfully, reloading user...');
         // Wait for user reload to complete
         await user?.reload();
 
-        console.log('User reloaded, waiting for metadata update...');
-        // Add a small delay to ensure metadata is updated
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        console.log('Redirecting to dashboard...');
         // Use window.location.href directly to bypass middleware issues
-        window.location.href = '/dashboard?onboarding=complete';
+        router.push('/dashboard');
       } else {
         console.error('Onboarding completion failed:', res);
         // Fallback redirect even if onboarding completion check fails
-        window.location.href = '/dashboard?onboarding=complete';
+        router.push('/dashboard');
       }
     } catch (error) {
       console.error('Onboarding error:', error);
       // Fallback redirect even if there's an error
-      window.location.href = '/dashboard?onboarding=complete';
+      router.push('/dashboard');
     } finally {
       setIsSubmitting(false);
     }
