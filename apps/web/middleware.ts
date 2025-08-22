@@ -1,6 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import { getSignedInUser } from './app/lib/auth';
+import { User } from '@prisma/client';
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding(.*)']);
 
@@ -15,7 +16,14 @@ const isPublicRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   const { userId, redirectToSignIn } = await auth();
-  const { dbUser } = await getSignedInUser();
+  let dbUser: User | null = null;
+
+  try {
+    const response = await getSignedInUser();
+    dbUser = response.dbUser;
+  } catch (error) {
+    return redirectToSignIn({ returnBackUrl: req.url });
+  }
 
   // For users visiting /onboarding, don't try to redirect
   if (userId && isOnboardingRoute(req)) {
