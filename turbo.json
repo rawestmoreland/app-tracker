@@ -3,7 +3,7 @@
   "globalDependencies": ["**/.env.*local"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build", "^db:generate", "^db:migrate:deploy"],
+      "dependsOn": ["^build", "^db:generate:prod", "^db:migrate:deploy"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "env": [
         "DATABASE_URL",
@@ -40,16 +40,18 @@
       "cache": false
     },
     "dev": {
-      "dependsOn": ["^db:generate"],
+      "dependsOn": ["^db:generate:dev"],
       "cache": false,
       "persistent": true
     },
-    "db:generate": {
-      "dependsOn": ["^db:generate"],
+    "db:generate:dev": {
+      "cache": false
+    },
+    "db:generate:prod": {
       "cache": false
     },
     "deploy": {
-      "dependsOn": ["^deploy", "^db:generate", "^db:migrate:deploy"],
+      "dependsOn": ["^deploy", "^db:generate:prod", "^db:migrate:deploy"],
       "cache": false,
       "persistent": true,
       "env": ["DATABASE_URL"]
