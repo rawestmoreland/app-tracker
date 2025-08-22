@@ -108,20 +108,8 @@ export default function OnboardingComponent() {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         console.log('Redirecting to dashboard...');
-        // Try Next.js router first, fallback to window.location
-        try {
-          router.push('/dashboard?onboarding=complete');
-          // If router.push doesn't work within 2 seconds, force navigation
-          setTimeout(() => {
-            if (window.location.pathname !== '/dashboard') {
-              console.log('Router push failed, forcing navigation...');
-              window.location.href = '/dashboard?onboarding=complete';
-            }
-          }, 2000);
-        } catch (routerError) {
-          console.error('Router error:', routerError);
-          window.location.href = '/dashboard?onboarding=complete';
-        }
+        // Use window.location.href directly to bypass middleware issues
+        window.location.href = '/dashboard?onboarding=complete';
       } else {
         console.error('Onboarding completion failed:', res);
         // Fallback redirect even if onboarding completion check fails

@@ -15,7 +15,23 @@ const isPublicRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   const { userId, sessionClaims, redirectToSignIn } = await auth();
 
-  console.log('sessionClaims', sessionClaims);
+  console.log('=== MIDDLEWARE DEBUG ===');
+  console.log('URL:', req.url);
+  console.log('userId:', userId);
+  console.log('sessionClaims:', sessionClaims);
+  console.log(
+    'onboardingComplete value:',
+    sessionClaims?.metadata?.onboardingComplete,
+  );
+  console.log(
+    'onboardingComplete type:',
+    typeof sessionClaims?.metadata?.onboardingComplete,
+  );
+  console.log(
+    'Should redirect to onboarding:',
+    userId && sessionClaims?.metadata?.onboardingComplete !== true,
+  );
+  console.log('=======================');
 
   // For users visiting /onboarding, don't try to redirect
   if (userId && isOnboardingRoute(req)) {
@@ -28,13 +44,24 @@ export default clerkMiddleware(async (auth, req) => {
 
   // Temporary bypass for users completing onboarding
   const url = new URL(req.url);
-  if (userId && url.searchParams.get('onboarding') === 'complete') {
+  const referer = req.headers.get('referer');
+  const isComingFromOnboarding = referer?.includes('/onboarding');
+
+  if (
+    userId &&
+    (url.searchParams.get('onboarding') === 'complete' ||
+      isComingFromOnboarding)
+  ) {
+    console.log(
+      'Bypassing onboarding check due to onboarding=complete parameter or referer from onboarding',
+    );
     return NextResponse.next();
   }
 
   // Catch users who do not have `onboardingComplete: true` in their publicMetadata
   // Redirect them to the /onboarding route to complete onboarding
   if (userId && sessionClaims?.metadata?.onboardingComplete !== true) {
+    console.log('Redirecting to onboarding - onboardingComplete is not true');
     const onboardingUrl = new URL('/onboarding', req.url);
     return NextResponse.redirect(onboardingUrl);
   }
