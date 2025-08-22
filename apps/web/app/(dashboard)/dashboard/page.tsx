@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma';
 import StatsContent from '@/app/_components/dashboard/stats-content';
 import { notFound } from 'next/navigation';
 import { User } from '@prisma/client';
+import { UserPreferences } from '@/lib/types/user';
 
 async function fetchApplications(dbUser: User) {
   const applications = await prisma.application.findMany({
@@ -22,6 +23,16 @@ async function fetchApplications(dbUser: User) {
         },
       },
       notes: true,
+      activities: {
+        where: {
+          type: 'APPLICATION_STATUS_CHANGED',
+          isProgression: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+        take: 1,
+      },
     },
     orderBy: { appliedAt: 'desc' },
   });
@@ -31,7 +42,7 @@ async function fetchApplications(dbUser: User) {
 
 async function fetchAnalytics(dbUser: User) {
   const applications = await prisma.application.findMany({
-    where: { userId: dbUser.id },
+    where: { userId: dbUser.id, archived: false },
     select: {
       status: true,
       appliedAt: true,
@@ -49,9 +60,10 @@ async function fetchAnalytics(dbUser: User) {
   const applicationsWithResponses = applications.filter(
     (app) => !['APPLIED', 'GHOSTED'].includes(app.status),
   ).length;
-  const responseRate = applications.length > 0 
-    ? (applicationsWithResponses / applications.length) * 100
-    : 0;
+  const responseRate =
+    applications.length > 0
+      ? (applicationsWithResponses / applications.length) * 100
+      : 0;
 
   const applicationsThisWeek = applications.filter(
     (app) => app.appliedAt >= oneWeekAgo,
@@ -90,6 +102,15 @@ const fetchUserPreference = async (dbUser: User) => {
     },
   });
 
+  const userPreferences = await prisma.userPreference.findUnique({
+    where: {
+      userId_configName: {
+        userId: dbUser.id,
+        configName: 'user-preferences',
+      },
+    },
+  });
+
   return {
     columnsVisibility: columnsVisibility?.configValue as Record<
       string,
@@ -99,6 +120,7 @@ const fetchUserPreference = async (dbUser: User) => {
       pageSize:
         (paginationSize?.configValue as { pageSize?: number })?.pageSize || 10,
     },
+    userPreferences: userPreferences?.configValue as UserPreferences,
   };
 };
 
@@ -128,6 +150,7 @@ async function DashboardContent() {
       <ApplicationsTable
         applications={applications}
         tableConfig={userPreference}
+        userPreferences={userPreference.userPreferences}
       />
     </div>
   );

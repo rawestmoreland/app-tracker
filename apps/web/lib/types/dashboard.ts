@@ -1,8 +1,9 @@
-import { Application, Company, Interview } from '@prisma/client';
+import { Activity, Application, Company, Interview } from '@prisma/client';
 
 export type DashboardApplication = Application & {
   company: Company;
   interviews: Interview[];
+  activities: Activity[];
 };
 
 export type Analytics = {
