@@ -23,13 +23,19 @@ export async function getApplicationFlowData(): Promise<ApplicationFlowData[]> {
       throw new Error('User not found');
     }
 
-    // Query activities for status changes
+    // Query activities for status changes, excluding transitions from null to APPLIED
     const statusChangeActivities = await prisma.activity.findMany({
       where: {
         userId: user.id,
         type: 'APPLICATION_STATUS_CHANGED',
         fromStatus: { not: null },
         toStatus: { not: null },
+        NOT: {
+          AND: [
+            { fromStatus: null },
+            { toStatus: 'APPLIED' }
+          ]
+        }
       },
       include: {
         application: {
@@ -78,45 +84,9 @@ export async function getApplicationFlowData(): Promise<ApplicationFlowData[]> {
       }
     });
 
-    // Also add applications that don't have status change activities (initial statuses)
-    const statusesToCheck = ['APPLIED', 'CONFIRMATION_RECEIVED', 'UNDER_REVIEW', 'DRAFT'];
-    
-    for (const status of statusesToCheck) {
-      const applicationsWithStatus = await prisma.application.findMany({
-        where: {
-          userId: user.id,
-          status: status as any,
-          // Only include applications that don't have any status change activities
-          activities: {
-            none: {
-              type: 'APPLICATION_STATUS_CHANGED',
-            },
-          },
-        },
-        include: {
-          company: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
-
-      if (applicationsWithStatus.length > 0) {
-        const key = `CREATED->${status}`;
-        flowMap.set(key, {
-          fromStatus: 'CREATED',
-          toStatus: status,
-          count: applicationsWithStatus.length,
-          applications: applicationsWithStatus.map(app => ({
-            id: app.id,
-            title: app.title,
-            company: app.company.name,
-            appliedAt: app.appliedAt,
-          })),
-        });
-      }
-    }
+    // Note: Applications in APPLIED status without status change activities represent 
+    // the starting point of our sankey chart (source nodes). They don't need explicit 
+    // flow entries as the chart will start from APPLIED status transitions.
 
     return Array.from(flowMap.values());
   } catch (error) {
