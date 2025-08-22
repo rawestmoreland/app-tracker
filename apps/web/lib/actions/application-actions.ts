@@ -288,7 +288,7 @@ export async function updateApplication(id: string, data: ApplicationFormData) {
   }
 }
 
-export async function addNote(id: string, data: NoteFormData) {
+export async function addNote(applicationId: string, data: NoteFormData) {
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
@@ -301,7 +301,7 @@ export async function addNote(id: string, data: NoteFormData) {
         content: data.content,
         type: data.type,
         userId: dbUser.id,
-        applicationId: id,
+        applicationId: applicationId,
         interviewId: data.interviewId,
       },
       include: {
@@ -320,11 +320,93 @@ export async function addNote(id: string, data: NoteFormData) {
       note.application?.company.name,
     );
 
-    revalidatePath(`/dashboard/applications/${id}`);
+    revalidatePath(`/dashboard/applications/${applicationId}`);
     return { success: true, note };
   } catch (error) {
     console.error('Error adding note:', error);
     return { success: false, error: 'Failed to add note' };
+  }
+}
+
+export async function updateNote(noteId: string, data: NoteFormData) {
+  const { dbUser } = await getSignedInUser();
+
+  if (!dbUser) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const note = await prisma.note.update({
+      where: {
+        id: noteId,
+        userId: dbUser.id, // Ensure user owns the note
+      },
+      data: {
+        content: data.content,
+        type: data.type,
+      },
+      include: {
+        application: {
+          include: { company: true },
+        },
+        interview: {
+          include: { application: { include: { company: true } } },
+        },
+      },
+    });
+
+    // Revalidate the appropriate path based on where the note is associated
+    if (note.applicationId) {
+      revalidatePath(`/dashboard/applications/${note.applicationId}`);
+    } else if (note.companyId) {
+      revalidatePath(`/dashboard/companies/${note.companyId}`);
+    }
+
+    return { success: true, note };
+  } catch (error) {
+    console.error('Error updating note:', error);
+    return { success: false, error: 'Failed to update note' };
+  }
+}
+
+export async function deleteNote(noteId: string) {
+  const { dbUser } = await getSignedInUser();
+
+  if (!dbUser) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const note = await prisma.note.findFirst({
+      where: {
+        id: noteId,
+        userId: dbUser.id, // Ensure user owns the note
+      },
+      include: {
+        application: true,
+        company: true,
+      },
+    });
+
+    if (!note) {
+      return { success: false, error: 'Note not found' };
+    }
+
+    await prisma.note.delete({
+      where: { id: noteId },
+    });
+
+    // Revalidate the appropriate path based on where the note was associated
+    if (note.interviewId) {
+      revalidatePath(`/dashboard/interviews/${note.interviewId}`);
+    } else if (note.companyId) {
+      revalidatePath(`/dashboard/companies/${note.companyId}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting note:', error);
+    return { success: false, error: 'Failed to delete note' };
   }
 }
 
@@ -432,9 +514,9 @@ export async function archiveApplications(applicationIds: string[]) {
     // Revalidate the dashboard page
     revalidatePath('/dashboard');
 
-    return { 
-      success: true, 
-      message: `Successfully archived ${applicationIds.length} application${applicationIds.length > 1 ? 's' : ''}` 
+    return {
+      success: true,
+      message: `Successfully archived ${applicationIds.length} application${applicationIds.length > 1 ? 's' : ''}`,
     };
   } catch (error) {
     console.error('Error archiving applications:', error);

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { DashboardApplication } from '@/lib/types/dashboard';
 import { getRemotePolicyColor } from '@/lib/utils';
-import { StatusDropdown } from './status-dropdown';
+import { ApplicationStatusDropdown } from './application-status-dropdown';
 import {
   applicationStatusOptions,
   remoteTypeOptions,
@@ -233,7 +233,7 @@ export default function ApplicationsTable({
         cell: (info) => {
           const application = info.row.original;
           return (
-            <StatusDropdown
+            <ApplicationStatusDropdown
               applicationId={application.id}
               currentStatus={application.status}
             />
