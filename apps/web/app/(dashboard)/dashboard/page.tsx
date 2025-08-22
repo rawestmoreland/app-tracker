@@ -111,7 +111,7 @@ async function DashboardContent() {
   ]);
 
   return (
-    <div>
+    <div className="space-y-8">
       {/* Analytics Cards */}
       <StatsContent analytics={analytics} />
 
