@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { cloudflareRateLimiter } from '@hono-rate-limiter/cloudflare';
 import { getPrisma } from './lib/prismaFunction';
+import { renderer } from './renderer';
+import { jsxRenderer } from 'hono/jsx-renderer';
 
 type AppType = {
   Variables: {
@@ -19,8 +21,21 @@ const app = new Hono<AppType>().use(
   }),
 );
 
+app.use('*', renderer);
+
 app.get('/', (c) => {
-  return c.json({ message: 'Hello World' });
+  return c.render(
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+      }}
+    >
+      <h1>The App Track API</h1>
+    </div>,
+  );
 });
 
 app.get('/v1/companies', async (c) => {
