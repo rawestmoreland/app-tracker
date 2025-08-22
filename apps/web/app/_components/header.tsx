@@ -174,12 +174,12 @@ export function Header() {
                 </PopoverTrigger>
                 <PopoverContent align="end" sideOffset={10}>
                   <div className="p-2">
-                    <ul className="flex flex-col gap-4">
+                    <ul className="flex flex-col gap-2">
                       <li>
                         <Button
-                          variant="link"
+                          variant="outline"
                           size="sm"
-                          className="flex items-center gap-2 text-sm underline underline-offset-2"
+                          className="w-full cursor-pointer"
                           onClick={() => {
                             setIsUserMenuOpen(false);
                             router.push('/dashboard/profile');
@@ -191,7 +191,13 @@ export function Header() {
                       </li>
                       <li>
                         <SignOutButton>
-                          <Button size="sm" className="w-full">
+                          <Button
+                            size="sm"
+                            className="w-full cursor-pointer"
+                            onClick={() => {
+                              setIsUserMenuOpen(false);
+                            }}
+                          >
                             Sign Out
                           </Button>
                         </SignOutButton>
@@ -204,7 +210,13 @@ export function Header() {
 
             {/* Mobile Actions */}
             <div className="flex items-center gap-2 md:hidden">
-              <UserButton />
+              <UserButton
+                appearance={{
+                  elements: {
+                    avatarBox: 'h-8 w-8',
+                  },
+                }}
+              />
               {isSignedIn && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -222,6 +234,13 @@ export function Header() {
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard/application-flow">
                         Application Flow
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile">
+                        <User2Icon className="h-4 w-4" />
+                        Profile
                       </Link>
                     </DropdownMenuItem>
                     {/* <DropdownMenuItem asChild>
