@@ -64,6 +64,7 @@ export function Header() {
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500"
               >
                 <LaptopMinimalCheckIcon className="h-5 w-5" color="white" />
+                <span className="sr-only">App Track</span>
               </Link>
 
               {/* Desktop Navigation */}
