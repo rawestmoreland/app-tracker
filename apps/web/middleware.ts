@@ -5,6 +5,9 @@ import { User } from '@prisma/client';
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding(.*)']);
 
+const isSignInRoute = createRouteMatcher(['/sign-in(.*)']);
+const isSignUpRoute = createRouteMatcher(['/sign-up(.*)']);
+
 const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
@@ -22,6 +25,9 @@ export default clerkMiddleware(async (auth, req) => {
     const response = await getSignedInUser();
     dbUser = response.dbUser;
   } catch (error) {
+    if (isSignInRoute(req) || isSignUpRoute(req)) {
+      return NextResponse.next();
+    }
     return redirectToSignIn({ returnBackUrl: req.url });
   }
 
