@@ -5,7 +5,6 @@ import { transformApplicationFlowToSankeyData } from '@/lib/utils/sankey-data';
 import { getApplicationFlowData } from '@/lib/actions/sankey-actions';
 import { SankeyData, ApplicationFlowData } from '@/lib/types/sankey';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Info } from 'lucide-react';
 import {
@@ -20,8 +19,6 @@ export default function ApplicationFlowChart() {
   const [flowData, setFlowData] = useState<ApplicationFlowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  console.log(sankeyData);
 
   const loadData = async () => {
     try {
@@ -150,14 +147,6 @@ export default function ApplicationFlowChart() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex gap-2">
-            <Badge variant="secondary" className="text-xs">
-              {totalApplications} transitions
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {uniqueStatuses} statuses
-            </Badge>
-          </div>
           <Button
             variant="outline"
             size="sm"
@@ -169,10 +158,7 @@ export default function ApplicationFlowChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <SankeyChart 
-          data={sankeyData} 
-          height={400} 
-        />
+        <SankeyChart data={sankeyData} height={400} />
 
         {/* Legend */}
         <div className="mt-4 border-t pt-4">
