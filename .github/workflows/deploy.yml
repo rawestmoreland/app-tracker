@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Generate the database
-        run: npm run db:generate
+        run: npm run db:generate:prod
 
       - name: Migrate the database
         run: npm run db:migrate:deploy

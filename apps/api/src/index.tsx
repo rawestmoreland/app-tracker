@@ -64,8 +64,7 @@ app.get('/v1/companies', async (c) => {
     id: company.id,
     name: company.name,
     website: company.website,
-    plain_text_description: company.plainTextDescription,
-    html_description: company.description,
+    description: company.plainTextDescription,
     industry: company.industry,
     size: company.size,
     location: company.location,
@@ -104,8 +103,7 @@ app.get('/v1/companies/:id', async (c) => {
     size: company?.size,
     location: company?.location,
     logo: company?.logo,
-    plain_text_description: company?.plainTextDescription ?? '',
-    html_description: company?.description ?? '',
+    description: company?.plainTextDescription ?? '',
   });
 });
 
