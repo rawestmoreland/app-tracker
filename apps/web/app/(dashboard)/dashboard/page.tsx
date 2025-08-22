@@ -43,15 +43,24 @@ async function fetchAnalytics(dbUser: User) {
     },
   });
 
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const applicationsWithResponses = applications.filter(
+    (app) => !['APPLIED', 'GHOSTED'].includes(app.status),
+  ).length;
+  const responseRate = applications.length > 0 
+    ? (applicationsWithResponses / applications.length) * 100
+    : 0;
+
+  const applicationsThisWeek = applications.filter(
+    (app) => app.appliedAt >= oneWeekAgo,
+  ).length;
+
   const stats = {
     totalApplications: applications.length,
-    activeApplications: applications.filter(
-      (app) => !['REJECTED', 'ACCEPTED', 'WITHDRAWN'].includes(app.status),
-    ).length,
-    totalInterviews: applications.reduce(
-      (sum, app) => sum + app.interviews.length,
-      0,
-    ),
+    responseRate,
+    applicationsThisWeek,
     averageResponseTime: 0, // TODO: Calculate based on first interview date
     successRate: 0, // TODO: Calculate based on offers vs total
     ghostRate:

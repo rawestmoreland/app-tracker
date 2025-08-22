@@ -1,10 +1,12 @@
 import { verifyWebhook } from '@clerk/nextjs/webhooks';
 import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { ApplicationStatus, RemoteType } from '@prisma/client';
+import { Resend } from 'resend';
+import { WelcomeTemplate } from '@/components/email/welcome-template';
 
 export async function POST(req: NextRequest) {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const evt = await verifyWebhook(req);
     const { id } = evt.data;
     const eventType = evt.type;
@@ -45,13 +47,52 @@ export async function POST(req: NextRequest) {
               pageSize: 10,
             },
           },
+          {
+            userId: newUser.id,
+            configName: 'user-preferences',
+            configValue: {
+              ghostThreshold: 5 * 24 * 60 * 60,
+            },
+          },
         ],
+      });
+
+      // Add the contact to resend
+      await resend.contacts.create({
+        email: email_addresses[0].email_address,
+        firstName: first_name,
+        lastName: last_name,
+        audienceId: process.env.RESEND_AUDIENCE_ID!,
+      });
+
+      // Send the welcome email
+      await resend.emails.send({
+        from: 'Richard from App Tracker <richard@westmorelandcreative.com>',
+        to: [email_addresses[0].email_address],
+        subject: 'Welcome to App Track',
+        react: WelcomeTemplate({
+          firstName: first_name ?? '',
+          lastName: last_name ?? '',
+        }),
       });
     }
 
     if (eventType === 'user.deleted') {
+      const user = await prisma.user.findUnique({
+        where: { clerkId: id },
+      });
+
+      if (!user) {
+        return new Response('User not found', { status: 404 });
+      }
+
       await prisma.user.delete({
         where: { clerkId: id },
+      });
+
+      await resend.contacts.remove({
+        email: user.email,
+        audienceId: process.env.RESEND_AUDIENCE_ID!,
       });
     }
 

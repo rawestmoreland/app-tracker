@@ -102,7 +102,7 @@ async function fetchCompanyStats() {
     ],
   };
 
-  const [totalApplications, largeCompaniesCount, companiesWithWebsites] =
+  const [totalApplications, companiesWithResponses, needingFollowUp] =
     await Promise.all([
       prisma.application.count({
         where: {
@@ -113,16 +113,25 @@ async function fetchCompanyStats() {
       prisma.company.count({
         where: {
           ...where,
-          size: {
-            in: ['LARGE', 'ENTERPRISE'],
+          applications: {
+            some: {
+              userId: dbUser.id,
+              status: { not: 'APPLIED' },
+            },
           },
         },
       }),
       prisma.company.count({
         where: {
           ...where,
-          website: {
-            not: null,
+          applications: {
+            some: {
+              userId: dbUser.id,
+              status: 'APPLIED',
+              appliedAt: {
+                lt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+              },
+            },
           },
         },
       }),
@@ -130,8 +139,8 @@ async function fetchCompanyStats() {
 
   return {
     totalApplications,
-    largeCompaniesCount,
-    companiesWithWebsites,
+    companiesWithResponses,
+    needingFollowUp,
   };
 }
 
@@ -156,7 +165,7 @@ export default async function CompaniesPage({
       hasNextPage,
       hasPreviousPage,
     },
-    { totalApplications, largeCompaniesCount, companiesWithWebsites },
+    { totalApplications, companiesWithResponses, needingFollowUp },
   ] = await Promise.all([
     fetchCompanies(page, limit, search),
     fetchCompanyStats(),
@@ -202,21 +211,21 @@ export default async function CompaniesPage({
         </div>
         <div className="bg-card rounded-lg border p-4">
           <div className="flex items-center gap-2">
-            <div className="h-5 w-5 text-purple-500">👥</div>
+            <div className="h-5 w-5 text-purple-500">💬</div>
             <span className="text-muted-foreground text-sm font-medium">
-              Large Companies
+              Got Responses
             </span>
           </div>
-          <p className="text-2xl font-bold">{largeCompaniesCount}</p>
+          <p className="text-2xl font-bold">{companiesWithResponses}</p>
         </div>
         <div className="bg-card rounded-lg border p-4">
           <div className="flex items-center gap-2">
-            <div className="h-5 w-5 text-orange-500">🌐</div>
+            <div className="h-5 w-5 text-orange-500">⏰</div>
             <span className="text-muted-foreground text-sm font-medium">
-              With Websites
+              Need Follow-up
             </span>
           </div>
-          <p className="text-2xl font-bold">{companiesWithWebsites}</p>
+          <p className="text-2xl font-bold">{needingFollowUp}</p>
         </div>
       </div>
 

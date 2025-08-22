@@ -4,6 +4,9 @@ import { getSignedInUser } from '@/app/lib/auth';
 import { UserPreference } from '@prisma/client';
 import { prisma } from '../prisma';
 import { revalidatePath } from 'next/cache';
+import z from 'zod';
+import { prefsSchema } from '@/app/(dashboard)/dashboard/profile/_components/ProfileContent';
+import { UserPreferences } from '../types/user';
 
 export async function updateApplicationTableColumns(
   newConfig: UserPreference['configValue'],
@@ -120,6 +123,46 @@ export async function updateApplicationTablePagination(
     return {
       success: false,
       error: 'Failed to update application table pagination',
+    };
+  }
+}
+
+export async function updateUserPreferences(data: z.infer<typeof prefsSchema>) {
+  const { dbUser } = await getSignedInUser();
+
+  if (!dbUser) {
+    return { error: 'Unauthorized' };
+  }
+
+  try {
+    const prefs = await prisma.userPreference.upsert({
+      where: {
+        userId_configName: {
+          userId: dbUser.id,
+          configName: 'user-preferences',
+        },
+      },
+      update: {
+        configValue: data,
+      },
+      create: {
+        userId: dbUser.id,
+        configName: 'user-preferences',
+        configValue: data,
+      },
+      select: {
+        configValue: true,
+      },
+    });
+
+    revalidatePath('/dashboard/profile');
+
+    return { success: true, prefs: prefs.configValue as UserPreferences };
+  } catch (error) {
+    console.error('Error updating user preferences:', error);
+    return {
+      success: false,
+      error: 'Failed to update user preferences',
     };
   }
 }

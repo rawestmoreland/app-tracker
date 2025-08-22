@@ -1,9 +1,9 @@
 'use client';
 
-import { UserButton, useAuth } from '@clerk/nextjs';
+import { SignOutButton, UserButton, useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,6 +11,7 @@ import {
   CoffeeIcon,
   LaptopMinimalCheckIcon,
   MenuIcon,
+  User2Icon,
 } from 'lucide-react';
 import {
   Dialog,
@@ -29,11 +30,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export function Header() {
+  const router = useRouter();
   const { isSignedIn, isLoaded } = useAuth();
+  const { user } = useUser();
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const isCurrentPath = (path: string) => {
     return pathname === path;
@@ -90,7 +100,9 @@ export function Header() {
                   <Link
                     href="/dashboard/application-flow"
                     aria-current={
-                      isCurrentPath('/dashboard/application-flow') ? 'page' : undefined
+                      isCurrentPath('/dashboard/application-flow')
+                        ? 'page'
+                        : undefined
                     }
                     className={cn(
                       isCurrentPath('/dashboard/application-flow')
@@ -147,7 +159,44 @@ export function Header() {
                 </Link>
               </Button>
               <FeedbackDialog />
-              <UserButton />
+              <Popover open={isUserMenuOpen} onOpenChange={setIsUserMenuOpen}>
+                <PopoverTrigger asChild>
+                  <Avatar
+                    className="cursor-pointer"
+                    onClick={() => setIsUserMenuOpen(true)}
+                  >
+                    <AvatarImage src={user?.imageUrl} alt={user?.fullName} />
+                    <AvatarFallback>
+                      <User2Icon className="h-4 w-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </PopoverTrigger>
+                <PopoverContent align="end" sideOffset={10}>
+                  <div className="p-2">
+                    <ul className="flex flex-col gap-4">
+                      <li>
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="flex items-center gap-2 text-sm underline underline-offset-2"
+                          onClick={() => {
+                            setIsUserMenuOpen(false);
+                            router.push('/dashboard/profile');
+                          }}
+                        >
+                          <User2Icon className="h-4 w-4" />
+                          <span>Profile</span>
+                        </Button>
+                      </li>
+                      <SignOutButton>
+                        <Button size="sm" className="w-full">
+                          Sign Out
+                        </Button>
+                      </SignOutButton>
+                    </ul>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Mobile Actions */}
@@ -168,7 +217,9 @@ export function Header() {
                       <Link href="/dashboard/companies">My Companies</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/dashboard/application-flow">Application Flow</Link>
+                      <Link href="/dashboard/application-flow">
+                        Application Flow
+                      </Link>
                     </DropdownMenuItem>
                     {/* <DropdownMenuItem asChild>
                       <Link href="/dashboard/interviews">My Interviews</Link>
