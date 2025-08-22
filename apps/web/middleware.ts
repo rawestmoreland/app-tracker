@@ -1,12 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import { getSignedInUser } from './app/lib/auth';
-import { User } from '@prisma/client';
 
 const isOnboardingRoute = createRouteMatcher(['/onboarding(.*)']);
-
-const isSignInRoute = createRouteMatcher(['/sign-in(.*)']);
-const isSignUpRoute = createRouteMatcher(['/sign-up(.*)']);
 
 const isPublicRoute = createRouteMatcher([
   '/',
@@ -18,18 +13,7 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, redirectToSignIn } = await auth();
-  let dbUser: User | null = null;
-
-  try {
-    const response = await getSignedInUser();
-    dbUser = response.dbUser;
-  } catch (error) {
-    if (isSignInRoute(req) || isSignUpRoute(req)) {
-      return NextResponse.next();
-    }
-    return redirectToSignIn({ returnBackUrl: req.url });
-  }
+  const { userId, sessionClaims, redirectToSignIn } = await auth();
 
   // For users visiting /onboarding, don't try to redirect
   if (userId && isOnboardingRoute(req)) {
@@ -46,9 +30,13 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  // Catch users who do not have `onboardingComplete: true` in the database
+  // Catch users who do not have `onboardingComplete: true` in their publicMetadata
   // Redirect them to the /onboarding route to complete onboarding
-  if (userId && !dbUser?.onboardingComplete) {
+  if (
+    userId &&
+    !(sessionClaims?.metadata as { onboardingComplete: boolean })
+      ?.onboardingComplete
+  ) {
     const onboardingUrl = new URL('/onboarding', req.url);
     return NextResponse.redirect(onboardingUrl);
   }
