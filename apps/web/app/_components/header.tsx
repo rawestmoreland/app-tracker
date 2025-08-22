@@ -188,11 +188,13 @@ export function Header() {
                           <span>Profile</span>
                         </Button>
                       </li>
-                      <SignOutButton>
-                        <Button size="sm" className="w-full">
-                          Sign Out
-                        </Button>
-                      </SignOutButton>
+                      <li>
+                        <SignOutButton>
+                          <Button size="sm" className="w-full">
+                            Sign Out
+                          </Button>
+                        </SignOutButton>
+                      </li>
                     </ul>
                   </div>
                 </PopoverContent>
