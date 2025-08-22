@@ -35,17 +35,7 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
-      - name: Check for API changes
-        id: check-api-changes
-        run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep -E '^(apps/api/|packages/|package\.json|package-lock\.json|turbo\.json)' > /dev/null; then
-            echo "api-changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "api-changed=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Deploy the API
-        if: steps.check-api-changes.outputs.api-changed == 'true'
         run: npm run deploy
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
