@@ -34,6 +34,7 @@ export const completeOnboarding = async (data: {
       },
       data: {
         signupReason: data.signupReason,
+        onboardingComplete: true,
       },
     });
 

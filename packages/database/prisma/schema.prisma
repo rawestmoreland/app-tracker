@@ -12,25 +12,26 @@ datasource db {
 }
 
 model User {
-  id              String             @id @default(cuid())
-  clerkId         String             @unique
-  email           String             @unique
-  name            String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  role            UserRole           @default(USER)
-  isDonor         Boolean            @default(false)
-  signupReason    SignupReason?      @default(OTHER)
-  activities      Activity[]
-  events          ApplicationEvent[]
-  applications    Application[]
-  Company         Company[]          @relation("CreatedCompanies")
-  contacts        Contact[]
-  FeatureRequest  FeatureRequest[]
-  interviews      Interview[]
-  notes           Note[]
-  Offer           Offer[]
-  UserPreferences UserPreference[]
+  id                 String             @id @default(cuid())
+  clerkId            String             @unique
+  email              String             @unique
+  name               String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  role               UserRole           @default(USER)
+  isDonor            Boolean            @default(false)
+  signupReason       SignupReason?      @default(OTHER)
+  activities         Activity[]
+  events             ApplicationEvent[]
+  applications       Application[]
+  Company            Company[]          @relation("CreatedCompanies")
+  contacts           Contact[]
+  FeatureRequest     FeatureRequest[]
+  interviews         Interview[]
+  notes              Note[]
+  Offer              Offer[]
+  onboardingComplete Boolean            @default(false)
+  UserPreferences    UserPreference[]
 
   Resume Resume[]
 }
@@ -49,25 +50,25 @@ model UserPreference {
 }
 
 model Company {
-  id           String            @id @default(cuid())
-  name         String
-  website      String?
-  description  String?
+  id                   String            @id @default(cuid())
+  name                 String
+  website              String?
+  description          String?
   plainTextDescription String?
-  industry     String?
-  size         CompanySize?
-  location     String?
-  logo         String?
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  isGlobal     Boolean           @default(false)
-  createdBy    String?
-  visibility   CompanyVisibility @default(PRIVATE)
-  activities   Activity[]
-  applications Application[]
-  creator      User?             @relation("CreatedCompanies", fields: [createdBy], references: [id])
-  contacts     Contact[]
-  notes        Note[]
+  industry             String?
+  size                 CompanySize?
+  location             String?
+  logo                 String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  isGlobal             Boolean           @default(false)
+  createdBy            String?
+  visibility           CompanyVisibility @default(PRIVATE)
+  activities           Activity[]
+  applications         Application[]
+  creator              User?             @relation("CreatedCompanies", fields: [createdBy], references: [id])
+  contacts             Contact[]
+  notes                Note[]
 
   @@map("companies")
 }
@@ -120,20 +121,20 @@ model Application {
   Offer              Offer[]
   archived           Boolean            @default(false)
 
-  resumeId String?
+  resumeId        String?
   connectedResume Resume? @relation(fields: [resumeId], references: [id])
 
   @@map("applications")
 }
 
 model Resume {
-  id String @id @default(cuid())
-  name String
-  url String
+  id        String   @id @default(cuid())
+  name      String
+  url       String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   Application Application[]
 
