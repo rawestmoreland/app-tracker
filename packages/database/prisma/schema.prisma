@@ -180,6 +180,7 @@ model Interview {
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   notes         Note[]
   contacts      Contact[]         @relation("ContactToInterview")
+  archived      Boolean           @default(false)
 
   @@map("interviews")
 }

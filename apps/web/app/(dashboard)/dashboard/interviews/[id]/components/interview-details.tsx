@@ -4,7 +4,13 @@ import Link from 'next/link';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CalendarIcon, ClockIcon, UserIcon, MapPinIcon } from 'lucide-react';
+import {
+  CalendarIcon,
+  ClockIcon,
+  UserIcon,
+  MapPinIcon,
+  Trash2Icon,
+} from 'lucide-react';
 import type {
   Interview,
   Note,
@@ -30,9 +36,23 @@ import {
 } from '@/app/(dashboard)/dashboard/applications/lib/new-note-schema';
 import { InterviewStatusDropdown } from '@/app/_components/dashboard/interview-status-dropdown';
 import { InterviewTypeDropdown } from '@/app/_components/dashboard/interview-type-dropdown';
+import { InterviewFormatDropdown } from '@/app/_components/dashboard/interview-format-dropdown';
+import { InterviewDurationEditor } from '@/app/_components/dashboard/interview-duration-editor';
+import { InterviewDateTimeEditor } from '@/app/_components/dashboard/interview-datetime-editor';
 import { NotesSection } from '@/app/_components/dashboard/notes/notes-section';
 import { addNote } from '@/lib/actions/application-actions';
 import { toast } from 'sonner';
+import { deleteInterview } from '@/lib/actions/interview-actions';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type FullInterview = Interview & {
   notes: Note[];
@@ -53,14 +73,12 @@ const formatInterviewType = (type: string) => {
     .join(' ');
 };
 
-const formatInterviewFormat = (format: string) => {
-  return format
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-};
-
 export default function InterviewDetails({ interview }: InterviewDetailsProps) {
+  const router = useRouter();
+
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const noteForm = useForm<NoteFormData>({
     resolver: zodResolver(noteSchema),
     defaultValues: {
@@ -69,6 +87,21 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
       interviewId: interview.id,
     },
   });
+
+  const handleDeleteInterview = async (hardDelete: boolean = false) => {
+    setIsLoading(true);
+    const result = await deleteInterview(interview.id, hardDelete);
+
+    if (result.success) {
+      toast.success('Interview deleted successfully');
+      router.push('/dashboard');
+    } else {
+      toast.error(result.error || 'Failed to delete interview');
+    }
+
+    setIsLoading(false);
+    setIsDeleting(false);
+  };
 
   const handleAddNote = async (data: NoteFormData) => {
     try {
@@ -136,6 +169,42 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
                   Back to Application
                 </Link>
               </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                disabled={isLoading}
+                onClick={() => setIsDeleting(true)}
+              >
+                <Trash2Icon className="size-4" />
+                <span className="sr-only">Delete Interview</span>
+              </Button>
+              <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Delete Interview?</DialogTitle>
+                  </DialogHeader>
+                  <DialogDescription>
+                    Are you sure you want to delete this interview? This cannot
+                    be undone.
+                  </DialogDescription>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      disabled={isLoading}
+                      onClick={() => setIsDeleting(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      disabled={isLoading}
+                      onClick={() => handleDeleteInterview(true)}
+                    >
+                      {isLoading ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         </div>
@@ -170,51 +239,40 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
                       <h3 className="text-sm font-medium text-gray-700">
                         Format
                       </h3>
-                      <p className="text-sm text-gray-900">
-                        {formatInterviewFormat(interview.format)}
-                      </p>
+                      <InterviewFormatDropdown
+                        interviewId={interview.id}
+                        currentFormat={interview.format}
+                      />
                     </div>
                   </div>
 
-                  {interview.duration && (
-                    <div className="flex space-x-3">
-                      <ClockIcon className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-700">
-                          Duration
-                        </h3>
-                        <p className="text-sm text-gray-900">
-                          {interview.duration} minutes
-                        </p>
-                      </div>
+                  <div className="flex space-x-3">
+                    <ClockIcon className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700">
+                        Duration
+                      </h3>
+                      <InterviewDurationEditor
+                        interviewId={interview.id}
+                        currentDuration={interview.duration}
+                      />
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 <div className="space-y-4">
-                  {interview.scheduledAt && (
-                    <div className="flex space-x-3">
-                      <CalendarIcon className="h-5 w-5 text-gray-400" />
-                      <div>
-                        <h3 className="text-sm font-medium text-gray-700">
-                          Scheduled Date
-                        </h3>
-                        <p className="text-sm text-gray-900">
-                          {new Date(interview.scheduledAt).toLocaleDateString(
-                            'en-US',
-                            {
-                              weekday: 'long',
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            },
-                          )}
-                        </p>
-                      </div>
+                  <div className="flex space-x-3">
+                    <CalendarIcon className="h-5 w-5 text-gray-400" />
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700">
+                        Scheduled Date
+                      </h3>
+                      <InterviewDateTimeEditor
+                        interviewId={interview.id}
+                        currentDateTime={interview.scheduledAt}
+                      />
                     </div>
-                  )}
+                  </div>
 
                   <div>
                     <h3 className="mb-2 text-sm font-medium text-gray-700">
