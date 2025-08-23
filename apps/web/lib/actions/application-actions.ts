@@ -421,23 +421,26 @@ export async function deleteResume(id: string) {
     // Get the application and verify ownership
     const application = await prisma.application.findFirst({
       where: { id, userId: dbUser.id },
+      include: {
+        connectedResume: true,
+      },
     });
 
     if (!application) {
       return { success: false, error: 'Application not found' };
     }
 
-    if (!application.resume) {
+    if (!application.connectedResume) {
       return { success: false, error: 'No resume to delete' };
     }
 
     // Delete from R2
-    await R2Service.deleteFile(application.resume);
+    await R2Service.deleteFile(application.connectedResume.url);
 
     // Update application to remove resume info
     await prisma.application.update({
       where: { id },
-      data: { resume: null, resumeName: null },
+      data: { resumeId: null },
     });
 
     revalidatePath(`/dashboard/applications/${id}`);

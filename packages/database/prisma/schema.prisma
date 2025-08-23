@@ -97,8 +97,6 @@ model Application {
   remote             RemoteType?
   status             ApplicationStatus  @default(APPLIED)
   appliedAt          DateTime
-  resume             String?
-  resumeName         String?
   referredBy         String?
   firstResponseAt    DateTime?
   interviewInviteAt  DateTime?
