@@ -12,6 +12,7 @@ import {
   Note,
   NoteType,
   ApplicationEvent,
+  Resume,
 } from '@prisma/client';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
@@ -22,6 +23,7 @@ import ApplicationForm from '../../components/new-application-form';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/file-upload';
+import ResumeSelector from '@/components/resume-selector';
 import {
   getRemotePolicyColor,
   getSizeColor,
@@ -71,18 +73,24 @@ type FullApplication = Application & {
   notes: Note[];
   events: ApplicationEvent[];
   appliedAt: Date;
+  connectedResume?: Resume | null;
 };
 
 export default function ApplicationContent({
   application,
   companies,
+  resumes,
 }: {
   application: FullApplication;
   companies: Company[];
+  resumes: Resume[];
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [currentResumeId, setCurrentResumeId] = useState<string | null>(
+    application.resumeId || null,
+  );
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(schema),
@@ -185,6 +193,12 @@ export default function ApplicationContent({
     } else {
       alert(result.error || 'Failed to delete resume');
     }
+  };
+
+  const handleResumeChange = (resumeId: string | null) => {
+    setCurrentResumeId(resumeId);
+    // Refresh the page to get the updated application data
+    router.refresh();
   };
 
   const displaySalary = (
@@ -575,33 +589,13 @@ export default function ApplicationContent({
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Resume Upload */}
-            <div className="rounded-lg bg-white p-6 shadow">
-              <h2 className="mb-4 text-xl font-semibold text-gray-900">
-                Resume
-              </h2>
-              <FileUpload
-                onUploadComplete={handleResumeUploadComplete}
-                onUploadError={handleResumeUploadError}
-                onDelete={handleResumeDelete}
-                existingFile={
-                  application.resume && application.resumeName
-                    ? {
-                        key: application.resume,
-                        filename: application.resumeName,
-                      }
-                    : undefined
-                }
-                accept=".pdf,.doc,.docx"
-                maxSize={10 * 1024 * 1024} // 10MB
-                applicationId={application.id}
-                stackButtons
-                className="flex-col gap-2"
-              />
-              {uploadError && (
-                <p className="mt-2 text-sm text-red-600">{uploadError}</p>
-              )}
-            </div>
+            {/* Resume Selector */}
+            <ResumeSelector
+              applicationId={application.id}
+              resumes={resumes}
+              currentResumeId={currentResumeId}
+              onResumeChange={handleResumeChange}
+            />
 
             {/* Company Info */}
             <div className="rounded-lg bg-white p-6 shadow">

@@ -14,7 +14,12 @@
     "lint": "eslint . --max-warnings 0",
     "prebuild": "npm run generate",
     "predev": "npm run generate",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "migrate:resumes": "tsx migrate-resumes.ts",
+    "migrate:resumes:dry-run": "tsx migrate-resumes-dry-run.ts",
+    "deduplicate:resumes": "tsx deduplicate-resumes.ts",
+    "deduplicate:resumes:dry-run": "tsx deduplicate-resumes-dry-run.ts",
+    "verify:resume-constraint": "tsx add-resume-unique-constraint.ts"
   },
   "dependencies": {
     "@prisma/client": "latest",

@@ -15,6 +15,7 @@ const fetchApplication = async (dbUser: User, id: string) => {
   const application = await prisma.application.findUnique({
     where: { id, userId: dbUser.id },
     include: {
+      connectedResume: true,
       company: true,
       interviews: {
         include: {
@@ -38,6 +39,14 @@ const fetchApplication = async (dbUser: User, id: string) => {
   return application;
 };
 
+const fetchResumes = async (dbUser: User) => {
+  const resumes = await prisma.resume.findMany({
+    where: { userId: dbUser.id },
+  });
+
+  return resumes;
+};
+
 export default async function ApplicationDetail({
   params,
 }: {
@@ -52,11 +61,19 @@ export default async function ApplicationDetail({
 
   const applicationPromise = fetchApplication(dbUser, id);
   const companiesPromise = fetchCompanies();
+  const resumesPromise = fetchResumes(dbUser);
 
-  const [application, companies] = await Promise.all([
+  const [application, companies, resumes] = await Promise.all([
     applicationPromise,
     companiesPromise,
+    resumesPromise,
   ]);
 
-  return <ApplicationContent application={application} companies={companies} />;
+  return (
+    <ApplicationContent
+      application={application}
+      companies={companies}
+      resumes={resumes}
+    />
+  );
 }
