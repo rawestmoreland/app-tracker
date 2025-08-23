@@ -10,7 +10,7 @@ import {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -41,7 +41,7 @@ export async function POST(
       if (!file) {
         return NextResponse.json(
           { error: 'No file provided' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -56,7 +56,7 @@ export async function POST(
       if (!application) {
         return NextResponse.json(
           { error: 'Application not found' },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -69,7 +69,7 @@ export async function POST(
       if (!validationResult.isValid) {
         return NextResponse.json(
           { error: validationResult.error },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -82,15 +82,33 @@ export async function POST(
       await R2Service.uploadFile(
         key,
         buffer,
-        validationResult.detectedMimeType!
+        validationResult.detectedMimeType!,
       );
+
+      // Add resume to the Resume table
+      const newResume = await prisma.resume.create({
+        data: {
+          userId: dbUser.id,
+          name: sanitizedOriginalName,
+          url: key,
+        },
+      });
+
+      if (!newResume) {
+        // Delete the file from R2
+        await R2Service.deleteFile(key);
+
+        return NextResponse.json(
+          { error: 'Failed to create resume' },
+          { status: 500 },
+        );
+      }
 
       // Update application with resume info
       await prisma.application.update({
         where: { id: routeParams.id },
         data: {
-          resume: key,
-          resumeName: sanitizedOriginalName,
+          resumeId: newResume.id,
         },
       });
 
@@ -110,7 +128,7 @@ export async function POST(
       if (!filename || !contentType) {
         return NextResponse.json(
           { error: 'Filename and content type are required' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -125,7 +143,7 @@ export async function POST(
       if (!allowedMimeTypes.includes(contentType)) {
         return NextResponse.json(
           { error: `Content type not allowed: ${contentType}` },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -140,7 +158,7 @@ export async function POST(
       if (!application) {
         return NextResponse.json(
           { error: 'Application not found' },
-          { status: 404 }
+          { status: 404 },
         );
       }
 
@@ -152,15 +170,33 @@ export async function POST(
         dbUser.id,
         routeParams.id,
         secureFilename,
-        contentType
+        contentType,
       );
+
+      // Create resume in the Resume table
+      const newResume = await prisma.resume.create({
+        data: {
+          userId: dbUser.id,
+          name: sanitizedFilename,
+          url: key,
+        },
+      });
+
+      if (!newResume) {
+        // Delete the file from R2
+        await R2Service.deleteFile(key);
+
+        return NextResponse.json(
+          { error: 'Failed to create resume' },
+          { status: 500 },
+        );
+      }
 
       // Update application with resume info
       await prisma.application.update({
         where: { id: routeParams.id },
         data: {
-          resume: key,
-          resumeName: sanitizedFilename,
+          resumeId: newResume.id,
         },
       });
 
@@ -174,14 +210,14 @@ export async function POST(
     console.error('Error handling resume upload:', error);
     return NextResponse.json(
       { error: 'Failed to handle resume upload' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -212,14 +248,14 @@ export async function DELETE(
     if (!application) {
       return NextResponse.json(
         { error: 'Application not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (!application.resume) {
       return NextResponse.json(
         { error: 'No resume to delete' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -240,14 +276,14 @@ export async function DELETE(
     console.error('Error deleting resume:', error);
     return NextResponse.json(
       { error: 'Failed to delete resume' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -278,7 +314,7 @@ export async function GET(
     if (!application) {
       return NextResponse.json(
         { error: 'Application not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -298,7 +334,7 @@ export async function GET(
     console.error('Error generating download URL:', error);
     return NextResponse.json(
       { error: 'Failed to generate download URL' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

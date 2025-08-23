@@ -523,3 +523,76 @@ export async function archiveApplications(applicationIds: string[]) {
     return { error: 'Failed to archive applications' };
   }
 }
+
+export async function updateApplicationResume(
+  applicationId: string,
+  resumeId: string | null,
+) {
+  try {
+    const { dbUser } = await getSignedInUser();
+
+    if (!dbUser) {
+      return { error: 'Unauthorized' };
+    }
+
+    // Check if application belongs to the user
+    const existingApplication = await prisma.application.findFirst({
+      where: {
+        id: applicationId,
+        userId: dbUser.id,
+      },
+    });
+
+    if (!existingApplication) {
+      return { error: 'Application not found' };
+    }
+
+    // If resumeId is provided, verify it belongs to the user
+    if (resumeId) {
+      const resume = await prisma.resume.findFirst({
+        where: {
+          id: resumeId,
+          userId: dbUser.id,
+        },
+      });
+
+      if (!resume) {
+        return { error: 'Resume not found or unauthorized' };
+      }
+    }
+
+    // Update the application resumeId
+    const updatedApplication = await prisma.application.update({
+      where: {
+        id: applicationId,
+      },
+      data: {
+        resumeId,
+        updatedAt: new Date(),
+      },
+    });
+
+    // Create activity log entry
+    await prisma.applicationEvent.create({
+      data: {
+        type: EventType.OTHER,
+        title: resumeId ? 'Resume selected' : 'Resume removed',
+        content: resumeId
+          ? 'Resume selected for this application'
+          : 'Resume removed from this application',
+        occurredAt: new Date(),
+        source: EventSource.OTHER,
+        applicationId,
+        userId: dbUser.id,
+      },
+    });
+
+    // Revalidate the application page
+    revalidatePath(`/dashboard/applications/${applicationId}`);
+
+    return { success: true, application: updatedApplication };
+  } catch (error) {
+    console.error('Error updating application resume:', error);
+    return { error: 'Failed to update application resume' };
+  }
+}
