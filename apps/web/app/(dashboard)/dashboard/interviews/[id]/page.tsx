@@ -14,6 +14,7 @@ const fetchInterview = async (id: string) => {
     where: {
       id,
       userId: dbUser.id,
+      archived: false,
     },
     include: {
       notes: {
