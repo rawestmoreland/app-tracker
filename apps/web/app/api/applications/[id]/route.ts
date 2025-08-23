@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -38,7 +38,7 @@ export async function GET(
     if (!application) {
       return NextResponse.json(
         { error: 'Application not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -47,14 +47,14 @@ export async function GET(
     console.error('Error fetching application:', error);
     return NextResponse.json(
       { error: 'Failed to fetch application' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -84,8 +84,7 @@ export async function PUT(
       status,
       appliedAt,
       companyId,
-      resume,
-      resumeName,
+      resumeId,
     } = body;
 
     const application = await prisma.application.updateMany({
@@ -102,15 +101,14 @@ export async function PUT(
         status,
         appliedAt: appliedAt ? new Date(appliedAt) : undefined,
         companyId,
-        resume,
-        resumeName,
+        resumeId,
       },
     });
 
     if (application.count === 0) {
       return NextResponse.json(
         { error: 'Application not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -133,14 +131,14 @@ export async function PUT(
     console.error('Error updating application:', error);
     return NextResponse.json(
       { error: 'Failed to update application' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { userId } = await auth();
@@ -164,7 +162,7 @@ export async function DELETE(
     if (application.count === 0) {
       return NextResponse.json(
         { error: 'Application not found' },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -173,7 +171,7 @@ export async function DELETE(
     console.error('Error deleting application:', error);
     return NextResponse.json(
       { error: 'Failed to delete application' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

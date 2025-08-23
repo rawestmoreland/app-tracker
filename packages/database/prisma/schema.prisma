@@ -97,8 +97,6 @@ model Application {
   remote             RemoteType?
   status             ApplicationStatus  @default(APPLIED)
   appliedAt          DateTime
-  resume             String?
-  resumeName         String?
   referredBy         String?
   firstResponseAt    DateTime?
   interviewInviteAt  DateTime?
@@ -130,7 +128,7 @@ model Application {
 model Resume {
   id        String   @id @default(cuid())
   name      String
-  url       String
+  url       String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String
@@ -139,6 +137,7 @@ model Resume {
   Application Application[]
 
   @@index([userId, createdAt])
+  @@unique([name, userId, url])
   @@map("resumes")
 }
 

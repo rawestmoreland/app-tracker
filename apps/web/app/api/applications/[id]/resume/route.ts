@@ -243,6 +243,9 @@ export async function DELETE(
         id: routeParams.id,
         userId: dbUser.id,
       },
+      include: {
+        connectedResume: true,
+      },
     });
 
     if (!application) {
@@ -252,7 +255,7 @@ export async function DELETE(
       );
     }
 
-    if (!application.resume) {
+    if (!application.connectedResume) {
       return NextResponse.json(
         { error: 'No resume to delete' },
         { status: 400 },
@@ -260,16 +263,7 @@ export async function DELETE(
     }
 
     // Delete from R2
-    await R2Service.deleteFile(application.resume);
-
-    // Update application to remove resume info
-    await prisma.application.update({
-      where: { id: routeParams.id },
-      data: {
-        resume: null,
-        resumeName: null,
-      },
-    });
+    await R2Service.deleteFile(application.connectedResume.url);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -309,6 +303,9 @@ export async function GET(
         id: routeParams.id,
         userId: dbUser.id,
       },
+      include: {
+        connectedResume: true,
+      },
     });
 
     if (!application) {
@@ -318,17 +315,19 @@ export async function GET(
       );
     }
 
-    if (!application.resume) {
+    if (!application.connectedResume) {
       return NextResponse.json({ error: 'No resume found' }, { status: 404 });
     }
 
     // Generate download URL
-    const downloadUrl = await R2Service.generateDownloadUrl(application.resume);
+    const downloadUrl = await R2Service.generateDownloadUrl(
+      application.connectedResume.url,
+    );
 
     return NextResponse.json({
       downloadUrl,
-      filename: application.resumeName,
-      key: application.resume,
+      filename: application.connectedResume.name,
+      key: application.connectedResume.url,
     });
   } catch (error) {
     console.error('Error generating download URL:', error);
