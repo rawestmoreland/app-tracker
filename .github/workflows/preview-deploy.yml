@@ -24,25 +24,20 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
+          echo "Deployment URL: $DEPLOYMENT_URL"
 
       # Wait for deployment to be ready
       - run: sleep 30
-
-      # Get the preview URL using the zentered action
-      - name: Get Vercel Preview URL
-        uses: zentered/vercel-preview-url@v1.1.9
-        id: vercel_preview_url
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        with:
-          vercel_project_id: ${{ secrets.VERCEL_PROJECT_ID }}
 
       # Set the preview URL as job output
       - name: Set Preview URL Output
         id: set_output
         run: |
-          PREVIEW_URL="https://${{ steps.vercel_preview_url.outputs.preview_url }}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
+          PREVIEW_URL="${{ steps.deploy.outputs.deployment_url }}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
           echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
           echo "Preview URL: $PREVIEW_URL"
 
