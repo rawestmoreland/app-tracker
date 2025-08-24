@@ -10,12 +10,103 @@ jobs:
   Deploy-Preview:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
+
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Build Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "preview-url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Preview deployed to: $DEPLOYMENT_URL"
+
+  Cypress-E2E-Tests:
+    needs: Deploy-Preview
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      # For Turborepo monorepo - install dependencies at root
+      - name: Install dependencies
+        run: npm ci
+
+      # Wait for deployment to be fully ready (optional but recommended)
+      - name: Wait for deployment
+        run: |
+          echo "Waiting for deployment to be ready..."
+          npx wait-on ${{ needs.Deploy-Preview.outputs.preview-url }} -t 60000
+
+      # Run Cypress tests against the preview URL
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          # Adjust the working directory if your app is in a subdirectory
+          working-directory: apps/e2e
+
+          # Use the preview URL from the deployment
+          config: baseUrl=${{ needs.Deploy-Preview.outputs.preview-url }}
+
+          # Optional: specify which tests to run for PR previews (smoke tests)
+          spec: |
+            cypress/e2e/smoke/**/*.cy.{js,ts}
+            cypress/e2e/critical/**/*.cy.{js,ts}
+
+          # Optional: record to Cypress Dashboard (requires CYPRESS_RECORD_KEY secret)
+          # record: true
+
+          # Optional: parallelization (if using Cypress Dashboard)
+          # parallel: true
+
+          # Browser selection
+          browser: chrome
+
+        env:
+          # Add any environment variables your tests need
+          CYPRESS_TEST_USER_EMAIL: ${{ secrets.CYPRESS_TEST_USER_EMAIL }}
+          CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CYPRESS_TEST_USER_PASSWORD }}
+          # CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+
+      # Upload test artifacts on failure
+      - name: Upload Cypress screenshots
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - name: Upload Cypress videos
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-videos
+          path: cypress/videos
+
+      # Optional: Comment on PR with test results
+      - name: Comment PR with test results
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const status = '${{ job.status }}';
+            const previewUrl = '${{ needs.Deploy-Preview.outputs.preview-url }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${emoji} **E2E Tests ${status}**\n\nPreview URL: ${previewUrl}\n\n[View workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            })
