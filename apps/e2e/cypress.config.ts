@@ -3,6 +3,7 @@ import { clerkSetup } from '@clerk/testing/cypress';
 
 export default defineConfig({
   e2e: {
+    baseUrl: 'http://localhost:3000', // Default fallback
     setupNodeEvents(on, config) {
       return clerkSetup({ config });
     },
