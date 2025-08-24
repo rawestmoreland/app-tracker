@@ -19,7 +19,9 @@
         "R2_ENDPOINT",
         "R2_ACCESS_KEY_ID",
         "R2_SECRET_ACCESS_KEY",
-        "R2_BUCKET_NAME"
+        "R2_BUCKET_NAME",
+        "CLERK_USERNAME",
+        "CLERK_PASSWORD"
       ]
     },
     "db:migrate:dev": {
@@ -55,6 +57,10 @@
       "cache": false,
       "persistent": true,
       "env": ["DATABASE_URL"]
+    },
+    "test:e2e": {
+      "inputs": ["cypress/**/*", "cypress.config.ts"],
+      "env": ["CLERK_USERNAME", "CLERK_PASSWORD"]
     },
     "lint": {}
   }

@@ -6,6 +6,7 @@
   "scripts": {
     "deploy": "npm run -w apps/api deploy",
     "build": "turbo run build",
+    "test:e2e": "npm run -w apps/e2e test:e2e",
     "db:generate:prod": "npm run -w database db:generate:prod",
     "db:generate:dev": "npm run -w database db:generate:dev",
     "db:migrate:deploy": "npm run -w database db:migrate:deploy",
