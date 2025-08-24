@@ -42,7 +42,7 @@ jobs:
       - name: Set Preview URL Output
         id: set_output
         run: |
-          echo "preview-url=https://${{ steps.vercel_preview_url.outputs.preview_url }}" >> $GITHUB_OUTPUT
+          echo "preview-url=https://${{ steps.vercel_preview_url.outputs.preview_url }}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}" >> $GITHUB_OUTPUT
           echo "Preview URL: ${{ steps.vercel_preview_url.outputs.preview_url }}"
 
   Cypress-E2E-Tests:
