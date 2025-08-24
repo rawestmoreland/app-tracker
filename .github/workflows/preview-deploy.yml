@@ -23,23 +23,17 @@ jobs:
       - name: Build Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy Project Artifacts to Vercel
-        id: deploy
+      - name: Deploy Project Artifacts to Vercel and Set Preview URL
+        id: set_output
         run: |
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "deployment_url=$DEPLOYMENT_URL" >> "$GITHUB_OUTPUT"
+          PREVIEW_URL="${DEPLOYMENT_URL}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
+          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
           echo "Deployment URL: $DEPLOYMENT_URL"
+          echo "Preview URL: $PREVIEW_URL"
 
       # Wait for deployment to be ready
       - run: sleep 30
-
-      # Set the preview URL as job output
-      - name: Set Preview URL Output
-        id: set_output
-        run: |
-          PREVIEW_URL="${{ steps.deploy.outputs.deployment_url }}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
-          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
-          echo "Preview URL: $PREVIEW_URL"
 
   cypress-e2e-tests:
     needs: deploy-preview
