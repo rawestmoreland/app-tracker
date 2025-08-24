@@ -6,7 +6,6 @@ export default defineConfig({
     setupNodeEvents(on, config) {
       return clerkSetup({ config });
     },
-    baseUrl: 'http://localhost:3000',
     env: {
       CLERK_USERNAME: process.env.CLERK_USERNAME,
       CLERK_PASSWORD: process.env.CLERK_PASSWORD,
