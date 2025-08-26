@@ -63,11 +63,14 @@ jobs:
           echo "Available outputs: ${{ toJSON(needs.deploy_preview.outputs) }}"
 
       - env:
-          PREVIEW_URL: ${{ needs.deploy_preview.outputs.output1 }}
+          BASE_URL: ${{ needs.deploy_preview.outputs.output1 }}
+          BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
-          echo "Preview URL: $PREVIEW_URL"
-          if [ -z "$PREVIEW_URL" ]; then
-            echo "ERROR: Preview URL is empty!"
+          PREVIEW_URL="${BASE_URL}?x-vercel-protection-bypass=${BYPASS_SECRET}"
+          echo "Base URL: $BASE_URL"
+          echo "Preview URL with bypass: $PREVIEW_URL"
+          if [ -z "$BASE_URL" ]; then
+            echo "ERROR: Base URL is empty!"
             exit 1
           fi
 
@@ -84,39 +87,51 @@ jobs:
 
       # Wait for deployment to be fully ready (optional but recommended)
       - name: Wait for deployment
+        env:
+          BASE_URL: ${{ needs.deploy_preview.outputs.output1 }}
+          BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
+          PREVIEW_URL="${BASE_URL}?x-vercel-protection-bypass=${BYPASS_SECRET}"
           echo "Waiting for deployment to be ready..."
-          echo "Preview URL from job output: '${{ needs.deploy_preview.outputs.output1 }}'"
-          if [ -z "${{ needs.deploy_preview.outputs.output1 }}" ]; then
-            echo "ERROR: Preview URL is empty!"
+          echo "Preview URL from job output: '$PREVIEW_URL'"
+          if [ -z "$BASE_URL" ]; then
+            echo "ERROR: Base URL is empty!"
             exit 1
           fi
-          npx wait-on "${{ needs.deploy_preview.outputs.output1 }}" -t 60000
+          npx wait-on "$PREVIEW_URL" -t 60000
 
       # Run Cypress tests against the preview URL
       - name: Run Cypress E2E tests
-        run: |
-          cd apps/e2e
-          echo "Using baseUrl: ${{ needs.deploy_preview.outputs.output1 }}"
-          npx cypress run \
-            --config baseUrl="${{ needs.deploy_preview.outputs.output1 }}" \
-            --spec "cypress/e2e/smoke/**/*.cy.{js,ts},cypress/e2e/critical/**/*.cy.{js,ts}" \
-            --browser chrome
         env:
+          BASE_URL: ${{ needs.deploy_preview.outputs.output1 }}
+          BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
           # Add any environment variables your tests need
           CLERK_USERNAME: ${{ secrets.CLERK_USERNAME }}
           CLERK_PASSWORD: ${{ secrets.CLERK_PASSWORD }}
           CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+        run: |
+          cd apps/e2e
+          PREVIEW_URL="${BASE_URL}?x-vercel-protection-bypass=${BYPASS_SECRET}"
+          echo "Using baseUrl: $PREVIEW_URL"
+          npx cypress run \
+            --config baseUrl="$PREVIEW_URL" \
+            --spec "cypress/e2e/smoke/**/*.cy.{js,ts},cypress/e2e/critical/**/*.cy.{js,ts}" \
+            --browser chrome
 
       # Optional: Comment on PR with test results
       - name: Comment PR with test results
         if: always() && github.event_name == 'pull_request'
         uses: actions/github-script@v6
+        env:
+          BASE_URL: ${{ needs.deploy_preview.outputs.output1 }}
+          BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         with:
           script: |
             const status = '${{ job.status }}';
-            const previewUrl = '${{ needs.deploy_preview.outputs.output1 }}';
+            const baseUrl = process.env.BASE_URL;
+            const bypassSecret = process.env.BYPASS_SECRET;
+            const previewUrl = `${baseUrl}?x-vercel-protection-bypass=${bypassSecret}`;
             const emoji = status === 'success' ? '✅' : '❌';
 
             github.rest.issues.createComment({
