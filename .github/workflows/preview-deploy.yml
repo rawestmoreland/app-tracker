@@ -50,6 +50,12 @@ jobs:
     needs: [deploy_preview]
     runs-on: ubuntu-latest
     steps:
+      - name: Debug - Check received outputs
+        run: |
+          echo "All outputs from deploy_preview job:"
+          echo "preview_url: '${{ needs.deploy_preview.outputs.preview_url }}'"
+          echo "Available outputs: ${{ toJSON(needs.deploy_preview.outputs) }}"
+          
       - env:
           PREVIEW_URL: ${{ needs.deploy_preview.outputs.preview_url }}
         run: |
