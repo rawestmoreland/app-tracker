@@ -10,7 +10,7 @@ jobs:
   deploy_preview:
     runs-on: ubuntu-latest
     outputs:
-      preview_url: ${{ steps.set_output.outputs.VERCEL_URL }}
+      preview_url: ${{ steps.deploy_preview.outputs.VERCEL_URL }}
     steps:
       - uses: actions/checkout@v3
 
@@ -41,7 +41,7 @@ jobs:
       # Debug step to verify output
       - name: Debug - Check step output
         run: |
-          echo "Step output VERCEL_URL: '${{ steps.set_output.outputs.VERCEL_URL }}'"
+          echo "Step output VERCEL_URL: '${{ steps.deploy_preview.outputs.VERCEL_URL }}'"
 
       # Wait for deployment to be ready
       - run: sleep 30
