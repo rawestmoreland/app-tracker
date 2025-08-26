@@ -10,7 +10,7 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
     outputs:
-      preview_url: ${{ steps.set_output.outputs.preview_url }}
+      preview-url: ${{ steps.set_output.outputs.VERCEL_URL }}
     steps:
       - uses: actions/checkout@v3
 
@@ -28,7 +28,7 @@ jobs:
         run: |
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           PREVIEW_URL="${DEPLOYMENT_URL}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
-          echo "preview_url=$PREVIEW_URL" >> "$GITHUB_OUTPUT"
+          echo "VERCEL_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "Deployment URL: $DEPLOYMENT_URL"
           echo "Preview URL: $PREVIEW_URL"
 
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - env:
-          PREVIEW_URL: ${{ needs.deploy-preview.outputs.preview_url }}
+          PREVIEW_URL: ${{ needs.deploy-preview.outputs.preview-url }}
         run: |
           echo "Preview URL: $PREVIEW_URL"
 
@@ -59,20 +59,20 @@ jobs:
       - name: Wait for deployment
         run: |
           echo "Waiting for deployment to be ready..."
-          echo "Preview URL from job output: '${{ needs.deploy-preview.outputs.preview_url }}'"
-          if [ -z "${{ needs.deploy-preview.outputs.preview_url }}" ]; then
+          echo "Preview URL from job output: '${{ needs.deploy-preview.outputs.preview-url }}'"
+          if [ -z "${{ needs.deploy-preview.outputs.preview-url }}" ]; then
             echo "ERROR: Preview URL is empty!"
             exit 1
           fi
-          npx wait-on "${{ needs.deploy-preview.outputs.preview_url }}" -t 60000
+          npx wait-on "${{ needs.deploy-preview.outputs.preview-url }}" -t 60000
 
       # Run Cypress tests against the preview URL
       - name: Run Cypress E2E tests
         run: |
           cd apps/e2e
-          echo "Using baseUrl: ${{ needs.deploy-preview.outputs.preview_url }}"
+          echo "Using baseUrl: ${{ needs.deploy-preview.outputs.preview-url }}"
           npx cypress run \
-            --config baseUrl="${{ needs.deploy-preview.outputs.preview_url }}" \
+            --config baseUrl="${{ needs.deploy-preview.outputs.preview-url }}" \
             --spec "cypress/e2e/smoke/**/*.cy.{js,ts},cypress/e2e/critical/**/*.cy.{js,ts}" \
             --browser chrome
         env:
@@ -89,7 +89,7 @@ jobs:
         with:
           script: |
             const status = '${{ job.status }}';
-            const previewUrl = '${{ needs.deploy-preview.outputs.preview_url }}';
+            const previewUrl = '${{ needs.deploy-preview.outputs.preview-url }}';
             const emoji = status === 'success' ? '✅' : '❌';
 
             github.rest.issues.createComment({
