@@ -39,4 +39,14 @@ import { addClerkCommands } from '@clerk/testing/cypress';
 
 addClerkCommands({ Cypress, cy });
 
+beforeEach(() => {
+  cy.log('Executing universal beforeEach hook');
+
+  cy.intercept('*', (req) => {
+    req.headers['x-vercel-protection-bypass'] = Cypress.env(
+      'VERCEL_AUTOMATION_BYPASS_SECRET',
+    );
+  });
+});
+
 export {};
