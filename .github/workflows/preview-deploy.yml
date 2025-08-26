@@ -32,11 +32,11 @@ jobs:
             echo "ERROR: Deployment URL is empty!"
             exit 1
           fi
-          PREVIEW_URL="${DEPLOYMENT_URL}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
+          # Test without secret first
           echo "Deployment URL: $DEPLOYMENT_URL"
-          echo "Preview URL: $PREVIEW_URL"
+          echo "Testing URL without secret: $DEPLOYMENT_URL"
           # Clear any existing output and set fresh output
-          echo "url=$PREVIEW_URL" >> $GITHUB_OUTPUT
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           echo "Output file after writing:"
           cat $GITHUB_OUTPUT
 
