@@ -27,10 +27,21 @@ jobs:
         id: set_output
         run: |
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Raw deployment URL: '$DEPLOYMENT_URL'"
+          if [ -z "$DEPLOYMENT_URL" ]; then
+            echo "ERROR: Deployment URL is empty!"
+            exit 1
+          fi
           PREVIEW_URL="${DEPLOYMENT_URL}?x-vercel-protection-bypass=${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}"
           echo "VERCEL_URL=$PREVIEW_URL" >> $GITHUB_OUTPUT
           echo "Deployment URL: $DEPLOYMENT_URL"
           echo "Preview URL: $PREVIEW_URL"
+          echo "Step output should be: $PREVIEW_URL"
+
+      # Debug step to verify output
+      - name: Debug - Check step output
+        run: |
+          echo "Step output VERCEL_URL: '${{ steps.set_output.outputs.VERCEL_URL }}'"
 
       # Wait for deployment to be ready
       - run: sleep 30
