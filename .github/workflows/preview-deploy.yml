@@ -24,7 +24,7 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy Project Artifacts to Vercel and Set Preview URL
-        id: set_output
+        id: deploy_preview
         run: |
           DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
           echo "Raw deployment URL: '$DEPLOYMENT_URL'"
@@ -55,7 +55,7 @@ jobs:
           echo "All outputs from deploy_preview job:"
           echo "preview_url: '${{ needs.deploy_preview.outputs.preview_url }}'"
           echo "Available outputs: ${{ toJSON(needs.deploy_preview.outputs) }}"
-          
+
       - env:
           PREVIEW_URL: ${{ needs.deploy_preview.outputs.preview_url }}
         run: |
