@@ -1,42 +1,65 @@
-name: (Staging) CI/CD Pipeline
-
+name: Vercel Preview Deployment
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-
 on:
   push:
     branches-ignore:
       - main
-
 jobs:
-  deploy:
+  deploy_preview:
     runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.deploy.outputs.url }}
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Install Vercel CLI
-        working-directory: apps/web
-        run: npm install --global vercel
+        run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --cwd apps/web --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        working-directory: apps/web
-        run: vercel build --target=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Get Vercel .env
-        run: vercel env pull .env --cwd apps/web --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      # - name: Deploy Project Artifacts to Vercel and Set Preview URL
+      #   id: deploy
+      #   run: |
+      #     DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+      #     echo "Raw deployment URL: '$DEPLOYMENT_URL'"
+      #     if [ -z "$DEPLOYMENT_URL" ]; then
+      #       echo "ERROR: Deployment URL is empty!"
+      #       exit 1
+      #     fi
+      #     # Test without secret first
+      #     echo "Deployment URL: $DEPLOYMENT_URL"
+      #     echo "Testing URL without secret: $DEPLOYMENT_URL"
+      #     # Clear any existing output and set fresh output
+      #     echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+      #     echo "Output file after writing:"
+      #     cat $GITHUB_OUTPUT
 
-      - name: Cypress run
+  cypress-e2e-tests:
+    needs: [deploy_preview]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      # For Turborepo monorepo - install dependencies at root
+      - name: Install dependencies
+        run: npm ci
+
+      # Wait for deployment to be fully ready (optional but recommended)
+      - name: Start the NextJS Server
         uses: cypress-io/github-action@v4
         with:
           working-directory: apps/web
           build: npm run build
           start: npm run start
           wait-on: 'http://localhost:3000'
-
-      - name: Deploy To Vercel Preview
-        run: cd apps/web && vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
