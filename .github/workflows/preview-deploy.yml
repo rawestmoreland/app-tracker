@@ -40,26 +40,14 @@ jobs:
       #     echo "Output file after writing:"
       #     cat $GITHUB_OUTPUT
 
-  cypress-e2e-tests:
-    needs: [deploy_preview]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'
-
       # For Turborepo monorepo - install dependencies at root
       - name: Install dependencies
         run: npm ci
 
       # Wait for deployment to be fully ready (optional but recommended)
       - name: Start the NextJS Server
-        uses: cypress-io/github-action@v4
-        with:
-          working-directory: apps/web
-          build: npm run build
-          start: npm run start
-          wait-on: 'http://localhost:3000'
+        working-directory: apps/web
+        run: |
+          npm run build
+          npm run start
+          npx cypress run --config baseUrl=http://localhost:3000
