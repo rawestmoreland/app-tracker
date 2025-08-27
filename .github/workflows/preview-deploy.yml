@@ -21,24 +21,20 @@ jobs:
         run: npm install --global vercel
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: cd apps/web && vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
-        working-directory: apps/web
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: cd apps/web && vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Get Vercel .env
-        working-directory: apps/web
-        run: vercel env pull .env --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: cd apps/web && vercel env pull .env --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Cypress run
         uses: cypress-io/github-action@v4
         with:
-          working-directory: apps/web
-          build: npm run build
-          start: npm run start
+          build: cd apps/web && npm run build
+          start: cd apps/web && npm run start
           wait-on: 'http://localhost:3000'
 
       - name: Deploy To Vercel Preview
-        working-directory: apps/web
-        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
+        run: cd apps/web && vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
