@@ -25,7 +25,7 @@ jobs:
 
       - name: Build Project Artifacts
         working-directory: apps/web
-        run: vercel build --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Get Vercel .env
         working-directory: apps/web
