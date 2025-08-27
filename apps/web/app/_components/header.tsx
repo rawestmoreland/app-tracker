@@ -115,20 +115,6 @@ export function Header() {
                     Application Flow
                   </Link>
                   {/* <Link
-                    href="/dashboard/activity"
-                    aria-current={
-                      isCurrentPath("/dashboard/activity") ? "page" : undefined
-                    }
-                    className={cn(
-                      isCurrentPath("/dashboard/activity")
-                        ? "border-indigo-600 text-gray-900"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
-                    )}
-                  >
-                    Activity
-                  </Link> */}
-                  {/* <Link
                     href="/dashboard/interviews"
                     aria-current={
                       isCurrentPath("/dashboard/interviews")
