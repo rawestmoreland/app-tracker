@@ -39,14 +39,22 @@ import { addClerkCommands } from '@clerk/testing/cypress';
 
 addClerkCommands({ Cypress, cy });
 
-beforeEach(() => {
-  cy.log('Executing universal beforeEach hook');
+Cypress.Commands.add('visitPreview', (url: string) =>
+  cy.visit(url, {
+    headers: {
+      'x-vercel-protection-bypass': Cypress.env(
+        'VERCEL_AUTOMATION_BYPASS_SECRET',
+      ),
+    },
+  }),
+);
 
-  cy.intercept('*', (req) => {
-    req.headers['x-vercel-protection-bypass'] = Cypress.env(
-      'VERCEL_AUTOMATION_BYPASS_SECRET',
-    );
-  });
-});
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      visitPreview(url: string): Chainable<AUTWindow>;
+    }
+  }
+}
 
 export {};

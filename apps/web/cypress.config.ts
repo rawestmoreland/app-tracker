@@ -10,6 +10,8 @@ export default defineConfig({
     env: {
       CLERK_USERNAME: process.env.CLERK_USERNAME,
       CLERK_PASSWORD: process.env.CLERK_PASSWORD,
+      VERCEL_AUTOMATION_BYPASS_SECRET:
+        process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
     },
   },
 });

@@ -58,10 +58,6 @@
       "persistent": true,
       "env": ["DATABASE_URL"]
     },
-    "test:e2e": {
-      "inputs": ["cypress/**/*", "cypress.config.ts"],
-      "env": ["CLERK_USERNAME", "CLERK_PASSWORD"]
-    },
     "lint": {}
   }
 }

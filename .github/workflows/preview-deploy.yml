@@ -1,127 +1,44 @@
-name: Vercel Preview Deployment
+name: (Staging) CI/CD Pipeline
+
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 on:
   push:
     branches-ignore:
       - main
+
 jobs:
-  deploy_preview:
+  deploy:
     runs-on: ubuntu-latest
-    outputs:
-      output1: ${{ steps.deploy.outputs.url }}
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        working-directory: apps/web
+        run: npm install --global vercel
 
       - name: Pull Vercel Environment Information
         run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Build Project Artifacts
+        working-directory: apps/web
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Deploy Project Artifacts to Vercel and Set Preview URL
-        id: deploy
-        run: |
-          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-          echo "Raw deployment URL: '$DEPLOYMENT_URL'"
-          if [ -z "$DEPLOYMENT_URL" ]; then
-            echo "ERROR: Deployment URL is empty!"
-            exit 1
-          fi
-          # Test without secret first
-          echo "Deployment URL: $DEPLOYMENT_URL"
-          echo "Testing URL without secret: $DEPLOYMENT_URL"
-          # Clear any existing output and set fresh output
-          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-          echo "Output file after writing:"
-          cat $GITHUB_OUTPUT
+      - name: Get Vercel .env
+        working-directory: apps/web
+        run: vercel env pull .env --environment=preview --git-branch=staging --token=${{ secrets.VERCEL_TOKEN }}
 
-      # Debug step to verify output
-      - name: Debug - Check step output
-        run: |
-          echo "Step output preview_url: '${{ steps.deploy.outputs.url }}'"
-          echo "Contents of GITHUB_OUTPUT file:"
-          cat $GITHUB_OUTPUT || echo "GITHUB_OUTPUT file not found"
-          echo "All step outputs:"
-          echo '${{ toJSON(steps.deploy.outputs) }}'
-
-      # Wait for deployment to be ready
-      - run: sleep 30
-
-  cypress-e2e-tests:
-    needs: [deploy_preview]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug - Check received outputs
-        run: |
-          echo "All outputs from deploy_preview job:"
-          echo "output1: '${{ needs.deploy_preview.outputs.output1 }}'"
-          echo "Available outputs: ${{ toJSON(needs.deploy_preview.outputs) }}"
-
-      - uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Cypress run
+        uses: cypress-io/github-action@v4
         with:
-          node-version: '22'
+          working-directory: apps/web
+          build: npm run build
+          start: npm run start
+          wait-on: 'http://localhost:3000'
 
-      # For Turborepo monorepo - install dependencies at root
-      - name: Install dependencies
-        run: npm ci
-
-      # Wait for deployment to be fully ready (optional but recommended)
-      - name: Wait for deployment
-        env:
-          BASE_URL: ${{ needs.deploy_preview.outputs.output1 }}
-          BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
-        run: |
-          PREVIEW_URL="${BASE_URL}?x-vercel-protection-bypass=${BYPASS_SECRET}"
-          echo "Waiting for deployment to be ready..."
-          echo "Preview URL from job output: '$PREVIEW_URL'"
-          if [ -z "$BASE_URL" ]; then
-            echo "ERROR: Base URL is empty!"
-            exit 1
-          fi
-          npx wait-on "$PREVIEW_URL" -t 60000
-
-      # Run Cypress tests against the preview URL
-      - name: Run Cypress E2E tests
-        env:
-          BASE_URL: ${{ needs.deploy_preview.outputs.output1 }}
-          # Add any environment variables your tests need
-          CLERK_USERNAME: ${{ secrets.CLERK_USERNAME }}
-          CLERK_PASSWORD: ${{ secrets.CLERK_PASSWORD }}
-          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
-          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
-        run: |
-          cd apps/e2e
-          PREVIEW_URL="${BASE_URL}"
-          echo "Using baseUrl: $PREVIEW_URL"
-          npx cypress run \
-            --config baseUrl="$PREVIEW_URL" \
-            --spec "cypress/e2e/smoke/**/*.cy.{js,ts},cypress/e2e/critical/**/*.cy.{js,ts}" \
-            --browser chrome
-
-      # Optional: Comment on PR with test results
-      - name: Comment PR with test results
-        if: always() && github.event_name == 'pull_request'
-        uses: actions/github-script@v6
-        env:
-          BASE_URL: ${{ needs.deploy_preview.outputs.output1 }}
-        with:
-          script: |
-            const status = '${{ job.status }}';
-            const baseUrl = process.env.BASE_URL;
-            const previewUrl = `${baseUrl}`;
-            const emoji = status === 'success' ? '✅' : '❌';
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `${emoji} **E2E Tests ${status}**\n\nPreview URL: ${previewUrl}\n\n[View workflow run](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
-            })
+      - name: Deploy To Vercel [Staging]
+        working-directory: apps/web
+        run: vercel deploy --token=${{ secrets.VERCEL_TOKEN }}
