@@ -61,8 +61,19 @@ jobs:
       - name: Start the NextJS Server and run Cypress tests
         working-directory: apps/web
         env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PREVIEW }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_PREVIEW }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_PREVIEW }}
+          CLERK_CALLBACK_URL: ${{ secrets.CLERK_CALLBACK_URL_PREVIEW }}
           CLERK_USERNAME: ${{ secrets.CLERK_USERNAME }}
           CLERK_PASSWORD: ${{ secrets.CLERK_PASSWORD }}
+          NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: '/'
+          NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: '/dashboard'
+          NEXT_PUBLIC_CLERK_SIGN_IN_URL: '/sign-in'
+          NEXT_PUBLIC_CLERK_SIGN_UP_URL: '/sign-up'
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
+          CLERK_WEBHOOK_SIGNING_SECRET: ${{ secrets.CLERK_WEBHOOK_SIGNING_SECRET_PREVIEW }}
         run: |
           npm run build
           npm run start &

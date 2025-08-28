@@ -122,7 +122,7 @@ export default function OnboardingComponent() {
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Welcome to JobTracker
+            Welcome to App Track
           </h1>
           <p className="text-lg text-gray-600">
             Let&apos;s get you set up for success

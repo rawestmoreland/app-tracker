@@ -1,7 +1,7 @@
 import { setupClerkTestingToken } from '@clerk/testing/cypress';
 
-describe('Visit the sign in page', () => {
-  it('should visit the sign in page', () => {
+describe('Sign in', () => {
+  it('should visit the sign in page as a new user', () => {
     setupClerkTestingToken();
 
     cy.visit('/sign-in');
@@ -16,5 +16,7 @@ describe('Visit the sign in page', () => {
     });
 
     cy.visit('/dashboard');
+
+    cy.contains('No applications yet');
   });
 });
