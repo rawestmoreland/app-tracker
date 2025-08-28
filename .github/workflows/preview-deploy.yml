@@ -41,7 +41,7 @@ jobs:
       #     cat $GITHUB_OUTPUT
 
       # Wait for deployment to be fully ready (optional but recommended)
-      - name: Start the NextJS Server
+      - name: Start the NextJS Server and run Cypress tests
         working-directory: apps/web
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -50,4 +50,8 @@ jobs:
           CLERK_CALLBACK_URL: ${{ secrets.CLERK_CALLBACK_URL }}
         run: |
           npm run build
-          npm run start & npx cypress run --config baseUrl=http://localhost:3000
+          npm run start &
+          npx cypress run --config baseUrl=http://localhost:3000 --spec 'apps/web/cypress/e2e/smoke/**/*.cy.{js,ts}'
+
+      - name: Deploy to Vercel
+        run: vercel deploy --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

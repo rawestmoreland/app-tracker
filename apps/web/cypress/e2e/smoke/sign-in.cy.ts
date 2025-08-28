@@ -4,21 +4,17 @@ describe('Visit the sign in page', () => {
   it('should visit the sign in page', () => {
     setupClerkTestingToken();
 
-    cy.visit('/');
+    cy.visit('/sign-in');
+    cy.url().should('include', '/sign-in');
 
-    cy.contains('App Track');
+    cy.contains('Sign in to App Track');
 
-    // cy.visit('/sign-in');
-    // cy.url().should('include', '/sign-in');
+    cy.clerkSignIn({
+      strategy: 'password',
+      identifier: Cypress.env('CLERK_USERNAME'),
+      password: Cypress.env('CLERK_PASSWORD'),
+    });
 
-    // cy.contains('Sign in to App Track');
-
-    // cy.clerkSignIn({
-    //   strategy: 'password',
-    //   identifier: Cypress.env('CLERK_USERNAME'),
-    //   password: Cypress.env('CLERK_PASSWORD'),
-    // });
-
-    // cy.visit('/dashboard');
+    cy.visit('/dashboard');
   });
 });
