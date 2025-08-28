@@ -23,12 +23,19 @@ jobs:
 
       - name: Pull env variables to local file
         run: |
-          vercel env pull ./apps/web/env.local --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env pull ./apps/web/.env.local --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: Echo some vars
         run: |
           echo "CLERK_USERNAME: $CLERK_USERNAME"
           echo "CLERK_PASSWORD: $CLERK_PASSWORD"
+
+      - name: Verify environment file exists
+        working-directory: apps/web
+        run: |
+          ls -la .env.local
+          echo "Environment file contents (first few lines):"
+          head -5 .env.local
 
       - name: Build Project Artifacts
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
