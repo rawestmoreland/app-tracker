@@ -51,7 +51,7 @@ jobs:
         run: |
           npm run build
           npm run start &
-          npx cypress run --config baseUrl=http://localhost:3000 --spec '/cypress/e2e/smoke/*.cy.{js,ts}'
+          npx cypress run --config baseUrl=http://localhost:3000 --spec 'cypress/e2e/smoke/*.cy.ts'
 
       - name: Deploy to Vercel
         run: vercel deploy --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
