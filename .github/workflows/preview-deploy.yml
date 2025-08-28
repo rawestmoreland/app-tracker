@@ -49,6 +49,7 @@ jobs:
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
           CLERK_REDIRECT_URL: ${{ secrets.CLERK_REDIRECT_URL }}
         run: |
-          npm run build
-          npm run start
+          npm run build &&
+          npm run start &
+          sleep 10 &&
           npx cypress run --config baseUrl=http://localhost:3000
