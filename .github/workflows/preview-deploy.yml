@@ -24,7 +24,8 @@ jobs:
 
       - name: Pull env variables to local file
         run: |
-          vercel env pull ./apps/web/.env.local --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          vercel env pull .env.local --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
 
       - name: Echo some vars
         run: |
