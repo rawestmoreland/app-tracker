@@ -60,6 +60,9 @@ jobs:
       # Wait for deployment to be fully ready (optional but recommended)
       - name: Start the NextJS Server and run Cypress tests
         working-directory: apps/web
+        env:
+          CLERK_USERNAME: ${{ secrets.CLERK_USERNAME }}
+          CLERK_PASSWORD: ${{ secrets.CLERK_PASSWORD }}
         run: |
           npm run build
           npm run start &
