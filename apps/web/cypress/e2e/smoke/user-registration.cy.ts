@@ -1,7 +1,11 @@
+import { setupClerkTestingToken } from '@clerk/testing/cypress';
+
 describe('User Registration', () => {
   const now = new Date().getTime();
 
   it('should register a new user', () => {
+    setupClerkTestingToken();
+
     cy.visit('/sign-up');
     cy.url().should('include', '/sign-up');
 
