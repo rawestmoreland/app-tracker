@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { createClerkClient } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST({ request }: { request: NextRequest }) {
+export async function POST(request: NextRequest) {
   console.log('Test User cleanup started');
 
   const clerk = createClerkClient({
