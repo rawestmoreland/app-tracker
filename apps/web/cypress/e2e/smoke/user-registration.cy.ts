@@ -12,6 +12,13 @@ describe('User Registration', () => {
     });
   });
 
+  afterEach(() => {
+    // Delete the test user
+    cy.request('POST', '/api/cron/test-cleanup', {
+      userEmail: `richard+${now}_e2e@westmorelandcreative.com`,
+    });
+  });
+
   it('should register a new user and complete onboarding', () => {
     setupClerkTestingToken();
 
