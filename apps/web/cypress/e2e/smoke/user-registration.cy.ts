@@ -14,8 +14,19 @@ describe('User Registration', () => {
 
   afterEach(() => {
     // Delete the test user
-    cy.request('POST', '/api/cron/test-cleanup', {
-      userEmail: `richard+${now}_e2e@westmorelandcreative.com`,
+    cy.request({
+      method: 'POST',
+      url: '/api/cron/test-cleanup',
+      headers: {
+        Authorization: `Bearer ${Cypress.env('API_ACCESS_KEY')}`,
+        'Content-Type': 'application/json',
+        'x-vercel-protection-bypass': Cypress.env(
+          'VERCEL_AUTOMATION_BYPASS_SECRET',
+        ),
+      },
+      body: {
+        userEmail: `richard+${now}_e2e@westmorelandcreative.com`,
+      },
     });
   });
 
