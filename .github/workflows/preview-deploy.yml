@@ -25,37 +25,25 @@ jobs:
         run: |
           vercel env pull ./apps/web/.env.local --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Echo some vars
-        run: |
-          echo "CLERK_USERNAME: $CLERK_USERNAME"
-          echo "CLERK_PASSWORD: $CLERK_PASSWORD"
-
-      - name: Verify environment file exists
-        working-directory: apps/web
-        run: |
-          ls -la .env.local
-          echo "Environment file contents (first few lines):"
-          head -5 .env.local
-
       - name: Build Project Artifacts
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: vercel build --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
 
-      # - name: Deploy Project Artifacts to Vercel and Set Preview URL
-      #   id: deploy
-      #   run: |
-      #     DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
-      #     echo "Raw deployment URL: '$DEPLOYMENT_URL'"
-      #     if [ -z "$DEPLOYMENT_URL" ]; then
-      #       echo "ERROR: Deployment URL is empty!"
-      #       exit 1
-      #     fi
-      #     # Test without secret first
-      #     echo "Deployment URL: $DEPLOYMENT_URL"
-      #     echo "Testing URL without secret: $DEPLOYMENT_URL"
-      #     # Clear any existing output and set fresh output
-      #     echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
-      #     echo "Output file after writing:"
-      #     cat $GITHUB_OUTPUT
+      - name: Deploy Project Artifacts to Vercel and Set Preview URL
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Raw deployment URL: '$DEPLOYMENT_URL'"
+          if [ -z "$DEPLOYMENT_URL" ]; then
+            echo "ERROR: Deployment URL is empty!"
+            exit 1
+          fi
+          # Test without secret first
+          echo "Deployment URL: $DEPLOYMENT_URL"
+          echo "Testing URL without secret: $DEPLOYMENT_URL"
+          # Clear any existing output and set fresh output
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Output file after writing:"
+          cat $GITHUB_OUTPUT
 
       # Wait for deployment to be fully ready (optional but recommended)
       - name: Start the NextJS Server and run Cypress tests
@@ -74,10 +62,6 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
           CLERK_WEBHOOK_SIGNING_SECRET: ${{ secrets.CLERK_WEBHOOK_SIGNING_SECRET_PREVIEW }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
-          npm run build
-          npm run start &
-          npx cypress run --config baseUrl=http://localhost:3000 --spec 'cypress/e2e/smoke/*.cy.ts'
-
-      - name: Deploy to Vercel
-        run: vercel deploy --yes --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+          npx cypress run --config baseUrl=https://${{ steps.deploy.outputs.url }} --spec 'cypress/e2e/smoke/*.cy.ts'
