@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import { Header } from "@/app/_components/header";
-import { ClerkProvider } from "@clerk/nextjs";
-import { Geist, Geist_Mono } from "next/font/google";
-import "../globals.css";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { Toaster } from "@/components/ui/sonner";
+import { Header } from '@/app/_components/header';
+import { ClerkProvider } from '@clerk/nextjs';
+import { Geist, Geist_Mono } from 'next/font/google';
+import '../globals.css';
+import { GoogleAnalytics } from '@next/third-parties/google';
+import { Toaster } from '@/components/ui/sonner';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
 });
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider waitlistUrl="/waitlist">
+    <ClerkProvider waitlistUrl="/waitlist" signUpForceRedirectUrl="/onboarding">
       <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
         <body className="antialiased">
           <div className="flex min-h-screen flex-col">

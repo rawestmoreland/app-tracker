@@ -37,24 +37,28 @@ const signupReasonData = {
     description: 'Currently searching for your next opportunity',
     icon: Briefcase,
     color: 'bg-blue-50 text-blue-700 border-blue-200',
+    testID: 'between-jobs',
   },
   [SignupReason.JUST_GRADUATED]: {
     title: 'Just Graduated',
     description: 'Ready to start your professional journey',
     icon: GraduationCap,
     color: 'bg-green-50 text-green-700 border-green-200',
+    testID: 'just-graduated',
   },
   [SignupReason.EMPLOYED_AND_LOOKING]: {
     title: 'Employed & Looking',
     description: 'Exploring new opportunities while working',
     icon: Building2,
     color: 'bg-purple-50 text-purple-700 border-purple-200',
+    testID: 'employed-and-looking',
   },
   [SignupReason.OTHER]: {
     title: 'Other',
     description: 'Tell us more about your situation',
     icon: Sparkles,
     color: 'bg-orange-50 text-orange-700 border-orange-200',
+    testID: 'other',
   },
 };
 
@@ -122,7 +126,7 @@ export default function OnboardingComponent() {
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Welcome to JobTracker
+            Welcome to App Track
           </h1>
           <p className="text-lg text-gray-600">
             Let&apos;s get you set up for success
@@ -184,6 +188,7 @@ export default function OnboardingComponent() {
                                       : 'border-gray-200 bg-white hover:border-gray-300'
                                   }`}
                                   onClick={() => field.onChange(reason)}
+                                  data-testid={data.testID}
                                 >
                                   <div className="flex items-start space-x-3">
                                     <div

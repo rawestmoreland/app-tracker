@@ -10,9 +10,14 @@ const isPublicRoute = createRouteMatcher([
   '/waitlist(.*)',
   '/about(.*)',
   '/api/webhooks/clerk(.*)',
+  '/api/cron/test-cleanup(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req)) {
+    return NextResponse.next();
+  }
+
   const { userId, sessionClaims, redirectToSignIn } = await auth();
 
   // For users visiting /onboarding, don't try to redirect

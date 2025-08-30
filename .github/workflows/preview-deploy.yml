@@ -1,0 +1,68 @@
+name: Vercel Preview Deployment
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+on:
+  push:
+    branches-ignore:
+      - main
+jobs:
+  deploy_preview:
+    runs-on: ubuntu-latest
+    outputs:
+      output1: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information for Build
+        run: |
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Pull env variables to local file
+        run: |
+          vercel env pull ./apps/web/.env.local --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --target=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Project Artifacts to Vercel and Set Preview URL
+        id: deploy
+        run: |
+          DEPLOYMENT_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }})
+          echo "Raw deployment URL: '$DEPLOYMENT_URL'"
+          if [ -z "$DEPLOYMENT_URL" ]; then
+            echo "ERROR: Deployment URL is empty!"
+            exit 1
+          fi
+          # Test without secret first
+          echo "Deployment URL: $DEPLOYMENT_URL"
+          echo "Testing URL without secret: $DEPLOYMENT_URL"
+          # Clear any existing output and set fresh output
+          echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+          echo "Output file after writing:"
+          cat $GITHUB_OUTPUT
+
+      # Wait for deployment to be fully ready (optional but recommended)
+      - name: Start the NextJS Server and run Cypress tests
+        working-directory: apps/web
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PREVIEW }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY_PREVIEW }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY_PREVIEW }}
+          CLERK_CALLBACK_URL: ${{ secrets.CLERK_CALLBACK_URL_PREVIEW }}
+          CLERK_USERNAME: ${{ secrets.CLERK_USERNAME }}
+          CLERK_PASSWORD: ${{ secrets.CLERK_PASSWORD }}
+          NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL: '/onboarding'
+          NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: '/dashboard'
+          NEXT_PUBLIC_CLERK_SIGN_IN_URL: '/sign-in'
+          NEXT_PUBLIC_CLERK_SIGN_UP_URL: '/sign-up'
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          RESEND_AUDIENCE_ID: ${{ secrets.RESEND_AUDIENCE_ID }}
+          CLERK_WEBHOOK_SIGNING_SECRET: ${{ secrets.CLERK_WEBHOOK_SIGNING_SECRET_PREVIEW }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          API_ACCESS_KEY: ${{ secrets.API_ACCESS_KEY }}
+        run: |
+          npx cypress run --config baseUrl=${{ steps.deploy.outputs.url }} --spec 'cypress/e2e/smoke/*.cy.ts'

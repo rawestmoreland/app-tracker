@@ -85,6 +85,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { UserPreferences } from '@/lib/types/user';
+import { ApplicationStatus } from '@prisma/client';
 
 export default function ApplicationsTable({
   applications,
@@ -128,7 +129,10 @@ export default function ApplicationsTable({
       return (
         application.activities.length > 0 &&
         Date.now() - new Date(application.activities[0].createdAt).getTime() >
-          userPreferences.ghostThreshold * 1000
+          userPreferences.ghostThreshold * 1000 &&
+        application.status !== ApplicationStatus.GHOSTED &&
+        application.status !== ApplicationStatus.DRAFT &&
+        application.status !== ApplicationStatus.REJECTED
       );
     });
   }, [applications, userPreferences?.ghostThreshold]);

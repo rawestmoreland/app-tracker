@@ -88,10 +88,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider waitlistUrl='/waitlist'>
-      <html lang='en' className={`${geistSans.variable} ${geistMono.variable}`}>
-        <body className='antialiased'>{children}</body>
-        <GoogleAnalytics gaId='G-FE9XBVBH38' />
+    <ClerkProvider waitlistUrl="/waitlist" signUpForceRedirectUrl="/onboarding">
+      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+        <body className="antialiased">{children}</body>
+        <GoogleAnalytics gaId="G-FE9XBVBH38" />
       </html>
     </ClerkProvider>
   );
