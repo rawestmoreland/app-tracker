@@ -46,7 +46,7 @@ jobs:
           cat $GITHUB_OUTPUT
 
       # Wait for deployment to be fully ready (optional but recommended)
-      - name: Start the NextJS Server and run Cypress tests
+      - name: Smoke test the preview deployment
         working-directory: apps/web
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PREVIEW }}

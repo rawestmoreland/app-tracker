@@ -69,15 +69,16 @@ async function fetchAnalytics(dbUser: User) {
     (app) => app.appliedAt >= oneWeekAgo,
   ).length;
 
+  const ghostedApplications =
+    applications.filter((app) => app.status === 'GHOSTED')?.length ?? 0;
+
   const stats = {
     totalApplications: applications.length,
     responseRate,
     applicationsThisWeek,
     averageResponseTime: 0, // TODO: Calculate based on first interview date
     successRate: 0, // TODO: Calculate based on offers vs total
-    ghostRate:
-      (applications.filter((app) => app.status === 'GHOSTED')?.length ??
-        0 / applications.length) * 100,
+    ghostRate: (ghostedApplications / applications.length) * 100,
   };
 
   return stats;
