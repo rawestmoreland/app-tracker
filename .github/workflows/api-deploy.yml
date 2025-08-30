@@ -9,6 +9,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'turbo.json'
+      - '.github/workflows/api-deploy.yml'
 
 jobs:
   deploy:
