@@ -3,6 +3,14 @@ import { setupClerkTestingToken } from '@clerk/testing/cypress';
 describe('User Registration', () => {
   const now = new Date().getTime();
 
+  beforeEach(() => {
+    cy.intercept('*', (req) => {
+      req.headers['x-vercel-protection-bypass'] = Cypress.env(
+        'VERCEL_AUTOMATION_BYPASS_SECRET',
+      );
+    });
+  });
+
   afterEach(() => {
     // Delete the test user
     cy.request({
@@ -21,13 +29,7 @@ describe('User Registration', () => {
   it('should register a new user and complete onboarding', () => {
     setupClerkTestingToken();
 
-    cy.visit('/sign-up', {
-      headers: {
-        'x-vercel-protection-bypass': Cypress.env(
-          'VERCEL_AUTOMATION_BYPASS_SECRET',
-        ),
-      },
-    });
+    cy.visit('/sign-up');
     cy.url().should('include', '/sign-up');
 
     cy.contains('Create your account');
