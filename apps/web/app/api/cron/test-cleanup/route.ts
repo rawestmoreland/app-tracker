@@ -10,25 +10,37 @@ export async function POST(request: NextRequest) {
     publishableKey: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
   });
 
-  const body = await request.json();
-  const { userEmail } = body;
-
-  if (!userEmail) {
-    return NextResponse.json(
-      { error: 'User email is required' },
-      { status: 400 },
-    );
-  }
-
-  const user = await prisma.user.delete({
-    where: { email: userEmail },
-    select: {
-      id: true,
-      clerkId: true,
+  const testUsers = await prisma.user.findMany({
+    where: {
+      email: {
+        contains: '_e2e',
+      },
     },
   });
 
-  await clerk.users.deleteUser(user.clerkId);
+  if (testUsers.length > 0) {
+    for await (const user of testUsers) {
+      try {
+        await prisma.user.delete({
+          where: { id: user.id },
+        });
+      } catch (error) {
+        console.error('Error deleting test user:', error);
+      }
+    }
+  }
+
+  const clerkUsers = await clerk.users.getUserList({ query: '_e2e' });
+
+  console.log(`Found ${clerkUsers.data.length} test users in Clerk`);
+
+  for await (const user of clerkUsers.data) {
+    try {
+      await clerk.users.deleteUser(user.id);
+    } catch (error) {
+      console.error('Error deleting test user:', error);
+    }
+  }
 
   return NextResponse.json({ message: 'Test User cleanup ended' });
 }

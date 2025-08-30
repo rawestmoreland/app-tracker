@@ -3,8 +3,7 @@ import { clerkSetup } from '@clerk/testing/cypress';
 
 export default defineConfig({
   e2e: {
-    baseUrl:
-      'https://app-tracker-2graps0rs-rawestmorelands-projects.vercel.app',
+    baseUrl: 'http://localhost:3000',
     setupNodeEvents(on, config) {
       return clerkSetup({ config });
     },
