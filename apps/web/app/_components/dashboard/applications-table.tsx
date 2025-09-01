@@ -70,6 +70,7 @@ import {
   useState,
   useCallback,
   useRef,
+  useEffect,
 } from 'react';
 import Image from 'next/image';
 import {
@@ -136,6 +137,12 @@ export default function ApplicationsTable({
       );
     });
   }, [applications, userPreferences?.ghostThreshold]);
+
+  useEffect(() => {
+    if (ghostedApplications.length === 0 && showGhostedOnly) {
+      setShowGhostedOnly(false);
+    }
+  }, [ghostedApplications, showGhostedOnly]);
 
   // Use regular useState for pagination to persist during re-renders
   const [pagination, setPagination] = useState<PaginationState>({
