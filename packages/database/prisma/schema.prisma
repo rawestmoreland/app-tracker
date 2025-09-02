@@ -264,18 +264,19 @@ model Offer {
 }
 
 model ApplicationEvent {
-  id            String      @id @default(cuid())
+  id            String       @id @default(cuid())
   type          EventType
   title         String
   content       String?
   occurredAt    DateTime
   source        EventSource
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  responseType  ResponseType?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
   applicationId String
   userId        String
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("application_events")
 }
@@ -571,4 +572,9 @@ enum Platform {
   MOBILE_ANDROID
   API
   OTHER
+}
+
+enum ResponseType {
+  HUMAN
+  AUTOMATED
 }

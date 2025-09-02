@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { ApplicationStatus, EventType, EventSource } from '@prisma/client';
+import { ApplicationStatus, EventType, EventSource, ResponseType } from '@prisma/client';
 import { getSignedInUser } from '@/app/lib/auth';
 import { R2Service } from '../r2';
 import { NoteFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-note-schema';
@@ -58,6 +58,7 @@ function getEventTitleFromStatus(status: ApplicationStatus): string {
 export async function updateApplicationStatus(
   applicationId: string,
   status: ApplicationStatus,
+  responseType?: ResponseType,
 ) {
   try {
     const { dbUser } = await getSignedInUser();
@@ -111,6 +112,11 @@ export async function updateApplicationStatus(
           )} to ${status.replace(/_/g, ' ')}`,
           occurredAt: transitionTime,
           source: EventSource.OTHER,
+          responseType: 
+            existingApplication.status === ApplicationStatus.APPLIED && 
+            status === ApplicationStatus.CONFIRMATION_RECEIVED 
+              ? responseType 
+              : null,
           applicationId,
           userId: dbUser.id,
         },

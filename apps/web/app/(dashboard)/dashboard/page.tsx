@@ -51,18 +51,44 @@ async function fetchAnalytics(dbUser: User) {
           outcome: true,
         },
       },
+      events: {
+        select: {
+          type: true,
+          responseType: true,
+        },
+        where: {
+          type: 'CONFIRMATION_RECEIVED',
+        },
+      },
     },
   });
 
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  const applicationsWithResponses = applications.filter(
-    (app) => !['APPLIED', 'GHOSTED'].includes(app.status),
-  ).length;
+  // Count applications with human responses only
+  const applicationsWithHumanResponses = applications.filter((app) => {
+    // If the app has moved past APPLIED, check if it has a human response
+    if (!['APPLIED', 'GHOSTED'].includes(app.status)) {
+      // Check if there's a CONFIRMATION_RECEIVED event with HUMAN response type
+      const hasHumanResponse = app.events.some(event => 
+        event.type === 'CONFIRMATION_RECEIVED' && event.responseType === 'HUMAN'
+      );
+      
+      // If there's no CONFIRMATION_RECEIVED event but status moved past APPLIED,
+      // treat as human response (for backwards compatibility with existing data)
+      if (app.events.length === 0) {
+        return true;
+      }
+      
+      return hasHumanResponse;
+    }
+    return false;
+  }).length;
+
   const responseRate =
     applications.length > 0
-      ? (applicationsWithResponses / applications.length) * 100
+      ? (applicationsWithHumanResponses / applications.length) * 100
       : 0;
 
   const applicationsThisWeek = applications.filter(
@@ -72,9 +98,19 @@ async function fetchAnalytics(dbUser: User) {
   const ghostedApplications =
     applications.filter((app) => app.status === 'GHOSTED')?.length ?? 0;
 
+  // Calculate overall response rate (including automated responses)
+  const applicationsWithAnyResponse = applications.filter(
+    (app) => !['APPLIED', 'GHOSTED'].includes(app.status),
+  ).length;
+  const overallResponseRate =
+    applications.length > 0
+      ? (applicationsWithAnyResponse / applications.length) * 100
+      : 0;
+
   const stats = {
     totalApplications: applications.length,
-    responseRate,
+    responseRate, // Human response rate only
+    overallResponseRate, // All responses (human + automated)
     applicationsThisWeek,
     averageResponseTime: 0, // TODO: Calculate based on first interview date
     successRate: 0, // TODO: Calculate based on offers vs total

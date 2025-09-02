@@ -8,7 +8,8 @@ export type DashboardApplication = Application & {
 
 export type Analytics = {
   totalApplications: number;
-  responseRate: number;
+  responseRate: number; // Human response rate only
+  overallResponseRate: number; // All responses (human + automated)
   applicationsThisWeek: number;
   successRate: number;
   ghostRate: number;
