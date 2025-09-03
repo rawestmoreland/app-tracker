@@ -1,7 +1,13 @@
-import { Suspense } from "react";
-import { getSignedInUser } from "@/app/lib/auth";
-import { prisma } from "@/lib/prisma";
-import NewContactContent from "./_components/new-contact-content";
+import { Suspense } from 'react';
+import { getSignedInUser } from '@/app/lib/auth';
+import { prisma } from '@/lib/prisma';
+import NewContactContent from './_components/new-contact-content';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'App Track - New Contact',
+  description: 'Create a new contact for a company',
+};
 
 async function fetchCompanies() {
   const { dbUser } = await getSignedInUser();
@@ -12,8 +18,8 @@ async function fetchCompanies() {
   const companies = await prisma.company.findMany({
     where: {
       OR: [
-        { visibility: "GLOBAL" },
-        { visibility: "PUBLIC" },
+        { visibility: 'GLOBAL' },
+        { visibility: 'PUBLIC' },
         { createdBy: dbUser.id },
       ],
     },

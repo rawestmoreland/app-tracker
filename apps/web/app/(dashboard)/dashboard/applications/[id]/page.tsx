@@ -5,6 +5,26 @@ import { notFound } from 'next/navigation';
 import ApplicationContent from './components/application-content';
 import { User } from '@prisma/client';
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { dbUser } = await getSignedInUser();
+  if (!dbUser) {
+    return {
+      title: 'App Track',
+      description: 'Track your job applications and interviews with App Track',
+    };
+  }
+  const { id } = await params;
+  const application = await fetchApplication(dbUser, id);
+  return {
+    title: `${application?.title} - App Track`,
+    description: `View ${application?.title}`,
+  };
+}
+
 const fetchCompanies = async () => {
   const companies = await prisma.company.findMany();
 

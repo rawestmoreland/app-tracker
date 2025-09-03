@@ -1,11 +1,15 @@
-'use client';
-
 import { Header } from '@/app/_components/header';
 import { ClerkProvider } from '@clerk/nextjs';
 import { Geist, Geist_Mono } from 'next/font/google';
 import '../globals.css';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Toaster } from '@/components/ui/sonner';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'App Track - Dashboard',
+  description: 'Track your job applications and interviews with App Track',
+};
 
 const geistSans = Geist({
   variable: '--font-geist-sans',

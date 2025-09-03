@@ -5,6 +5,15 @@ import { prisma } from '@/lib/prisma';
 import { getSignedInUser } from '@/app/lib/auth';
 import { CompanyContent } from './components/company-content';
 
+export async function generateMetadata({ params }: PageProps) {
+  const { id } = await params;
+  const company = await fetchCompany(id);
+  return {
+    title: `${company?.name} - App Track`,
+    description: `View ${company?.name}`,
+  };
+}
+
 // Type for the Prisma result
 export type PrismaCompany = {
   id: string;

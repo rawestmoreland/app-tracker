@@ -6,6 +6,12 @@ import { User } from '@prisma/client';
 import { unauthorized } from 'next/navigation';
 import { UserPreferences } from '@/lib/types/user';
 import { Loading } from '@/components/ui/loading';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'App Track - Profile',
+  description: 'Manage your profile and preferences',
+};
 
 async function fetchUserPreferences(dbUser: User) {
   const userPrefs = await prisma.userPreference.findUnique({
