@@ -4,6 +4,8 @@ import NewApplicationContent from './components/new-application-content';
 import { prisma } from '@/lib/prisma';
 import { getSignedInUser } from '@/app/lib/auth';
 import { Metadata } from 'next';
+import { unauthorized } from 'next/navigation';
+import { User } from '@prisma/client';
 
 export const metadata: Metadata = {
   title: 'App Track - New Application',
@@ -33,13 +35,19 @@ function NewApplicationLoading() {
   );
 }
 
-async function fetchCompanies() {
-  const { dbUser } = await getSignedInUser();
-  if (!dbUser) {
-    throw new Error('Unauthorized');
-  }
-
+async function fetchCompanies(dbUser: User) {
   const companies = await prisma.company.findMany({
+    where: {
+      OR: [
+        { visibility: 'GLOBAL' },
+        { visibility: 'PUBLIC' },
+        { visibility: 'PRIVATE', createdBy: dbUser.id },
+        { createdBy: dbUser.id },
+      ],
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
     include: {
       applications: {
         where: { userId: dbUser.id },
@@ -54,7 +62,12 @@ async function fetchCompanies() {
 }
 
 export default async function NewApplication() {
-  const companies = await fetchCompanies();
+  const { dbUser } = await getSignedInUser();
+  if (!dbUser) {
+    return unauthorized();
+  }
+
+  const companies = await fetchCompanies(dbUser);
 
   return (
     <Suspense fallback={<NewApplicationLoading />}>
