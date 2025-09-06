@@ -2,6 +2,13 @@ import { setupClerkTestingToken } from '@clerk/testing/cypress';
 
 describe('Critical: Complete Auth Flow', () => {
   const now = new Date().getTime();
+  beforeEach(() => {
+    cy.intercept('*', (req) => {
+      req.headers['x-vercel-protection-bypass'] = Cypress.env(
+        'VERCEL_AUTOMATION_BYPASS_SECRET',
+      );
+    });
+  });
 
   afterEach(() => {
     // Delete the test user
@@ -21,7 +28,7 @@ describe('Critical: Complete Auth Flow', () => {
   it('should register a new user and complete onboarding', () => {
     setupClerkTestingToken();
 
-    cy.visitPreview('/sign-up');
+    cy.visit('/sign-up');
     cy.url().should('include', '/sign-up');
 
     cy.contains('Create your account');
