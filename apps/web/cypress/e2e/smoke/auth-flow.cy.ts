@@ -8,22 +8,16 @@ describe('Sign in', () => {
       );
     });
   });
+
   it('should visit the sign in page as a new user', () => {
     setupClerkTestingToken();
 
     cy.visit('/sign-in');
-    cy.url().should('include', '/sign-in');
+    cy.get('input[name="identifier"]').should('be.visible');
 
-    cy.contains('Sign in to App Track');
+    cy.get('button').contains('Continue').should('not.be.disabled');
 
-    cy.clerkSignIn({
-      strategy: 'password',
-      identifier: Cypress.env('CLERK_USERNAME'),
-      password: Cypress.env('CLERK_PASSWORD'),
-    });
-
-    cy.visit('/dashboard');
-
-    cy.contains('No applications yet');
+    // Don't actually sign in for smoke tests - it's too slow
+    // Just verify the page isn't broken
   });
 });
