@@ -1,6 +1,6 @@
 import { notFound, unauthorized } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
-import { Note, UserRole } from '@prisma/client';
+import { CompanyVisibility, Note, UserRole } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { getSignedInUser } from '@/app/lib/auth';
 import { CompanyContent } from './components/company-content';
@@ -27,6 +27,9 @@ export type PrismaCompany = {
   createdAt: Date;
   updatedAt: Date;
   notes: Note[];
+  visibility: CompanyVisibility;
+  isGlobal: boolean;
+  createdBy: string | null;
   applications: Array<{
     id: string;
     title: string;
@@ -70,6 +73,9 @@ export interface Company {
   createdAt: string;
   updatedAt: string;
   notes: Note[];
+  visibility: CompanyVisibility;
+  isGlobal: boolean;
+  createdBy: string | null;
   applications: Array<{
     id: string;
     title: string;
@@ -112,6 +118,9 @@ function convertPrismaCompanyToCompany(prismaCompany: PrismaCompany): Company {
     createdAt: prismaCompany.createdAt.toISOString(),
     updatedAt: prismaCompany.updatedAt.toISOString(),
     notes: prismaCompany.notes,
+    visibility: prismaCompany.visibility,
+    isGlobal: prismaCompany.isGlobal,
+    createdBy: prismaCompany.createdBy || undefined,
     applications: prismaCompany.applications.map((app) => ({
       id: app.id,
       title: app.title,

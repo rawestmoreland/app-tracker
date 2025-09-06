@@ -118,10 +118,11 @@ export function CompanyContent({
             )}
           </div>
         </div>
-        {isAdmin && (
+        {((isAdmin && company.visibility === 'GLOBAL') ||
+          company.visibility === 'PRIVATE') && (
           <div className="flex gap-2">
             <CompanyEditForm company={company} />
-            <CompanyDeleteButton companyId={company.id} />
+            {isAdmin && <CompanyDeleteButton companyId={company.id} />}
           </div>
         )}
       </div>
