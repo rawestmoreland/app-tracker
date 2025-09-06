@@ -15,6 +15,8 @@ import {
   HandshakeIcon,
   FileTextIcon,
   StopCircleIcon,
+  Shield,
+  Users,
 } from "lucide-react";
 
 export const applicationStatusOptions: FacetOption[] = [
@@ -115,5 +117,18 @@ export const remoteTypeOptions: FacetOption[] = [
     label: "Flexible",
     value: RemoteType.FLEXIBLE,
     icon: ClockIcon,
+  },
+];
+
+export const companyTypeOptions: FacetOption[] = [
+  {
+    label: "Global",
+    value: "global",
+    icon: Shield,
+  },
+  {
+    label: "Private",
+    value: "private",
+    icon: Users,
   },
 ];
