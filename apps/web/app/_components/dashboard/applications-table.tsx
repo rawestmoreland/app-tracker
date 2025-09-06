@@ -184,6 +184,19 @@ export default function ApplicationsTable({
           />
         ),
       }),
+      columnHelper.display({
+        id: 'global',
+        enableHiding: false,
+        enableSorting: false,
+        filterFn: (row, id, value) => {
+          const searchValue = value.toLowerCase();
+          const title = row.original.title.toLowerCase();
+          const companyName = row.original.company.name.toLowerCase();
+          return title.includes(searchValue) || companyName.includes(searchValue);
+        },
+        header: () => null,
+        cell: () => null,
+      }),
       columnHelper.accessor('title', {
         id: 'title',
         header: 'Position',
@@ -570,12 +583,12 @@ export default function ApplicationsTable({
           <div className="flex flex-1 items-center gap-2">
             <Search className="text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search positions..."
+              placeholder="Search positions and companies..."
               value={
-                (table.getColumn('title')?.getFilterValue() as string) ?? ''
+                (table.getColumn('global')?.getFilterValue() as string) ?? ''
               }
               onChange={(event) =>
-                table.getColumn('title')?.setFilterValue(event.target.value)
+                table.getColumn('global')?.setFilterValue(event.target.value)
               }
               className="max-w-sm"
             />
@@ -755,21 +768,21 @@ export default function ApplicationsTable({
 
         {/* Active Filters */}
         {(columnFilters.length > 0 ||
-          (table.getColumn('title')?.getFilterValue() as string)?.length >
+          (table.getColumn('global')?.getFilterValue() as string)?.length >
             0) && (
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground text-sm">
               Active filters:
             </span>
-            {(table.getColumn('title')?.getFilterValue() as string)?.length >
+            {(table.getColumn('global')?.getFilterValue() as string)?.length >
               0 && (
               <div className="bg-secondary text-secondary-foreground inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium">
-                Position: {table.getColumn('title')?.getFilterValue() as string}
+                Search: {table.getColumn('global')?.getFilterValue() as string}
                 <button
                   type="button"
                   className="hover:bg-secondary-foreground/20 ml-1 inline-flex h-4 w-4 items-center justify-center rounded-full"
                   onClick={() => {
-                    table.getColumn('title')?.setFilterValue('');
+                    table.getColumn('global')?.setFilterValue('');
                   }}
                 >
                   <X className="h-3 w-3" />
