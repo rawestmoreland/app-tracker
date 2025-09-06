@@ -15,10 +15,26 @@ describe('Smoke: Application Loads', () => {
 
   it('should load critical static assets', () => {
     // Verify favicon is loading
-    cy.request('/favicon.ico').its('status').should('eq', 200);
+    cy.request('/favicon.ico', {
+      headers: {
+        'x-vercel-protection-bypass': Cypress.env(
+          'VERCEL_AUTOMATION_BYPASS_SECRET',
+        ),
+      },
+    })
+      .its('status')
+      .should('eq', 200);
 
     // Verify health check endpoint is working
-    cy.request('/api/health').its('status').should('eq', 200);
+    cy.request('/api/health', {
+      headers: {
+        'x-vercel-protection-bypass': Cypress.env(
+          'VERCEL_AUTOMATION_BYPASS_SECRET',
+        ),
+      },
+    })
+      .its('status')
+      .should('eq', 200);
 
     // Verify CSS loaded (check for a styled element)
     cy.visit('/');
