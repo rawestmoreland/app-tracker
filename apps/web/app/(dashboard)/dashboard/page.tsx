@@ -4,64 +4,86 @@ import ApplicationsTable from '@/app/_components/dashboard/applications-table';
 import { getSignedInUser } from '@/app/lib/auth';
 import { prisma } from '@/lib/prisma';
 import StatsContent from '@/app/_components/dashboard/stats-content';
-import { notFound } from 'next/navigation';
+import { unauthorized } from 'next/navigation';
 import { User } from '@prisma/client';
 import { UserPreferences } from '@/lib/types/user';
+import { unstable_cache } from 'next/cache';
 
 async function fetchApplications(dbUser: User) {
-  const applications = await prisma.application.findMany({
-    where: {
-      userId: dbUser.id,
-      archived: false,
-    },
-    include: {
-      company: true,
-      interviews: {
-        include: {
-          contacts: true,
-          notes: true,
-        },
-      },
-      notes: true,
-      activities: {
+  const getCachedApplications = unstable_cache(
+    async () => {
+      return await prisma.application.findMany({
         where: {
-          type: 'APPLICATION_STATUS_CHANGED',
-          isProgression: true,
+          userId: dbUser.id,
+          archived: false,
         },
-        orderBy: {
-          createdAt: 'desc',
+        include: {
+          company: true,
+          interviews: {
+            include: {
+              contacts: true,
+              notes: true,
+            },
+          },
+          notes: true,
+          activities: {
+            where: {
+              type: 'APPLICATION_STATUS_CHANGED',
+              isProgression: true,
+            },
+            orderBy: {
+              createdAt: 'desc',
+            },
+            take: 1,
+          },
         },
-        take: 1,
-      },
+        orderBy: { appliedAt: 'desc' },
+      });
     },
-    orderBy: { appliedAt: 'desc' },
-  });
+    ['applications', dbUser.id],
+    {
+      revalidate: 300,
+      tags: ['applications'],
+    },
+  );
+
+  const applications = await getCachedApplications();
 
   return applications;
 }
 
 async function fetchAnalytics(dbUser: User) {
-  const applications = await prisma.application.findMany({
-    where: { userId: dbUser.id, archived: false },
-    select: {
-      status: true,
-      appliedAt: true,
-      interviews: {
+  const getCachedApplications = unstable_cache(
+    async () => {
+      return await prisma.application.findMany({
+        where: { userId: dbUser.id, archived: false },
         select: {
-          outcome: true,
+          status: true,
+          appliedAt: true,
+          interviews: {
+            select: {
+              outcome: true,
+            },
+          },
+          events: {
+            select: {
+              type: true,
+              responseType: true,
+            },
+            where: {
+              type: 'CONFIRMATION_RECEIVED',
+            },
+          },
         },
-      },
-      events: {
-        select: {
-          type: true,
-          responseType: true,
-        },
-        where: {
-          type: 'CONFIRMATION_RECEIVED',
-        },
-      },
+      });
     },
-  });
+    ['analytics', dbUser.id],
+    {
+      revalidate: 300,
+      tags: ['analytics'],
+    },
+  );
+  const applications = await getCachedApplications();
 
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -71,16 +93,18 @@ async function fetchAnalytics(dbUser: User) {
     // If the app has moved past APPLIED, check if it has a human response
     if (!['APPLIED', 'GHOSTED'].includes(app.status)) {
       // Check if there's a CONFIRMATION_RECEIVED event with HUMAN response type
-      const hasHumanResponse = app.events.some(event => 
-        event.type === 'CONFIRMATION_RECEIVED' && event.responseType === 'HUMAN'
+      const hasHumanResponse = app.events.some(
+        (event) =>
+          event.type === 'CONFIRMATION_RECEIVED' &&
+          event.responseType === 'HUMAN',
       );
-      
+
       // If there's no CONFIRMATION_RECEIVED event but status moved past APPLIED,
       // treat as human response (for backwards compatibility with existing data)
       if (app.events.length === 0) {
         return true;
       }
-      
+
       return hasHumanResponse;
     }
     return false;
@@ -165,7 +189,7 @@ async function DashboardContent() {
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
-    notFound();
+    unauthorized();
   }
 
   const applicationsPromise = fetchApplications(dbUser);
