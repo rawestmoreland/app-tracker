@@ -57,6 +57,7 @@ export async function PUT(
         location: location || null,
         logo: logo || null,
         isGlobal: isGlobal || false,
+        visibility: isGlobal ? 'GLOBAL' : 'PRIVATE',
         updatedAt: new Date(),
       },
     });
@@ -100,8 +101,9 @@ export async function DELETE(
 
     if (applicationCount > 0) {
       return NextResponse.json(
-        { 
-          error: 'Cannot delete company with existing applications. Please delete all applications first.' 
+        {
+          error:
+            'Cannot delete company with existing applications. Please delete all applications first.',
         },
         { status: 400 },
       );
