@@ -266,7 +266,7 @@ export function CompaniesTable({
         return (
           <div className="flex items-center gap-1">
             <Calendar className="text-muted-foreground h-4 w-4" />
-            <span>{date.toLocaleDateString()}</span>
+            <span>{new Date(date).toLocaleDateString()}</span>
           </div>
         );
       },

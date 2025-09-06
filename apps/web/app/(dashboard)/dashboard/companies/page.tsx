@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import { CompaniesTable } from './_components/companies-table';
 import { getSignedInUser } from '../../../lib/auth';
+import { unstable_cache } from 'next/cache';
 
 async function fetchCompanies(
   page: number = 1,
@@ -40,26 +41,54 @@ async function fetchCompanies(
     };
   }
 
-  const [companies, totalCount] = await Promise.all([
-    prisma.company.findMany({
-      where,
-      include: {
-        applications: {
-          select: {
-            id: true,
-          },
-          where: {
-            userId: dbUser.id,
+  const getCachedCompanies = unstable_cache(
+    async () => {
+      return prisma.company.findMany({
+        where,
+        include: {
+          applications: {
+            select: {
+              id: true,
+            },
+            where: {
+              userId: dbUser.id,
+            },
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      skip,
-      take: limit,
-    }),
-    prisma.company.count({ where }),
+        orderBy: {
+          createdAt: 'desc',
+        },
+        skip,
+        take: limit,
+      });
+    },
+    [
+      'companies-with-apps',
+      search,
+      skip.toString(),
+      page.toString(),
+      limit.toString(),
+    ],
+    {
+      revalidate: 300,
+      tags: ['companies, applications'],
+    },
+  );
+
+  const getCachedCount = unstable_cache(
+    async () => {
+      return prisma.company.count({ where });
+    },
+    ['companies-with-apps-count', search],
+    {
+      revalidate: 300,
+      tags: ['companies, applications'],
+    },
+  );
+
+  const [companies, totalCount] = await Promise.all([
+    getCachedCompanies(),
+    getCachedCount(),
   ]);
 
   const companiesWithCounts = companies.map((company) => ({

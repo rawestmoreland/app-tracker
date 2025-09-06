@@ -585,8 +585,8 @@ export default function ApplicationsTable({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <ClipboardListIcon className="mr-2 h-4 w-4" />
-                Status
+                <ClipboardListIcon className="h-4 w-4 md:mr-2" />
+                <span className="sr-only md:not-sr-only md:block">Status</span>
                 {(table.getColumn('status')?.getFilterValue() as string[])
                   ?.length > 0 && (
                   <Badge variant="secondary" className="ml-2 h-5 w-5 p-0">
@@ -655,8 +655,8 @@ export default function ApplicationsTable({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm">
-                <HomeIcon className="mr-2 h-4 w-4" />
-                Remote
+                <HomeIcon className="h-4 w-4 md:mr-2" />
+                <span className="sr-only md:not-sr-only md:block">Remote</span>
                 {(table.getColumn('remote')?.getFilterValue() as string[])
                   ?.length > 0 && (
                   <Badge variant="secondary" className="ml-2 h-5 w-5 p-0">
@@ -725,8 +725,8 @@ export default function ApplicationsTable({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="ml-auto">
-                <Filter className="mr-2 h-4 w-4" />
-                Columns
+                <Filter className="h-4 w-4 md:mr-2" />
+                <span className="sr-only md:not-sr-only md:block">Columns</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
