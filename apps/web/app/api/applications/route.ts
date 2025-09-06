@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { EventType, EventSource } from '@prisma/client';
 import { ActivityTracker } from '@/lib/services/activity-tracker';
+import { revalidateTag } from 'next/cache';
 
 export async function GET() {
   try {
@@ -157,6 +158,10 @@ export async function POST(request: NextRequest) {
         new Date(appliedAt),
       ),
     ]);
+
+    // Invalidate the applications cache to show the new application in the dashboard
+    revalidateTag('applications');
+    revalidateTag('analytics');
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
