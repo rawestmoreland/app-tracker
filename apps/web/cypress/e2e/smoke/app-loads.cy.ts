@@ -1,6 +1,14 @@
 describe('Smoke: Application Loads', () => {
+  beforeEach(() => {
+    cy.intercept('*', (req) => {
+      req.headers['x-vercel-protection-bypass'] = Cypress.env(
+        'VERCEL_AUTOMATION_BYPASS_SECRET',
+      );
+    });
+  });
+
   it('should load the homepage', () => {
-    cy.visitPreview('/');
+    cy.visit('/');
 
     cy.contains('h1', 'Track Your Job Search');
   });
@@ -31,7 +39,7 @@ describe('Smoke: Application Loads', () => {
       .should('eq', 200);
 
     // Verify CSS loaded (check for a styled element)
-    cy.visitPreview('/');
+    cy.visit('/');
     cy.get('a')
       .contains('Get Started')
       .should('have.css', 'background-color')
