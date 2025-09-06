@@ -22,7 +22,7 @@ jobs:
       preview-url: ${{ steps.preview-deploy.outputs.preview-url }}
       production-url: ${{ steps.production-deploy.outputs.production-url }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

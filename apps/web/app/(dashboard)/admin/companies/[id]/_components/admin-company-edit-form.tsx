@@ -135,8 +135,12 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
         <div className="flex items-center gap-2">
           {company.website && (
             <Button variant="outline" size="sm" asChild>
-              <a href={company.website} target="_blank" rel="noopener noreferrer">
-                <Globe className="h-4 w-4 mr-2" />
+              <a
+                href={company.website}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Globe className="mr-2 h-4 w-4" />
                 Visit Website
               </a>
             </Button>
@@ -147,7 +151,7 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
           >
             {editing ? (
               <>
-                <X className="h-4 w-4 mr-2" />
+                <X className="mr-2 h-4 w-4" />
                 Cancel
               </>
             ) : (
@@ -158,24 +162,24 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
       </div>
 
       {/* Company Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="rounded-lg border bg-white p-4">
           <div className="text-2xl font-bold">{company.applicationCount}</div>
-          <div className="text-sm text-muted-foreground">Applications</div>
+          <div className="text-muted-foreground text-sm">Applications</div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="rounded-lg border bg-white p-4">
           <div className="text-2xl font-bold">{company.size || '—'}</div>
-          <div className="text-sm text-muted-foreground">Company Size</div>
+          <div className="text-muted-foreground text-sm">Company Size</div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="rounded-lg border bg-white p-4">
           <div className="text-2xl font-bold">{company.location || '—'}</div>
-          <div className="text-sm text-muted-foreground">Location</div>
+          <div className="text-muted-foreground text-sm">Location</div>
         </div>
-        <div className="bg-white p-4 rounded-lg border">
+        <div className="rounded-lg border bg-white p-4">
           <div className="text-2xl font-bold">
             {new Date(company.createdAt).toLocaleDateString()}
           </div>
-          <div className="text-sm text-muted-foreground">Added</div>
+          <div className="text-muted-foreground text-sm">Added</div>
         </div>
       </div>
 
@@ -183,7 +187,7 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
       {editing ? (
         <form
           onSubmit={handleUpdate}
-          className="rounded-lg bg-white p-6 shadow border"
+          className="rounded-lg border bg-white p-6 shadow"
         >
           <h2 className="mb-4 text-xl font-semibold">Edit Company Details</h2>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -298,17 +302,21 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
                   onChange={(e) =>
                     setFormData({ ...formData, isGlobal: e.target.checked })
                   }
-                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                  className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500"
                 />
-                <label htmlFor="isGlobal" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="isGlobal"
+                  className="text-sm font-medium text-gray-700"
+                >
                   <div className="flex items-center gap-1">
                     <Shield className="h-4 w-4 text-purple-600" />
                     Mark as Global Company
                   </div>
                 </label>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Global companies are visible to all users and can be shared across applications
+              <p className="mt-1 text-xs text-gray-500">
+                Global companies are visible to all users and can be shared
+                across applications
               </p>
             </div>
           </div>
@@ -322,7 +330,7 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
                 'Saving...'
               ) : (
                 <>
-                  <Save className="h-4 w-4 mr-2" />
+                  <Save className="mr-2 h-4 w-4" />
                   Save Changes
                 </>
               )}
@@ -332,22 +340,26 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
               variant="outline"
               onClick={() => setEditing(false)}
             >
-              <X className="h-4 w-4 mr-2" />
+              <X className="mr-2 h-4 w-4" />
               Cancel
             </Button>
           </div>
         </form>
       ) : (
         /* Company Details View */
-        <div className="rounded-lg bg-white p-6 shadow border">
+        <div className="rounded-lg border bg-white p-6 shadow">
           <h2 className="mb-4 text-xl font-semibold">Company Details</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Company Name</h3>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Company Name
+              </h3>
               <p className="text-gray-900">{company.name}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Website</h3>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Website
+              </h3>
               <p className="text-gray-900">
                 {company.website ? (
                   <a
@@ -364,19 +376,27 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Industry</h3>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Industry
+              </h3>
               <p className="text-gray-900">{company.industry || '—'}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Company Size</h3>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Company Size
+              </h3>
               <p className="text-gray-900">{company.size || '—'}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Location</h3>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Location
+              </h3>
               <p className="text-gray-900">{company.location || '—'}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Global Status</h3>
+              <h3 className="mb-2 text-sm font-medium text-gray-700">
+                Global Status
+              </h3>
               <div className="flex items-center gap-2">
                 {company.isGlobal ? (
                   <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
@@ -390,9 +410,11 @@ export function AdminCompanyEditForm({ company }: { company: AdminCompany }) {
             </div>
             {company.description && (
               <div className="md:col-span-2">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Description</h3>
-                <div 
-                  className="text-gray-900 prose prose-sm max-w-none"
+                <h3 className="mb-2 text-sm font-medium text-gray-700">
+                  Description
+                </h3>
+                <div
+                  className="prose prose-sm max-w-none text-gray-900"
                   dangerouslySetInnerHTML={{ __html: company.description }}
                 />
               </div>
