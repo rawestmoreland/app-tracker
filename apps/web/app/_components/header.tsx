@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export function Header() {
+export function Header({ isAdmin }: { isAdmin: boolean }) {
   const router = useRouter();
   const { isSignedIn, isLoaded } = useAuth();
   const { user } = useUser();
@@ -114,6 +114,24 @@ export function Header() {
                   >
                     Application Flow
                   </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      aria-current={
+                        isCurrentPath('/dashboard/application-flow')
+                          ? 'page'
+                          : undefined
+                      }
+                      className={cn(
+                        isCurrentPath('/dashboard/application-flow')
+                          ? 'border-indigo-600 text-gray-900'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
+                      )}
+                    >
+                      Admin
+                    </Link>
+                  )}
                   {/* <Link
                     href="/dashboard/interviews"
                     aria-current={
@@ -222,6 +240,11 @@ export function Header() {
                         Application Flow
                       </Link>
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin">Admin</Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/dashboard/profile">

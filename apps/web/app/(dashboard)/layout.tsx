@@ -5,6 +5,8 @@ import '../globals.css';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { Toaster } from '@/components/ui/sonner';
 import { Metadata } from 'next';
+import { getSignedInUser } from '../lib/auth';
+import { UserRole } from '@prisma/client';
 
 export const metadata: Metadata = {
   title: 'App Track - Dashboard',
@@ -21,17 +23,20 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { dbUser } = await getSignedInUser();
+  const isAdmin = dbUser?.role === UserRole.ADMIN;
+
   return (
     <ClerkProvider waitlistUrl="/waitlist" signUpForceRedirectUrl="/onboarding">
       <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
         <body className="antialiased">
           <div className="flex min-h-screen flex-col">
-            <Header />
+            <Header isAdmin={isAdmin} />
             <main className="flex-1 bg-gray-50">
               <div className="container mx-auto px-4 py-8 sm:px-6 lg:px-8">
                 {children}
