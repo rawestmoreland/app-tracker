@@ -1,6 +1,7 @@
 describe('Smoke: API Health', () => {
   it('should respond to health check', () => {
-    cy.request('/api/health', {
+    cy.request({
+      url: '/api/health',
       headers: {
         'x-vercel-protection-bypass': Cypress.env(
           'VERCEL_AUTOMATION_BYPASS_SECRET',

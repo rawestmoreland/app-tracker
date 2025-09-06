@@ -40,7 +40,8 @@ import { addClerkCommands } from '@clerk/testing/cypress';
 addClerkCommands({ Cypress, cy });
 
 Cypress.Commands.add('visitPreview', (url: string) =>
-  cy.visit(url, {
+  cy.visit({
+    url,
     headers: {
       'x-vercel-protection-bypass': Cypress.env(
         'VERCEL_AUTOMATION_BYPASS_SECRET',
