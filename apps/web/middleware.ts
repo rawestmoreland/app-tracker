@@ -5,6 +5,8 @@ const isOnboardingRoute = createRouteMatcher(['/onboarding(.*)']);
 
 const isPublicRoute = createRouteMatcher([
   '/',
+  '/terms-of-service',
+  '/privacy-policy',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/waitlist(.*)',
