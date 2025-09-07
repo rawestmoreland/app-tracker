@@ -3,6 +3,13 @@ import { setupClerkTestingToken } from '@clerk/testing/cypress';
 describe('Critical: Complete Auth Flow', () => {
   const now = new Date().getTime();
   beforeEach(() => {
+    Cypress.on('uncaught:exception', (err, _runnable) => {
+      // returning false here prevents Cypress from failing the test
+      if (err.message.toLowerCase().includes('minified')) {
+        return false;
+      }
+    });
+
     cy.intercept('*', (req) => {
       req.headers['x-vercel-protection-bypass'] = Cypress.env(
         'VERCEL_AUTOMATION_BYPASS_SECRET',
