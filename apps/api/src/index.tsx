@@ -2,7 +2,8 @@ import { Hono } from 'hono';
 import { cloudflareRateLimiter } from '@hono-rate-limiter/cloudflare';
 import { getPrisma } from './lib/prismaFunction';
 import { renderer } from './renderer';
-import { jsxRenderer } from 'hono/jsx-renderer';
+
+const MAX_LIMIT = 100;
 
 type AppType = {
   Variables: {
@@ -39,7 +40,19 @@ app.get('/', (c) => {
 });
 
 app.get('/v1/companies', async (c) => {
+  const limit = c.req.query('limit') ?? 10;
+  const offset = c.req.query('offset') ?? 0;
+
+  if (Number(limit) > MAX_LIMIT) {
+    return c.json({ error: 'Limited to 100 companies per page' }, 400);
+  }
+
   const prisma = getPrisma(c.env.DATABASE_URL);
+  const total = await prisma.company.count({
+    where: {
+      visibility: 'GLOBAL',
+    },
+  });
   const companies = await prisma.company.findMany({
     where: {
       visibility: 'GLOBAL',
@@ -58,6 +71,8 @@ app.get('/v1/companies', async (c) => {
     orderBy: {
       name: 'asc',
     },
+    take: Number(limit),
+    skip: Number(offset),
   });
 
   const returnedCompanies = companies.map((company) => ({
@@ -71,7 +86,12 @@ app.get('/v1/companies', async (c) => {
     logo: company.logo,
   }));
 
-  return c.json(returnedCompanies);
+  return c.json({
+    companies: returnedCompanies,
+    total,
+    limit: Number(limit),
+    offset: Number(offset),
+  });
 });
 
 app.get('/v1/companies/:id', async (c) => {
