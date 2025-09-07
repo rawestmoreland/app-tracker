@@ -5,6 +5,7 @@ import { getSignedInUser } from '@/app/lib/auth';
 import { prisma } from '../prisma';
 import { ActivityTracker } from '../services/activity-tracker';
 import { CompanyVisibility } from '@prisma/client';
+import { LogoUploadService } from '../services/logo-upload';
 
 export async function createCompany({
   company,
@@ -90,6 +91,19 @@ export async function createCompany({
   // Use the plain text description passed from the client (from Tiptap's getText())
   const plainTextDescription = company.plainTextDescription || null;
 
+  // Upload the logo to our R2 bucket
+  let logoFilename = null;
+  if (logo) {
+    const result = await LogoUploadService.uploadLogo(
+      logo,
+      process.env.R2_LOGO_BUCKET_NAME!,
+      name,
+    );
+    if (result.success) {
+      logoFilename = result.filename;
+    }
+  }
+
   const newCompany = await prisma.company.create({
     data: {
       name,
@@ -99,7 +113,7 @@ export async function createCompany({
       industry,
       size,
       location,
-      logo,
+      logo: logoFilename || logo,
       visibility: finalVisibility,
       isGlobal: finalIsGlobal,
       createdBy: dbUser.id,

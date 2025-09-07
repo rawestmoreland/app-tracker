@@ -35,10 +35,11 @@ export class R2Service {
   static async uploadFile(
     key: string,
     buffer: Buffer,
-    contentType: string
+    contentType: string,
+    bucketName: string = R2_BUCKET_NAME,
   ): Promise<void> {
     const command = new PutObjectCommand({
-      Bucket: R2_BUCKET_NAME,
+      Bucket: bucketName,
       Key: key,
       Body: buffer,
       ContentType: contentType,
@@ -54,7 +55,7 @@ export class R2Service {
     userId: string,
     applicationId: string,
     filename: string,
-    contentType: string
+    contentType: string,
   ): Promise<{ uploadUrl: string; key: string }> {
     const key = `${userId}/${applicationId}/${filename}`;
 

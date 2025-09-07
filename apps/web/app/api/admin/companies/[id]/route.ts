@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
+import { validateFile } from '@/lib/file-validation';
+import { R2Service } from '@/lib/r2';
+import { LogoUploadService } from '@/lib/services/logo-upload';
 
 export async function PUT(
   request: NextRequest,
@@ -45,6 +48,19 @@ export async function PUT(
       );
     }
 
+    // Upload company logo to our R2 bucket
+    let filename = null;
+    if (logo) {
+      const result = await LogoUploadService.uploadLogo(
+        logo,
+        process.env.R2_LOGO_BUCKET_NAME!,
+        name,
+      );
+      if (result.success) {
+        filename = result.filename;
+      }
+    }
+
     const company = await prisma.company.update({
       where: { id },
       data: {
@@ -55,7 +71,8 @@ export async function PUT(
         industry: industry || null,
         size: size || null,
         location: location || null,
-        logo: logo || null,
+        logo:
+          `${process.env.R2_COMPANY_LOGO_BASE_URL}/${filename}` || logo || null,
         isGlobal: isGlobal || false,
         visibility: isGlobal ? 'GLOBAL' : 'PRIVATE',
         updatedAt: new Date(),
