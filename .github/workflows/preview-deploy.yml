@@ -6,6 +6,13 @@ on:
   push:
     branches-ignore:
       - main
+    paths:
+      - '.github/workflows/preview-deploy.yml'
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'turbo.json'
 jobs:
   deploy-preview:
     name: Deploy Preview
