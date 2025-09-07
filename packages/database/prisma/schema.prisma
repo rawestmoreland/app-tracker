@@ -12,26 +12,27 @@ datasource db {
 }
 
 model User {
-  id                 String             @id @default(cuid())
-  clerkId            String             @unique
-  email              String             @unique
-  name               String?
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  role               UserRole           @default(USER)
-  isDonor            Boolean            @default(false)
-  signupReason       SignupReason?      @default(OTHER)
-  activities         Activity[]
-  events             ApplicationEvent[]
-  applications       Application[]
-  Company            Company[]          @relation("CreatedCompanies")
-  contacts           Contact[]
-  FeatureRequest     FeatureRequest[]
-  interviews         Interview[]
-  notes              Note[]
-  Offer              Offer[]
-  onboardingComplete Boolean            @default(false)
-  UserPreferences    UserPreference[]
+  id                     String             @id @default(cuid())
+  clerkId                String             @unique
+  email                  String             @unique
+  name                   String?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+  role                   UserRole           @default(USER)
+  isDonor                Boolean            @default(false)
+  signupReason           SignupReason?      @default(OTHER)
+  activities             Activity[]
+  events                 ApplicationEvent[]
+  applications           Application[]
+  Company                Company[]          @relation("CreatedCompanies")
+  contacts               Contact[]
+  FeatureRequest         FeatureRequest[]
+  interviews             Interview[]
+  notes                  Note[]
+  Offer                  Offer[]
+  onboardingComplete     Boolean            @default(false)
+  UserPreferences        UserPreference[]
+  dataOptOut Boolean            @default(false)
 
   Resume Resume[]
 }
@@ -136,8 +137,8 @@ model Resume {
 
   Application Application[]
 
-  @@index([userId, createdAt])
   @@unique([name, userId, url])
+  @@index([userId, createdAt])
   @@map("resumes")
 }
 
@@ -264,19 +265,19 @@ model Offer {
 }
 
 model ApplicationEvent {
-  id            String       @id @default(cuid())
+  id            String        @id @default(cuid())
   type          EventType
   title         String
   content       String?
   occurredAt    DateTime
   source        EventSource
   responseType  ResponseType?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   applicationId String
   userId        String
-  application   Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("application_events")
 }

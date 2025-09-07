@@ -35,6 +35,7 @@ import z from 'zod';
 export const prefsSchema = z.object({
   ghostThreshold: z.number().min(5 * 24 * 60 * 60),
   receiveEmailNotifications: z.boolean(),
+  dataOptOut: z.boolean(),
 });
 
 export default function ProfileContent({
@@ -47,6 +48,7 @@ export default function ProfileContent({
     defaultValues: {
       ghostThreshold: userPrefs.ghostThreshold,
       receiveEmailNotifications: userPrefs.receiveEmailNotifications,
+      dataOptOut: userPrefs.dataOptOut,
     },
   });
 
@@ -56,6 +58,8 @@ export default function ProfileContent({
     if (result.success) {
       prefsForm.reset({
         ghostThreshold: result.prefs.ghostThreshold,
+        receiveEmailNotifications: result.prefs.receiveEmailNotifications,
+        dataOptOut: result.prefs.dataOptOut,
       });
       toast('User preferences updated', {
         description: 'Your preferences have been updated.',
@@ -157,6 +161,28 @@ export default function ProfileContent({
                   </FormItem>
                 )}
               />
+              <FormField
+                control={prefsForm.control}
+                name="dataOptOut"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data Opt Out</FormLabel>
+                    <FormDescription>
+                      Don't sell my data to third parties.
+                    </FormDescription>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={(value) => {
+                          field.onChange(value);
+                          prefsForm.handleSubmit(onSubmit)();
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormMessage />
             </form>
           </Form>
         </CardContent>

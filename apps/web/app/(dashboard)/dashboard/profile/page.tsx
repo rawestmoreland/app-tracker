@@ -27,6 +27,7 @@ async function fetchUserPreferences(dbUser: User) {
     return {
       ghostThreshold: 5 * 24 * 60 * 60,
       receiveEmailNotifications: false,
+      dataOptOut: false,
     };
   }
 
