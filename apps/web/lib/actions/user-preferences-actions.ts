@@ -143,15 +143,29 @@ export async function updateUserPreferences(data: z.infer<typeof prefsSchema>) {
         },
       },
       update: {
-        configValue: data,
+        configValue: {
+          receiveEmailNotifications: data.receiveEmailNotifications,
+          ghostThreshold: data.ghostThreshold,
+        },
       },
       create: {
         userId: dbUser.id,
         configName: 'user-preferences',
-        configValue: data,
+        configValue: {
+          receiveEmailNotifications: data.receiveEmailNotifications,
+          ghostThreshold: data.ghostThreshold,
+        },
       },
       select: {
         configValue: true,
+      },
+    });
+
+    // Data opt out is stored on the user model
+    await prisma.user.update({
+      where: { id: dbUser.id },
+      data: {
+        dataOptOut: data.dataOptOut,
       },
     });
 

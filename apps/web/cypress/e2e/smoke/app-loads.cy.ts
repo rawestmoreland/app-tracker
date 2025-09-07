@@ -13,6 +13,16 @@ describe('Smoke: Application Loads', () => {
     cy.contains('h1', 'Track Your Job Search');
   });
 
+  it('should load the terms of service', () => {
+    cy.visit('/terms-of-service');
+    cy.contains('h1', 'Terms of Service');
+  });
+
+  it('should load the privacy policy', () => {
+    cy.visit('/privacy-policy');
+    cy.contains('h1', 'Privacy Policy');
+  });
+
   it('should load critical static assets', () => {
     // Verify favicon is loading
     cy.request({
