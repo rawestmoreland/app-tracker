@@ -1,6 +1,5 @@
 import React, { Suspense } from 'react';
 import { AppTrackerLoading } from '@/components/ui/loading';
-import ApplicationFlowChart from '@/components/dashboard/application-flow-chart';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -20,9 +19,6 @@ function ApplicationFlowContent() {
           statuses using this Sankey diagram.
         </p>
       </div>
-
-      {/* Application Flow Chart */}
-      <ApplicationFlowChart />
     </div>
   );
 }

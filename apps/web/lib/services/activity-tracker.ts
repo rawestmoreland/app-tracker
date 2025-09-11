@@ -4,16 +4,11 @@ import {
   Platform,
   ApplicationStatus,
   Prisma,
-} from "@prisma/client";
-import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
-import { currentUser } from "@clerk/nextjs/server";
-import {
-  isProgressiveTransition,
-  getStageOrder,
-  generateSankeyData,
-  SankeyData,
-} from "@/lib/application-flow";
+} from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { headers } from 'next/headers';
+import { currentUser } from '@clerk/nextjs/server';
+import { isProgressiveTransition, getStageOrder } from '@/lib/application-flow';
 
 interface ActivityData {
   type: ActivityType;
@@ -49,17 +44,17 @@ interface RequestContext {
 export class ActivityTracker {
   static async getRequestContext(): Promise<RequestContext> {
     const headersList = await headers();
-    const forwardedFor = headersList.get("x-forwarded-for");
-    const realIp = headersList.get("x-real-ip");
-    const ipAddress = forwardedFor?.split(",")[0] || realIp || "unknown";
-    const userAgent = headersList.get("user-agent") || undefined;
+    const forwardedFor = headersList.get('x-forwarded-for');
+    const realIp = headersList.get('x-real-ip');
+    const ipAddress = forwardedFor?.split(',')[0] || realIp || 'unknown';
+    const userAgent = headersList.get('user-agent') || undefined;
 
     // Determine platform from user agent
     let platform: Platform = Platform.WEB;
     if (userAgent) {
-      if (userAgent.includes("Mobile") || userAgent.includes("Android")) {
+      if (userAgent.includes('Mobile') || userAgent.includes('Android')) {
         platform = Platform.MOBILE_ANDROID;
-      } else if (userAgent.includes("iPhone") || userAgent.includes("iPad")) {
+      } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
         platform = Platform.MOBILE_IOS;
       }
     }
@@ -125,7 +120,7 @@ export class ActivityTracker {
       });
     } catch (error) {
       // Log error but don't throw - activity tracking should not break the main flow
-      console.error("Failed to track activity:", error);
+      console.error('Failed to track activity:', error);
     }
   }
 
@@ -137,7 +132,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.APPLICATION_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
@@ -153,7 +148,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.APPLICATION_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
@@ -175,13 +170,13 @@ export class ActivityTracker {
 
     await this.trackActivity({
       type: ActivityType.APPLICATION_STATUS_CHANGED,
-      action: "status_changed",
+      action: 'status_changed',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
       description: fromStatus
-        ? `Changed status from ${fromStatus.replace(/_/g, " ").toLowerCase()} to ${toStatus.replace(/_/g, " ").toLowerCase()} for ${applicationTitle}`
-        : `Set initial status to ${toStatus.replace(/_/g, " ").toLowerCase()} for ${applicationTitle}`,
+        ? `Changed status from ${fromStatus.replace(/_/g, ' ').toLowerCase()} to ${toStatus.replace(/_/g, ' ').toLowerCase()} for ${applicationTitle}`
+        : `Set initial status to ${toStatus.replace(/_/g, ' ').toLowerCase()} for ${applicationTitle}`,
 
       // Populate dedicated columns for fast querying
       fromStatus,
@@ -192,7 +187,7 @@ export class ActivityTracker {
       // Keep minimal metadata for additional context
       metadata: {
         reason,
-        transitionType: fromStatus ? "update" : "initial",
+        transitionType: fromStatus ? 'update' : 'initial',
       },
       applicationId,
     });
@@ -205,7 +200,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.APPLICATION_ARCHIVED,
-      action: "archived",
+      action: 'archived',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
@@ -226,14 +221,14 @@ export class ActivityTracker {
       applicationTitle,
       null,
       status,
-      "Initial application submission",
+      'Initial application submission',
     );
   }
 
   static async trackCompanyCreated(companyId: string, companyName: string) {
     await this.trackActivity({
       type: ActivityType.COMPANY_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.COMPANY,
       entityId: companyId,
       entityName: companyName,
@@ -249,7 +244,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.COMPANY_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.COMPANY,
       entityId: companyId,
       entityName: companyName,
@@ -266,11 +261,11 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.CONTACT_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.CONTACT,
       entityId: contactId,
       entityName: contactName,
-      description: `Created contact ${contactName}${companyName ? ` at ${companyName}` : ""}`,
+      description: `Created contact ${contactName}${companyName ? ` at ${companyName}` : ''}`,
       contactId,
     });
   }
@@ -282,7 +277,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.CONTACT_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.CONTACT,
       entityId: contactId,
       entityName: contactName,
@@ -299,7 +294,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.INTERVIEW_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.INTERVIEW,
       entityId: interviewId,
       entityName: `${interviewType} Interview`,
@@ -315,7 +310,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.INTERVIEW_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.INTERVIEW,
       entityId: interviewId,
       entityName: `${interviewType} Interview`,
@@ -332,7 +327,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.INTERVIEW_COMPLETED,
-      action: "completed",
+      action: 'completed',
       entityType: EntityType.INTERVIEW,
       entityId: interviewId,
       entityName: `${interviewType} Interview`,
@@ -349,11 +344,11 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.NOTE_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.NOTE,
       entityId: noteId,
       entityName: `${noteType} Note`,
-      description: `Created ${noteType} note${relatedEntity ? ` for ${relatedEntity}` : ""}`,
+      description: `Created ${noteType} note${relatedEntity ? ` for ${relatedEntity}` : ''}`,
       noteId,
     });
   }
@@ -365,7 +360,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.OFFER_CREATED,
-      action: "received",
+      action: 'received',
       entityType: EntityType.OFFER,
       entityId: offerId,
       entityName: offerTitle,
@@ -377,7 +372,7 @@ export class ActivityTracker {
   static async trackOfferAccepted(offerId: string, offerTitle: string) {
     await this.trackActivity({
       type: ActivityType.OFFER_ACCEPTED,
-      action: "accepted",
+      action: 'accepted',
       entityType: EntityType.OFFER,
       entityId: offerId,
       entityName: offerTitle,
@@ -389,7 +384,7 @@ export class ActivityTracker {
   static async trackOfferDeclined(offerId: string, offerTitle: string) {
     await this.trackActivity({
       type: ActivityType.OFFER_DECLINED,
-      action: "declined",
+      action: 'declined',
       entityType: EntityType.OFFER,
       entityId: offerId,
       entityName: offerTitle,
@@ -405,7 +400,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.RESUME_UPLOADED,
-      action: "uploaded",
+      action: 'uploaded',
       entityType: EntityType.DOCUMENT,
       entityId: applicationId,
       entityName: fileName,
@@ -418,30 +413,30 @@ export class ActivityTracker {
   static async trackDashboardViewed() {
     await this.trackActivity({
       type: ActivityType.DASHBOARD_VIEWED,
-      action: "viewed",
+      action: 'viewed',
       entityType: EntityType.DASHBOARD,
-      entityId: "dashboard",
-      description: "Viewed dashboard",
+      entityId: 'dashboard',
+      description: 'Viewed dashboard',
     });
   }
 
   static async trackLogin() {
     await this.trackActivity({
       type: ActivityType.LOGIN,
-      action: "login",
+      action: 'login',
       entityType: EntityType.USER,
-      entityId: "session",
-      description: "User logged in",
+      entityId: 'session',
+      description: 'User logged in',
     });
   }
 
   static async trackLogout() {
     await this.trackActivity({
       type: ActivityType.LOGOUT,
-      action: "logout",
+      action: 'logout',
       entityType: EntityType.USER,
-      entityId: "session",
-      description: "User logged out",
+      entityId: 'session',
+      description: 'User logged out',
     });
   }
 
@@ -453,7 +448,7 @@ export class ActivityTracker {
   ) {
     return prisma.activity.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,
       include: {
@@ -535,10 +530,10 @@ export class ActivityTracker {
 
     // Use fast groupBy query with indexed columns
     const transitions = await prisma.activity.groupBy({
-      by: ["fromStatus", "toStatus"],
+      by: ['fromStatus', 'toStatus'],
       where: whereClause,
       _count: { id: true },
-      orderBy: [{ fromStatus: "asc" }, { toStatus: "asc" }],
+      orderBy: [{ fromStatus: 'asc' }, { toStatus: 'asc' }],
     });
 
     return transitions.map((t) => ({
@@ -548,21 +543,13 @@ export class ActivityTracker {
     }));
   }
 
-  static async generateUserSankeyData(
-    userId: string,
-    days?: number,
-  ): Promise<SankeyData> {
-    const transitions = await this.getUserStatusTransitions(userId, days);
-    return generateSankeyData(transitions);
-  }
-
   static async getApplicationStatusHistory(applicationId: string) {
     const statusActivities = await prisma.activity.findMany({
       where: {
         applicationId,
         type: ActivityType.APPLICATION_STATUS_CHANGED,
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
       select: {
         id: true,
         fromStatus: true,
@@ -620,7 +607,7 @@ export class ActivityTracker {
 
         // Group by final status
         prisma.activity.groupBy({
-          by: ["toStatus"],
+          by: ['toStatus'],
           where: {
             userId,
             type: ActivityType.APPLICATION_STATUS_CHANGED,
