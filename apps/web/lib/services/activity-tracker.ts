@@ -4,16 +4,17 @@ import {
   Platform,
   ApplicationStatus,
   Prisma,
-} from "@prisma/client";
-import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
-import { currentUser } from "@clerk/nextjs/server";
+} from '@prisma/client';
+import { prisma } from '@/lib/prisma';
+import { headers } from 'next/headers';
+import { currentUser } from '@clerk/nextjs/server';
 import {
   isProgressiveTransition,
   getStageOrder,
   generateSankeyData,
   SankeyData,
-} from "@/lib/application-flow";
+  APPLICATION_FLOW_STAGES,
+} from '@/lib/application-flow';
 
 interface ActivityData {
   type: ActivityType;
@@ -49,17 +50,17 @@ interface RequestContext {
 export class ActivityTracker {
   static async getRequestContext(): Promise<RequestContext> {
     const headersList = await headers();
-    const forwardedFor = headersList.get("x-forwarded-for");
-    const realIp = headersList.get("x-real-ip");
-    const ipAddress = forwardedFor?.split(",")[0] || realIp || "unknown";
-    const userAgent = headersList.get("user-agent") || undefined;
+    const forwardedFor = headersList.get('x-forwarded-for');
+    const realIp = headersList.get('x-real-ip');
+    const ipAddress = forwardedFor?.split(',')[0] || realIp || 'unknown';
+    const userAgent = headersList.get('user-agent') || undefined;
 
     // Determine platform from user agent
     let platform: Platform = Platform.WEB;
     if (userAgent) {
-      if (userAgent.includes("Mobile") || userAgent.includes("Android")) {
+      if (userAgent.includes('Mobile') || userAgent.includes('Android')) {
         platform = Platform.MOBILE_ANDROID;
-      } else if (userAgent.includes("iPhone") || userAgent.includes("iPad")) {
+      } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
         platform = Platform.MOBILE_IOS;
       }
     }
@@ -125,7 +126,7 @@ export class ActivityTracker {
       });
     } catch (error) {
       // Log error but don't throw - activity tracking should not break the main flow
-      console.error("Failed to track activity:", error);
+      console.error('Failed to track activity:', error);
     }
   }
 
@@ -137,7 +138,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.APPLICATION_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
@@ -153,7 +154,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.APPLICATION_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
@@ -175,13 +176,13 @@ export class ActivityTracker {
 
     await this.trackActivity({
       type: ActivityType.APPLICATION_STATUS_CHANGED,
-      action: "status_changed",
+      action: 'status_changed',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
       description: fromStatus
-        ? `Changed status from ${fromStatus.replace(/_/g, " ").toLowerCase()} to ${toStatus.replace(/_/g, " ").toLowerCase()} for ${applicationTitle}`
-        : `Set initial status to ${toStatus.replace(/_/g, " ").toLowerCase()} for ${applicationTitle}`,
+        ? `Changed status from ${fromStatus.replace(/_/g, ' ').toLowerCase()} to ${toStatus.replace(/_/g, ' ').toLowerCase()} for ${applicationTitle}`
+        : `Set initial status to ${toStatus.replace(/_/g, ' ').toLowerCase()} for ${applicationTitle}`,
 
       // Populate dedicated columns for fast querying
       fromStatus,
@@ -192,7 +193,7 @@ export class ActivityTracker {
       // Keep minimal metadata for additional context
       metadata: {
         reason,
-        transitionType: fromStatus ? "update" : "initial",
+        transitionType: fromStatus ? 'update' : 'initial',
       },
       applicationId,
     });
@@ -205,7 +206,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.APPLICATION_ARCHIVED,
-      action: "archived",
+      action: 'archived',
       entityType: EntityType.APPLICATION,
       entityId: applicationId,
       entityName: applicationTitle,
@@ -226,14 +227,14 @@ export class ActivityTracker {
       applicationTitle,
       null,
       status,
-      "Initial application submission",
+      'Initial application submission',
     );
   }
 
   static async trackCompanyCreated(companyId: string, companyName: string) {
     await this.trackActivity({
       type: ActivityType.COMPANY_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.COMPANY,
       entityId: companyId,
       entityName: companyName,
@@ -249,7 +250,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.COMPANY_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.COMPANY,
       entityId: companyId,
       entityName: companyName,
@@ -266,11 +267,11 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.CONTACT_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.CONTACT,
       entityId: contactId,
       entityName: contactName,
-      description: `Created contact ${contactName}${companyName ? ` at ${companyName}` : ""}`,
+      description: `Created contact ${contactName}${companyName ? ` at ${companyName}` : ''}`,
       contactId,
     });
   }
@@ -282,7 +283,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.CONTACT_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.CONTACT,
       entityId: contactId,
       entityName: contactName,
@@ -299,7 +300,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.INTERVIEW_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.INTERVIEW,
       entityId: interviewId,
       entityName: `${interviewType} Interview`,
@@ -315,7 +316,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.INTERVIEW_UPDATED,
-      action: "updated",
+      action: 'updated',
       entityType: EntityType.INTERVIEW,
       entityId: interviewId,
       entityName: `${interviewType} Interview`,
@@ -332,7 +333,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.INTERVIEW_COMPLETED,
-      action: "completed",
+      action: 'completed',
       entityType: EntityType.INTERVIEW,
       entityId: interviewId,
       entityName: `${interviewType} Interview`,
@@ -349,11 +350,11 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.NOTE_CREATED,
-      action: "created",
+      action: 'created',
       entityType: EntityType.NOTE,
       entityId: noteId,
       entityName: `${noteType} Note`,
-      description: `Created ${noteType} note${relatedEntity ? ` for ${relatedEntity}` : ""}`,
+      description: `Created ${noteType} note${relatedEntity ? ` for ${relatedEntity}` : ''}`,
       noteId,
     });
   }
@@ -365,7 +366,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.OFFER_CREATED,
-      action: "received",
+      action: 'received',
       entityType: EntityType.OFFER,
       entityId: offerId,
       entityName: offerTitle,
@@ -377,7 +378,7 @@ export class ActivityTracker {
   static async trackOfferAccepted(offerId: string, offerTitle: string) {
     await this.trackActivity({
       type: ActivityType.OFFER_ACCEPTED,
-      action: "accepted",
+      action: 'accepted',
       entityType: EntityType.OFFER,
       entityId: offerId,
       entityName: offerTitle,
@@ -389,7 +390,7 @@ export class ActivityTracker {
   static async trackOfferDeclined(offerId: string, offerTitle: string) {
     await this.trackActivity({
       type: ActivityType.OFFER_DECLINED,
-      action: "declined",
+      action: 'declined',
       entityType: EntityType.OFFER,
       entityId: offerId,
       entityName: offerTitle,
@@ -405,7 +406,7 @@ export class ActivityTracker {
   ) {
     await this.trackActivity({
       type: ActivityType.RESUME_UPLOADED,
-      action: "uploaded",
+      action: 'uploaded',
       entityType: EntityType.DOCUMENT,
       entityId: applicationId,
       entityName: fileName,
@@ -418,30 +419,30 @@ export class ActivityTracker {
   static async trackDashboardViewed() {
     await this.trackActivity({
       type: ActivityType.DASHBOARD_VIEWED,
-      action: "viewed",
+      action: 'viewed',
       entityType: EntityType.DASHBOARD,
-      entityId: "dashboard",
-      description: "Viewed dashboard",
+      entityId: 'dashboard',
+      description: 'Viewed dashboard',
     });
   }
 
   static async trackLogin() {
     await this.trackActivity({
       type: ActivityType.LOGIN,
-      action: "login",
+      action: 'login',
       entityType: EntityType.USER,
-      entityId: "session",
-      description: "User logged in",
+      entityId: 'session',
+      description: 'User logged in',
     });
   }
 
   static async trackLogout() {
     await this.trackActivity({
       type: ActivityType.LOGOUT,
-      action: "logout",
+      action: 'logout',
       entityType: EntityType.USER,
-      entityId: "session",
-      description: "User logged out",
+      entityId: 'session',
+      description: 'User logged out',
     });
   }
 
@@ -453,7 +454,7 @@ export class ActivityTracker {
   ) {
     return prisma.activity.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       take: limit,
       skip: offset,
       include: {
@@ -525,6 +526,8 @@ export class ActivityTracker {
     const whereClause: Prisma.ActivityWhereInput = {
       userId,
       type: ActivityType.APPLICATION_STATUS_CHANGED,
+      fromStatus: { not: null },
+      toStatus: { not: null },
     };
 
     if (days) {
@@ -533,19 +536,97 @@ export class ActivityTracker {
       whereClause.createdAt = { gte: since };
     }
 
-    // Use fast groupBy query with indexed columns
-    const transitions = await prisma.activity.groupBy({
-      by: ["fromStatus", "toStatus"],
+    // Get all status change activities ordered by creation time (descending)
+    const statusChangeActivities = await prisma.activity.findMany({
       where: whereClause,
-      _count: { id: true },
-      orderBy: [{ fromStatus: "asc" }, { toStatus: "asc" }],
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
 
-    return transitions.map((t) => ({
-      fromStatus: t.fromStatus,
-      toStatus: t.toStatus!,
-      count: t._count.id,
-    }));
+    // Group activities by application to build bridged paths
+    const applicationActivities = new Map<
+      string,
+      typeof statusChangeActivities
+    >();
+
+    statusChangeActivities.forEach((activity) => {
+      if (!activity.applicationId) return;
+
+      if (!applicationActivities.has(activity.applicationId)) {
+        applicationActivities.set(activity.applicationId, []);
+      }
+      applicationActivities.get(activity.applicationId)!.push(activity);
+    });
+
+    // Build bridged transitions for each application
+    const transitionMap = new Map<string, number>();
+
+    applicationActivities.forEach((activities, applicationId) => {
+      // Sort activities by creation time (ascending) to get chronological order
+      const sortedActivities = activities.sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      );
+
+      // Find the bridged path by skipping terminal statuses, but include final terminal transitions
+      let lastNonTerminalStatus: string | null = null;
+      let lastActivity = sortedActivities[sortedActivities.length - 1];
+
+      for (const activity of sortedActivities) {
+        if (!activity.fromStatus || !activity.toStatus) continue;
+
+        const fromStatusIsTerminal =
+          APPLICATION_FLOW_STAGES[activity.fromStatus as ApplicationStatus]
+            .isTerminal;
+        const toStatusIsTerminal =
+          APPLICATION_FLOW_STAGES[activity.toStatus as ApplicationStatus]
+            .isTerminal;
+
+        if (!toStatusIsTerminal) {
+          // This is a non-terminal status
+          if (
+            lastNonTerminalStatus &&
+            lastNonTerminalStatus !== activity.toStatus
+          ) {
+            // Create a bridged transition from the last non-terminal status to this one
+            const key = `${lastNonTerminalStatus}->${activity.toStatus}`;
+            transitionMap.set(key, (transitionMap.get(key) || 0) + 1);
+          }
+          lastNonTerminalStatus = activity.toStatus;
+        } else if (!fromStatusIsTerminal) {
+          // If we're moving to a terminal status from a non-terminal status,
+          // we need to remember the non-terminal status for potential bridging
+          lastNonTerminalStatus = activity.fromStatus;
+        }
+        // If both are terminal, we skip entirely
+      }
+
+      // If the application ends in a terminal status, include that final transition
+      if (lastActivity && lastActivity.fromStatus && lastActivity.toStatus) {
+        const lastToStatusIsTerminal =
+          APPLICATION_FLOW_STAGES[lastActivity.toStatus as ApplicationStatus]
+            .isTerminal;
+        const lastFromStatusIsTerminal =
+          APPLICATION_FLOW_STAGES[lastActivity.fromStatus as ApplicationStatus]
+            .isTerminal;
+
+        if (lastToStatusIsTerminal && !lastFromStatusIsTerminal) {
+          // This application ends in a terminal status from a non-terminal status
+          const key = `${lastActivity.fromStatus}->${lastActivity.toStatus}`;
+          transitionMap.set(key, (transitionMap.get(key) || 0) + 1);
+        }
+      }
+    });
+
+    return Array.from(transitionMap.entries()).map(([key, count]) => {
+      const [fromStatus, toStatus] = key.split('->');
+      return {
+        fromStatus: fromStatus as ApplicationStatus,
+        toStatus: toStatus as ApplicationStatus,
+        count,
+      };
+    });
   }
 
   static async generateUserSankeyData(
@@ -562,7 +643,7 @@ export class ActivityTracker {
         applicationId,
         type: ActivityType.APPLICATION_STATUS_CHANGED,
       },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: 'asc' },
       select: {
         id: true,
         fromStatus: true,
@@ -620,7 +701,7 @@ export class ActivityTracker {
 
         // Group by final status
         prisma.activity.groupBy({
-          by: ["toStatus"],
+          by: ['toStatus'],
           where: {
             userId,
             type: ActivityType.APPLICATION_STATUS_CHANGED,
