@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
 import { unauthorized } from 'next/navigation';
 import { UsersPerDayChart } from '@/components/dashboard/users-per-day-chart';
+import Link from 'next/link';
 
 interface UserRegistrationData {
   date: string;
@@ -50,7 +51,7 @@ async function fetchUserRegistrationData(): Promise<{
     nextDate.setDate(date.getDate() + 1);
 
     const usersOnDay = users.filter(
-      (user) => user.createdAt >= date && user.createdAt < nextDate
+      (user) => user.createdAt >= date && user.createdAt < nextDate,
     ).length;
 
     chartData.push({
@@ -82,7 +83,8 @@ export default async function AdminPage() {
     return unauthorized();
   }
 
-  const { chartData, totalUsers, usersThisWeek } = await fetchUserRegistrationData();
+  const { chartData, totalUsers, usersThisWeek } =
+    await fetchUserRegistrationData();
 
   return (
     <div className="space-y-6">
@@ -92,6 +94,11 @@ export default async function AdminPage() {
         <p className="text-muted-foreground">
           Monitor user registrations and system metrics
         </p>
+        <div className="mt-4">
+          <Link className="text-blue-600 underline" href="/admin/companies">
+            Companies
+          </Link>
+        </div>
       </div>
 
       {/* Users Chart */}

@@ -44,6 +44,7 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
   const pathname = usePathname();
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isAdminMenuOpen, setIsAdminMenuOpen] = useState(false);
 
   const isCurrentPath = (path: string) => {
     return pathname === path;
@@ -114,24 +115,6 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                   >
                     Application Flow
                   </Link>
-                  {isAdmin && (
-                    <Link
-                      href="/admin"
-                      aria-current={
-                        isCurrentPath('/dashboard/application-flow')
-                          ? 'page'
-                          : undefined
-                      }
-                      className={cn(
-                        isCurrentPath('/dashboard/application-flow')
-                          ? 'border-indigo-600 text-gray-900'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                        'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
-                      )}
-                    >
-                      Admin
-                    </Link>
-                  )}
                   {/* <Link
                     href="/dashboard/interviews"
                     aria-current={
@@ -154,6 +137,47 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
 
             {/* Desktop Actions */}
             <div className="hidden md:flex md:items-center md:gap-4">
+              {isAdmin && (
+                <Popover
+                  open={isAdminMenuOpen}
+                  onOpenChange={setIsAdminMenuOpen}
+                >
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsAdminMenuOpen(true)}
+                    >
+                      Admin
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-56">
+                    <Button
+                      variant="link"
+                      onClick={() => {
+                        router.push('/admin');
+                        setIsAdminMenuOpen(false);
+                      }}
+                      aria-current={
+                        isCurrentPath('/admin') ? 'page' : undefined
+                      }
+                    >
+                      Admin Dashboard
+                    </Button>
+                    <Button
+                      variant="link"
+                      onClick={() => {
+                        router.push('/admin/companies');
+                        setIsAdminMenuOpen(false);
+                      }}
+                      aria-current={
+                        isCurrentPath('/admin/companies') ? 'page' : undefined
+                      }
+                    >
+                      Manage Companies
+                    </Button>
+                  </PopoverContent>
+                </Popover>
+              )}
               <Button variant="outline" asChild>
                 <Link
                   href="https://buymeacoffee.com/westmorelandcreative"
