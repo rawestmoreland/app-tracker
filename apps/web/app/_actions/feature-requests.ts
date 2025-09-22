@@ -31,7 +31,8 @@ export async function createFeatureRequest(data: z.infer<typeof formSchema>) {
 
     // Send an email to Richard
     await resend.emails.send({
-      from: 'Richard from App Track <richard@westmorelandcreative.com>',
+      from: 'Richard from App Track <richard@apptrack.space>',
+      replyTo: 'richard@westmorelandcreative.com',
       to: ['richard@westmorelandcreative.com'],
       subject: 'New App Track Feature Request',
       react: FeatureRequestTemplate({ featureRequest }),
@@ -39,7 +40,8 @@ export async function createFeatureRequest(data: z.infer<typeof formSchema>) {
 
     // Send an email to the user
     await resend.emails.send({
-      from: 'Richard from App Track <richard@westmorelandcreative.com>',
+      from: 'Richard from App Track <richard@apptrack.space>',
+      replyTo: 'richard@westmorelandcreative.com',
       to: [dbUser.email],
       subject: 'Thank you for your feature request',
       react: FeatureRequestThankYouTemplate({ featureRequest }),
