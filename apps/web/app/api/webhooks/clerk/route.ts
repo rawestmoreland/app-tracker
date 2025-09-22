@@ -66,15 +66,17 @@ export async function POST(req: NextRequest) {
       });
 
       // Send the welcome email
-      await resend.emails.send({
-        from: 'Richard from App Tracker <richard@westmorelandcreative.com>',
-        to: [email_addresses[0].email_address],
-        subject: 'Welcome to App Track',
-        react: WelcomeTemplate({
-          firstName: first_name ?? '',
-          lastName: last_name ?? '',
-        }),
-      });
+      await resend.emails
+        .send({
+          from: 'Richard from App Tracker <richard@westmorelandcreative.com>',
+          to: [email_addresses[0].email_address],
+          subject: 'Welcome to App Track',
+          react: WelcomeTemplate({
+            firstName: first_name ?? '',
+            lastName: last_name ?? '',
+          }),
+        })
+        .catch(console.error);
     }
 
     if (eventType === 'user.deleted') {

@@ -6,17 +6,8 @@ interface EmailTemplateProps {
 }
 
 export function WelcomeTemplate({ firstName, lastName }: EmailTemplateProps) {
-  const name = React.useMemo(() => {
-    if (firstName && lastName) {
-      return `${firstName} ${lastName}`;
-    }
-
-    if (firstName) {
-      return firstName;
-    }
-
-    return 'there';
-  }, [firstName, lastName]);
+  const name =
+    firstName && lastName ? `${firstName} ${lastName}` : firstName || 'there';
 
   return (
     <div
