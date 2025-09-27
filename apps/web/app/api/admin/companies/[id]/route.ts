@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
 import { UserRole } from '@prisma/client';
-import { validateFile } from '@/lib/file-validation';
-import { R2Service } from '@/lib/r2';
 import { LogoUploadService } from '@/lib/services/logo-upload';
 
 export async function PUT(

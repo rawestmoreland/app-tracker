@@ -1,8 +1,13 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { prisma } from '@/lib/prisma';
-import { ApplicationStatus, EventType, EventSource, ResponseType } from '@prisma/client';
+import {
+  ApplicationStatus,
+  EventType,
+  EventSource,
+  ResponseType,
+} from '@prisma/client';
 import { getSignedInUser } from '@/app/lib/auth';
 import { R2Service } from '../r2';
 import { NoteFormData } from '@/app/(dashboard)/dashboard/applications/lib/new-note-schema';
@@ -112,10 +117,10 @@ export async function updateApplicationStatus(
           )} to ${status.replace(/_/g, ' ')}`,
           occurredAt: transitionTime,
           source: EventSource.OTHER,
-          responseType: 
-            existingApplication.status === ApplicationStatus.APPLIED && 
-            status === ApplicationStatus.CONFIRMATION_RECEIVED 
-              ? responseType 
+          responseType:
+            existingApplication.status === ApplicationStatus.APPLIED &&
+            status === ApplicationStatus.CONFIRMATION_RECEIVED
+              ? responseType
               : null,
           applicationId,
           userId: dbUser.id,
@@ -135,6 +140,8 @@ export async function updateApplicationStatus(
     // Revalidate the dashboard page
     revalidatePath('/dashboard');
     revalidatePath(`/dashboard/applications/${applicationId}`);
+    revalidateTag('applications');
+    revalidateTag('analytics');
 
     return { success: true, application: updatedApplication };
   } catch (error) {
@@ -207,6 +214,9 @@ export async function deleteApplication(id: string) {
     await prisma.application.delete({
       where: { id, userId: dbUser.id },
     });
+
+    revalidateTag('applications');
+    revalidateTag('analytics');
 
     return { success: true };
   } catch (error) {
@@ -287,6 +297,9 @@ export async function updateApplication(id: string, data: ApplicationFormData) {
     }
 
     revalidatePath(`/dashboard/applications/${id}`);
+    revalidateTag('applications');
+    revalidateTag('analytics');
+
     return { success: true };
   } catch (error) {
     console.error('Error updating application:', error);
@@ -327,6 +340,9 @@ export async function addNote(applicationId: string, data: NoteFormData) {
     );
 
     revalidatePath(`/dashboard/applications/${applicationId}`);
+    revalidateTag('applications');
+    revalidateTag('analytics');
+
     return { success: true, note };
   } catch (error) {
     console.error('Error adding note:', error);
@@ -364,8 +380,11 @@ export async function updateNote(noteId: string, data: NoteFormData) {
     // Revalidate the appropriate path based on where the note is associated
     if (note.applicationId) {
       revalidatePath(`/dashboard/applications/${note.applicationId}`);
+      revalidateTag('applications');
+      revalidateTag('analytics');
     } else if (note.companyId) {
       revalidatePath(`/dashboard/companies/${note.companyId}`);
+      revalidateTag('companies');
     }
 
     return { success: true, note };
@@ -522,6 +541,8 @@ export async function archiveApplications(applicationIds: string[]) {
 
     // Revalidate the dashboard page
     revalidatePath('/dashboard');
+    revalidateTag('applications');
+    revalidateTag('analytics');
 
     return {
       success: true,
@@ -598,6 +619,8 @@ export async function updateApplicationResume(
 
     // Revalidate the application page
     revalidatePath(`/dashboard/applications/${applicationId}`);
+    revalidateTag('applications');
+    revalidateTag('analytics');
 
     return { success: true, application: updatedApplication };
   } catch (error) {
