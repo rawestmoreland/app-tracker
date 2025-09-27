@@ -133,7 +133,8 @@ export default function ApplicationsTable({
           userPreferences.ghostThreshold * 1000 &&
         application.status !== ApplicationStatus.GHOSTED &&
         application.status !== ApplicationStatus.DRAFT &&
-        application.status !== ApplicationStatus.REJECTED
+        application.status !== ApplicationStatus.REJECTED &&
+        application.status !== ApplicationStatus.POSITION_FILLED
       );
     });
   }, [applications, userPreferences?.ghostThreshold]);
@@ -192,7 +193,9 @@ export default function ApplicationsTable({
           const searchValue = value.toLowerCase();
           const title = row.original.title.toLowerCase();
           const companyName = row.original.company.name.toLowerCase();
-          return title.includes(searchValue) || companyName.includes(searchValue);
+          return (
+            title.includes(searchValue) || companyName.includes(searchValue)
+          );
         },
         header: () => null,
         cell: () => null,
