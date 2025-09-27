@@ -6,6 +6,7 @@ import { prisma } from '../prisma';
 import { ActivityTracker } from '../services/activity-tracker';
 import { CompanyVisibility } from '@prisma/client';
 import { LogoUploadService } from '../services/logo-upload';
+import { revalidateTag } from 'next/cache';
 
 export async function createCompany({
   company,
@@ -122,6 +123,10 @@ export async function createCompany({
 
   await ActivityTracker.trackCompanyCreated(newCompany.id, newCompany.name);
 
+  revalidateTag('companies');
+  revalidateTag('applications');
+  revalidateTag('analytics');
+
   return { success: true, company: newCompany };
 }
 
@@ -150,6 +155,10 @@ export async function updateCompany(id: string, company: CompanyFormData) {
       updatedCompany.name,
       { changes: { oldData: company, newData: updatedCompany } },
     );
+
+    revalidateTag('companies');
+    revalidateTag('applications');
+    revalidateTag('analytics');
 
     return { success: true, company: updatedCompany };
   } catch (error) {
