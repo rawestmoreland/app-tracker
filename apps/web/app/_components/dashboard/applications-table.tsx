@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DashboardApplication } from '@/lib/types/dashboard';
-import { getRemotePolicyColor } from '@/lib/utils';
+import { getRemotePolicyColor, isTerminalStatus } from '@/lib/utils';
 import { ApplicationStatusDropdown } from './application-status-dropdown';
 import {
   applicationStatusOptions,
@@ -131,10 +131,7 @@ export default function ApplicationsTable({
         application.activities.length > 0 &&
         Date.now() - new Date(application.activities[0].createdAt).getTime() >
           userPreferences.ghostThreshold * 1000 &&
-        application.status !== ApplicationStatus.GHOSTED &&
-        application.status !== ApplicationStatus.DRAFT &&
-        application.status !== ApplicationStatus.REJECTED &&
-        application.status !== ApplicationStatus.POSITION_FILLED
+        !isTerminalStatus(application.status)
       );
     });
   }, [applications, userPreferences?.ghostThreshold]);
