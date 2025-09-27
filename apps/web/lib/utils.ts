@@ -1,3 +1,4 @@
+import { ApplicationStatus } from '@prisma/client';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -66,4 +67,13 @@ export function getVisibilityDescription(visibility: string) {
     default:
       return '';
   }
+}
+
+export function isTerminalStatus(status: ApplicationStatus) {
+  return (
+    status === ApplicationStatus.REJECTED ||
+    status === ApplicationStatus.WITHDRAWN ||
+    status === ApplicationStatus.GHOSTED ||
+    status === ApplicationStatus.POSITION_FILLED
+  );
 }

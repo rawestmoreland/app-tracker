@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DashboardApplication } from '@/lib/types/dashboard';
-import { getRemotePolicyColor } from '@/lib/utils';
+import { getRemotePolicyColor, isTerminalStatus } from '@/lib/utils';
 import { ApplicationStatusDropdown } from './application-status-dropdown';
 import {
   applicationStatusOptions,
@@ -131,9 +131,7 @@ export default function ApplicationsTable({
         application.activities.length > 0 &&
         Date.now() - new Date(application.activities[0].createdAt).getTime() >
           userPreferences.ghostThreshold * 1000 &&
-        application.status !== ApplicationStatus.GHOSTED &&
-        application.status !== ApplicationStatus.DRAFT &&
-        application.status !== ApplicationStatus.REJECTED
+        !isTerminalStatus(application.status)
       );
     });
   }, [applications, userPreferences?.ghostThreshold]);
@@ -192,7 +190,9 @@ export default function ApplicationsTable({
           const searchValue = value.toLowerCase();
           const title = row.original.title.toLowerCase();
           const companyName = row.original.company.name.toLowerCase();
-          return title.includes(searchValue) || companyName.includes(searchValue);
+          return (
+            title.includes(searchValue) || companyName.includes(searchValue)
+          );
         },
         header: () => null,
         cell: () => null,
