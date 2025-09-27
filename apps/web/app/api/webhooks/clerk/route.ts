@@ -86,7 +86,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (!user) {
-        return new Response('User not found', { status: 404 });
+        return new Response('User already deleted', { status: 200 });
       }
 
       await prisma.user.delete({
