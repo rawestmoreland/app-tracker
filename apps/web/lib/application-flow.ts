@@ -116,7 +116,8 @@ export interface SankeyData {
 }
 
 /**
- * Converts application status transitions to sankey diagram format
+ * Converts application status transitions to sankey diagram format with clean one-way flow
+ * Automatically handles edge cases like terminal→terminal and backward progressions by bridging them
  */
 export function generateSankeyData(transitions: Array<{
   fromStatus: ApplicationStatus | null;
@@ -126,8 +127,11 @@ export function generateSankeyData(transitions: Array<{
   const nodeMap = new Map<string, SankeyNode>();
   const links: SankeyLink[] = [];
 
+  // Process transitions to handle edge cases and ensure one-way flow
+  const processedTransitions = processTransitionsForSankey(transitions);
+
   // Create nodes for all statuses that appear in transitions
-  transitions.forEach(({ fromStatus, toStatus }) => {
+  processedTransitions.forEach(({ fromStatus, toStatus }) => {
     // Add 'to' status node
     if (!nodeMap.has(toStatus)) {
       const stage = APPLICATION_FLOW_STAGES[toStatus];
@@ -154,7 +158,7 @@ export function generateSankeyData(transitions: Array<{
   });
 
   // Create links
-  transitions.forEach(({ fromStatus, toStatus, count }) => {
+  processedTransitions.forEach(({ fromStatus, toStatus, count }) => {
     const sourceId = fromStatus || 'START';
     const targetId = toStatus;
     
@@ -181,4 +185,165 @@ export function generateSankeyData(transitions: Array<{
     nodes: Array.from(nodeMap.values()).sort((a, b) => a.order - b.order),
     links,
   };
+}
+
+/**
+ * Generates sankey data from application histories with intelligent bridging
+ * Preserves the last non-terminal state when bridging terminal→terminal transitions
+ */
+export function generateSankeyDataFromHistories(applicationHistories: Array<{
+  applicationId: string;
+  transitions: Array<{
+    fromStatus: ApplicationStatus | null;
+    toStatus: ApplicationStatus;
+    createdAt: Date;
+  }>;
+}>): SankeyData {
+  // First, process each application's history to create intelligent bridges
+  const processedTransitions = processApplicationHistories(applicationHistories);
+
+  // Then use the standard sankey generation logic
+  return generateSankeyData(processedTransitions);
+}
+
+/**
+ * Processes application histories to create intelligent bridged transitions
+ * Preserves the last non-terminal state when handling problematic transitions
+ */
+function processApplicationHistories(applicationHistories: Array<{
+  applicationId: string;
+  transitions: Array<{
+    fromStatus: ApplicationStatus | null;
+    toStatus: ApplicationStatus;
+    createdAt: Date;
+  }>;
+}>): Array<{
+  fromStatus: ApplicationStatus | null;
+  toStatus: ApplicationStatus;
+  count: number;
+}> {
+  const terminalStatuses = ['ACCEPTED', 'REJECTED', 'WITHDRAWN', 'GHOSTED', 'POSITION_FILLED'];
+  const transitionCounts = new Map<string, number>();
+
+  applicationHistories.forEach(({ transitions }) => {
+    // Sort transitions by date to ensure proper order
+    const sortedTransitions = [...transitions].sort((a, b) =>
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+
+    // Find the last non-terminal state for this application
+    let lastNonTerminalState: ApplicationStatus | null = null;
+    for (const transition of sortedTransitions) {
+      if (!terminalStatuses.includes(transition.toStatus)) {
+        lastNonTerminalState = transition.toStatus;
+      } else {
+        break; // Stop at first terminal state
+      }
+    }
+
+    // Process each transition
+    for (let i = 0; i < sortedTransitions.length; i++) {
+      const transition = sortedTransitions[i];
+      const { fromStatus, toStatus } = transition;
+
+      // Check if this is a problematic transition
+      const isTerminalToTerminal = fromStatus &&
+        terminalStatuses.includes(fromStatus) &&
+        terminalStatuses.includes(toStatus);
+
+      const isTerminalToNonTerminal = fromStatus &&
+        terminalStatuses.includes(fromStatus) &&
+        !terminalStatuses.includes(toStatus);
+
+      if (isTerminalToTerminal || isTerminalToNonTerminal) {
+        // Bridge using the last non-terminal state if available, otherwise START
+        const bridgeFrom = lastNonTerminalState;
+        const transitionKey = `${bridgeFrom || 'START'} → ${toStatus}`;
+        transitionCounts.set(transitionKey, (transitionCounts.get(transitionKey) || 0) + 1);
+      } else {
+        // Normal transition - keep as is
+        const transitionKey = `${fromStatus || 'START'} → ${toStatus}`;
+        transitionCounts.set(transitionKey, (transitionCounts.get(transitionKey) || 0) + 1);
+      }
+    }
+  });
+
+  // Convert back to the expected format
+  return Array.from(transitionCounts.entries()).map(([key, count]) => {
+    const [fromStatus, toStatus] = key.split(' → ');
+    return {
+      fromStatus: fromStatus === 'START' ? null : fromStatus as ApplicationStatus,
+      toStatus: toStatus as ApplicationStatus,
+      count
+    };
+  });
+}
+
+/**
+ * Processes transitions to ensure clean one-way flow for sankey diagram
+ * Handles edge cases like terminal→terminal and backward progressions
+ */
+function processTransitionsForSankey(
+  transitions: Array<{
+    fromStatus: ApplicationStatus | null;
+    toStatus: ApplicationStatus;
+    count: number;
+  }>
+): Array<{
+  fromStatus: ApplicationStatus | null;
+  toStatus: ApplicationStatus;
+  count: number;
+}> {
+  const result: Array<{
+    fromStatus: ApplicationStatus | null;
+    toStatus: ApplicationStatus;
+    count: number;
+  }> = [];
+
+  const terminalStatuses = ['ACCEPTED', 'REJECTED', 'WITHDRAWN', 'GHOSTED', 'POSITION_FILLED'];
+  const bridgedCounts = new Map<string, number>();
+
+  transitions.forEach(({ fromStatus, toStatus, count }) => {
+    const fromStage = fromStatus ? APPLICATION_FLOW_STAGES[fromStatus] : null;
+    const toStage = APPLICATION_FLOW_STAGES[toStatus];
+
+    // Case 1: Terminal → Non-terminal (bridge as new flow from START)
+    if (fromStatus && terminalStatuses.includes(fromStatus) && !terminalStatuses.includes(toStatus)) {
+      const bridgeKey = `START→${toStatus}`;
+      bridgedCounts.set(bridgeKey, (bridgedCounts.get(bridgeKey) || 0) + count);
+      return;
+    }
+
+    // Case 2: Terminal → Terminal (bridge as direct flow to final terminal)
+    if (fromStatus && terminalStatuses.includes(fromStatus) && terminalStatuses.includes(toStatus)) {
+      // Keep only the transition to the final terminal status
+      // For visualization purposes, we'll bridge this as START → final terminal
+      const bridgeKey = `START→${toStatus}`;
+      bridgedCounts.set(bridgeKey, (bridgedCounts.get(bridgeKey) || 0) + count);
+      return;
+    }
+
+    // Case 3: Backward progression (non-terminal → earlier non-terminal)
+    if (fromStage && !fromStage.isTerminal && !toStage.isTerminal && toStage.order < fromStage.order) {
+      // Bridge this as a new flow from START to the target status
+      const bridgeKey = `START→${toStatus}`;
+      bridgedCounts.set(bridgeKey, (bridgedCounts.get(bridgeKey) || 0) + count);
+      return;
+    }
+
+    // Case 4: Normal progressive transitions - keep as-is
+    result.push({ fromStatus, toStatus, count });
+  });
+
+  // Add bridged transitions as new flows from START
+  bridgedCounts.forEach((count, key) => {
+    const toStatus = key.split('→')[1] as ApplicationStatus;
+    result.push({
+      fromStatus: null, // null represents START
+      toStatus,
+      count
+    });
+  });
+
+  return result;
 }

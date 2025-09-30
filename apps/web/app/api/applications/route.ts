@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
       companyId,
       companyName,
       companyUrl,
+      referredBy,
     } = body;
 
     // Validate required fields
@@ -122,6 +123,7 @@ export async function POST(request: NextRequest) {
           appliedAt: new Date(appliedAt),
           userId: dbUser.id,
           companyId: finalCompanyId,
+          referredBy,
         },
         include: {
           company: true,

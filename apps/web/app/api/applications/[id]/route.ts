@@ -85,6 +85,7 @@ export async function PUT(
       appliedAt,
       companyId,
       resumeId,
+      referredBy,
     } = body;
 
     const application = await prisma.application.updateMany({
@@ -102,6 +103,7 @@ export async function PUT(
         appliedAt: appliedAt ? new Date(appliedAt) : undefined,
         companyId,
         resumeId,
+        referredBy,
       },
     });
 
