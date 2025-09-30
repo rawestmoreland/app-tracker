@@ -87,7 +87,6 @@ export default function ApplicationContent({
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const [currentResumeId, setCurrentResumeId] = useState<string | null>(
     application.resumeId || null,
   );
@@ -176,25 +175,6 @@ export default function ApplicationContent({
     }
   };
 
-  const handleResumeUploadComplete = () => {
-    setUploadError(null);
-    router.refresh(); // Refresh the page to show updated resume state
-  };
-
-  const handleResumeUploadError = (error: string) => {
-    setUploadError(error);
-  };
-
-  const handleResumeDelete = async () => {
-    const result = await deleteResume(application.id);
-
-    if (result.success) {
-      alert('Resume deleted successfully');
-    } else {
-      alert(result.error || 'Failed to delete resume');
-    }
-  };
-
   const handleResumeChange = (resumeId: string | null) => {
     setCurrentResumeId(resumeId);
     // Refresh the page to get the updated application data
@@ -238,7 +218,7 @@ export default function ApplicationContent({
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <Breadcrumb>
