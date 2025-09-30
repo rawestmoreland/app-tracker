@@ -29,6 +29,8 @@ app.get('/', (c) => {
     <div
       style={{
         display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
