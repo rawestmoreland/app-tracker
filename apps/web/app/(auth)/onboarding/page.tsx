@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { completeOnboarding } from './_actions/complete-onboarding';
+import { completeOnboarding, checkUserExists } from './_actions/complete-onboarding';
 import z from 'zod';
 import { SignupReason } from '@prisma/client';
 import { useForm } from 'react-hook-form';
@@ -66,6 +66,40 @@ export default function OnboardingComponent() {
   const { user } = useUser();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isWaitingForWebhook, setIsWaitingForWebhook] = React.useState(true);
+
+  // Poll for user existence in database (wait for webhook to complete)
+  React.useEffect(() => {
+    let isMounted = true;
+    let pollInterval: NodeJS.Timeout;
+
+    const pollForUser = async () => {
+      try {
+        const result = await checkUserExists();
+        if (result.exists && isMounted) {
+          setIsWaitingForWebhook(false);
+        } else if (isMounted) {
+          // Continue polling if user doesn't exist yet
+          pollInterval = setTimeout(pollForUser, 1000); // Poll every 1 second
+        }
+      } catch (error) {
+        console.error('Error polling for user:', error);
+        if (isMounted) {
+          pollInterval = setTimeout(pollForUser, 1000); // Retry on error
+        }
+      }
+    };
+
+    // Start polling
+    pollForUser();
+
+    return () => {
+      isMounted = false;
+      if (pollInterval) {
+        clearTimeout(pollInterval);
+      }
+    };
+  }, []);
 
   // Debug logging for production
   React.useEffect(() => {
@@ -116,6 +150,25 @@ export default function OnboardingComponent() {
   };
 
   const selectedReason = form.watch('signupReason');
+
+  // Show loading state while waiting for webhook to create user in database
+  if (isWaitingForWebhook) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">
+        <Card className="w-full max-w-md border-0 bg-white/80 shadow-xl backdrop-blur-sm">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="mb-6 h-16 w-16 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
+            <h2 className="mb-2 text-xl font-semibold text-gray-900">
+              Setting up your account...
+            </h2>
+            <p className="text-center text-sm text-gray-600">
+              This will only take a moment
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4">

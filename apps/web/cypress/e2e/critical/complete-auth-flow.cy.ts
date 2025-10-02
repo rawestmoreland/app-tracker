@@ -49,8 +49,11 @@ describe('Critical: Complete Auth Flow', () => {
     passwordField.type(Cypress.env('CLERK_PASSWORD'));
     submitButton.click();
 
+    // Wait for the webhook to complete (loading state may appear)
+    cy.contains('Setting up your account...', { timeout: 10000 }).should('not.exist');
+
     // The onboarding page options should be visible
-    cy.get('[data-testid=between-jobs]').should('be.visible');
+    cy.get('[data-testid=between-jobs]', { timeout: 10000 }).should('be.visible');
     cy.get('[data-testid=just-graduated]').should('be.visible');
     cy.get('[data-testid=employed-and-looking]').should('be.visible');
     cy.get('[data-testid=other]').should('be.visible');
