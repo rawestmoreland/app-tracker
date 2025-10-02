@@ -5,15 +5,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { UseFormReturn } from "react-hook-form";
-import { NewContactSchema } from "./new-contact-schema";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Company } from "@prisma/client";
-import { Combobox } from "@/components/ui/combobox";
-import { Loader2Icon } from "lucide-react";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/form';
+import { UseFormReturn } from 'react-hook-form';
+import { NewContactSchema } from './new-contact-schema';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Company } from '@prisma/client';
+import { Combobox } from '@/components/ui/combobox';
+import { Loader2Icon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function NewContactForm({
   form,
@@ -129,11 +129,11 @@ export function NewContactForm({
           className="flex items-center justify-center"
         >
           <Loader2Icon
-            className={cn("animate-spin", {
+            className={cn('animate-spin', {
               hidden: !form.formState.isSubmitting,
             })}
           />
-          {form.formState.isSubmitting ? "Creating..." : "Create Contact"}
+          {form.formState.isSubmitting ? 'Creating...' : 'Create Contact'}
         </Button>
       </form>
     </Form>

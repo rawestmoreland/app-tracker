@@ -42,7 +42,7 @@ async function fetchApplications(dbUser: User) {
     },
     ['applications', dbUser.id],
     {
-      revalidate: 300,
+      revalidate: 60,
       tags: ['applications'],
     },
   );
@@ -79,7 +79,7 @@ async function fetchAnalytics(dbUser: User) {
     },
     ['analytics', dbUser.id],
     {
-      revalidate: 300,
+      revalidate: 60,
       tags: ['analytics'],
     },
   );

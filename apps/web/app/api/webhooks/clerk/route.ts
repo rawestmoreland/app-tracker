@@ -26,36 +26,38 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      await prisma.userPreference.createMany({
-        data: [
-          {
-            userId: newUser.id,
-            configName: 'app-table-columns-visibility',
-            configValue: {
-              title: true,
-              'company.name': true,
-              status: true,
-              remote: true,
-              appliedAt: true,
-              interviews: true,
+      await prisma.userPreference
+        .createMany({
+          data: [
+            {
+              userId: newUser.id,
+              configName: 'app-table-columns-visibility',
+              configValue: {
+                title: true,
+                'company.name': true,
+                status: true,
+                remote: true,
+                appliedAt: true,
+                interviews: true,
+              },
             },
-          },
-          {
-            userId: newUser.id,
-            configName: 'app-table-pagination-size',
-            configValue: {
-              pageSize: 10,
+            {
+              userId: newUser.id,
+              configName: 'app-table-pagination-size',
+              configValue: {
+                pageSize: 10,
+              },
             },
-          },
-          {
-            userId: newUser.id,
-            configName: 'user-preferences',
-            configValue: {
-              ghostThreshold: 5 * 24 * 60 * 60,
+            {
+              userId: newUser.id,
+              configName: 'user-preferences',
+              configValue: {
+                ghostThreshold: 5 * 24 * 60 * 60,
+              },
             },
-          },
-        ],
-      });
+          ],
+        })
+        .catch(console.error);
 
       // Add the contact to resend
       await resend.contacts.create({
@@ -86,7 +88,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (!user) {
-        return new Response('User not found', { status: 404 });
+        return new Response('User already deleted', { status: 200 });
       }
 
       await prisma.user.delete({

@@ -865,9 +865,7 @@ export default function ApplicationsTable({
                     Date.now() -
                       new Date(application.activities[0].createdAt).getTime() >
                       userPreferences.ghostThreshold * 1000 &&
-                    application.status !== ApplicationStatus.GHOSTED &&
-                    application.status !== ApplicationStatus.DRAFT &&
-                    application.status !== ApplicationStatus.REJECTED;
+                    !isTerminalStatus(application.status);
 
                   return (
                     <TableRow

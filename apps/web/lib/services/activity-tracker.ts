@@ -13,7 +13,6 @@ import {
   getStageOrder,
   generateSankeyData,
   SankeyData,
-  APPLICATION_FLOW_STAGES,
 } from '@/lib/application-flow';
 
 interface ActivityData {
@@ -544,7 +543,16 @@ export class ActivityTracker {
       },
     });
 
-    // Group activities by application to build bridged paths
+    // Group activities by application to build application histories
+    const applicationHistories: Array<{
+      applicationId: string;
+      transitions: Array<{
+        fromStatus: ApplicationStatus | null;
+        toStatus: ApplicationStatus;
+        createdAt: Date;
+      }>;
+    }> = [];
+
     const applicationActivities = new Map<
       string,
       typeof statusChangeActivities
@@ -559,74 +567,109 @@ export class ActivityTracker {
       applicationActivities.get(activity.applicationId)!.push(activity);
     });
 
-    // Build bridged transitions for each application
-    const transitionMap = new Map<string, number>();
-
+    // Convert to application histories format
     applicationActivities.forEach((activities, applicationId) => {
-      // Sort activities by creation time (ascending) to get chronological order
-      const sortedActivities = activities.sort(
-        (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+      const transitions = activities
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        .map(activity => ({
+          fromStatus: activity.fromStatus as ApplicationStatus | null,
+          toStatus: activity.toStatus as ApplicationStatus,
+          createdAt: activity.createdAt,
+        }));
+
+      applicationHistories.push({ applicationId, transitions });
+    });
+
+    // Use the new intelligent processing logic
+    return this.processApplicationHistoriesForSankey(applicationHistories);
+  }
+
+  // New method that uses the same logic as the updated application-flow.ts
+  private static processApplicationHistoriesForSankey(
+    applicationHistories: Array<{
+      applicationId: string;
+      transitions: Array<{
+        fromStatus: ApplicationStatus | null;
+        toStatus: ApplicationStatus;
+        createdAt: Date;
+      }>;
+    }>
+  ): Array<{
+    fromStatus: ApplicationStatus | null;
+    toStatus: ApplicationStatus;
+    count: number;
+  }> {
+    const terminalStatuses = ['ACCEPTED', 'REJECTED', 'WITHDRAWN', 'GHOSTED', 'POSITION_FILLED'];
+    const transitionCounts = new Map<string, number>();
+
+    applicationHistories.forEach(({ transitions }) => {
+      // Sort transitions by date to ensure proper order
+      const sortedTransitions = [...transitions].sort((a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
       );
 
-      // Find the bridged path by skipping terminal statuses, but include final terminal transitions
-      let lastNonTerminalStatus: string | null = null;
-      let lastActivity = sortedActivities[sortedActivities.length - 1];
+      // Find the last meaningful state before terminal transitions
+      let lastMeaningfulState: ApplicationStatus | null = null;
 
-      for (const activity of sortedActivities) {
-        if (!activity.fromStatus || !activity.toStatus) continue;
+      // First, try to find the last non-terminal state
+      for (const transition of sortedTransitions) {
+        if (!terminalStatuses.includes(transition.toStatus)) {
+          lastMeaningfulState = transition.toStatus;
+        } else {
+          break; // Stop at first terminal state
+        }
+      }
 
-        const fromStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[activity.fromStatus as ApplicationStatus]
-            .isTerminal;
-        const toStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[activity.toStatus as ApplicationStatus]
-            .isTerminal;
+      // If no non-terminal state found, use the fromStatus of the first terminal transition
+      if (!lastMeaningfulState && sortedTransitions.length > 0) {
+        const firstTerminalTransition = sortedTransitions.find(transition =>
+          terminalStatuses.includes(transition.toStatus)
+        );
+        if (firstTerminalTransition && firstTerminalTransition.fromStatus) {
+          lastMeaningfulState = firstTerminalTransition.fromStatus;
+        }
+      }
 
-        if (!toStatusIsTerminal) {
-          // This is a non-terminal status
-          if (
-            lastNonTerminalStatus &&
-            lastNonTerminalStatus !== activity.toStatus
-          ) {
-            // Create a bridged transition from the last non-terminal status to this one
-            const key = `${lastNonTerminalStatus}->${activity.toStatus}`;
-            transitionMap.set(key, (transitionMap.get(key) || 0) + 1);
+      // Process each transition
+      for (let i = 0; i < sortedTransitions.length; i++) {
+        const transition = sortedTransitions[i];
+        const { fromStatus, toStatus } = transition;
+
+        // Check if this is a problematic transition
+        const isTerminalToTerminal = fromStatus &&
+          terminalStatuses.includes(fromStatus) &&
+          terminalStatuses.includes(toStatus);
+
+        const isTerminalToNonTerminal = fromStatus &&
+          terminalStatuses.includes(fromStatus) &&
+          !terminalStatuses.includes(toStatus);
+
+        if (isTerminalToTerminal || isTerminalToNonTerminal) {
+          // Bridge using the last meaningful state if available
+          if (lastMeaningfulState) {
+            const transitionKey = `${lastMeaningfulState}->${toStatus}`;
+            transitionCounts.set(transitionKey, (transitionCounts.get(transitionKey) || 0) + 1);
           }
-          lastNonTerminalStatus = activity.toStatus;
-        } else if (!fromStatusIsTerminal) {
-          // If we're moving to a terminal status from a non-terminal status,
-          // we need to remember the non-terminal status for potential bridging
-          lastNonTerminalStatus = activity.fromStatus;
-        }
-        // If both are terminal, we skip entirely
-      }
-
-      // If the application ends in a terminal status, include that final transition
-      if (lastActivity && lastActivity.fromStatus && lastActivity.toStatus) {
-        const lastToStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[lastActivity.toStatus as ApplicationStatus]
-            .isTerminal;
-        const lastFromStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[lastActivity.fromStatus as ApplicationStatus]
-            .isTerminal;
-
-        if (lastToStatusIsTerminal && !lastFromStatusIsTerminal) {
-          // This application ends in a terminal status from a non-terminal status
-          const key = `${lastActivity.fromStatus}->${lastActivity.toStatus}`;
-          transitionMap.set(key, (transitionMap.get(key) || 0) + 1);
+          // Skip transitions that have no meaningful progression to show
+        } else {
+          // Normal transition - keep as is
+          const transitionKey = `${fromStatus || 'START'}->${toStatus}`;
+          transitionCounts.set(transitionKey, (transitionCounts.get(transitionKey) || 0) + 1);
         }
       }
     });
 
-    return Array.from(transitionMap.entries()).map(([key, count]) => {
-      const [fromStatus, toStatus] = key.split('->');
-      return {
-        fromStatus: fromStatus as ApplicationStatus,
-        toStatus: toStatus as ApplicationStatus,
-        count,
-      };
-    });
+    // Convert back to the expected format
+    return Array.from(transitionCounts.entries())
+      .filter(([key]) => !key.startsWith('START->')) // Filter out any remaining START transitions
+      .map(([key, count]) => {
+        const [fromStatus, toStatus] = key.split('->');
+        return {
+          fromStatus: fromStatus as ApplicationStatus,
+          toStatus: toStatus as ApplicationStatus,
+          count
+        };
+      });
   }
 
   static async generateUserSankeyData(

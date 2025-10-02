@@ -3,8 +3,6 @@
 import { prisma } from '@/lib/prisma';
 import { ApplicationFlowData } from '@/lib/types/sankey';
 import { getSignedInUser } from '@/app/lib/auth';
-import { APPLICATION_FLOW_STAGES } from '../application-flow';
-import { ApplicationStatus } from '@prisma/client';
 
 export async function getApplicationFlowData(): Promise<ApplicationFlowData[]> {
   try {
@@ -56,110 +54,92 @@ export async function getApplicationFlowData(): Promise<ApplicationFlowData[]> {
       applicationActivities.get(activity.applicationId)!.push(activity);
     });
 
-    // Build bridged transitions for each application
+    // Build bridged transitions for each application using intelligent bridging
     const bridgedTransitions = new Map<string, ApplicationFlowData>();
+    const terminalStatuses = ['ACCEPTED', 'REJECTED', 'WITHDRAWN', 'GHOSTED', 'POSITION_FILLED'];
 
-    applicationActivities.forEach((activities, applicationId) => {
+    applicationActivities.forEach((activities) => {
       // Sort activities by creation time (ascending) to get chronological order
       const sortedActivities = activities.sort(
         (a, b) =>
           new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
       );
 
-      // Find the bridged path by skipping terminal statuses, but include final terminal transitions
-      let lastNonTerminalStatus: string | null = null;
-      let lastActivity = sortedActivities[sortedActivities.length - 1];
+      // Find the last meaningful state before terminal transitions
+      let lastMeaningfulState: string | null = null;
 
+      // First, try to find the last non-terminal state
       for (const activity of sortedActivities) {
+        if (!terminalStatuses.includes(activity.toStatus!)) {
+          lastMeaningfulState = activity.toStatus;
+        } else {
+          break; // Stop at first terminal state
+        }
+      }
+
+      // If no non-terminal state found, use the fromStatus of the first terminal transition
+      if (!lastMeaningfulState && sortedActivities.length > 0) {
+        const firstTerminalTransition = sortedActivities.find(activity =>
+          terminalStatuses.includes(activity.toStatus!)
+        );
+        if (firstTerminalTransition && firstTerminalTransition.fromStatus) {
+          lastMeaningfulState = firstTerminalTransition.fromStatus;
+        }
+      }
+
+      // Process each transition
+      for (let i = 0; i < sortedActivities.length; i++) {
+        const activity = sortedActivities[i];
         if (!activity.fromStatus || !activity.toStatus) continue;
 
-        const fromStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[activity.fromStatus as ApplicationStatus]
-            .isTerminal;
-        const toStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[activity.toStatus as ApplicationStatus]
-            .isTerminal;
+        // Check if this is a problematic transition
+        const isTerminalToTerminal = terminalStatuses.includes(activity.fromStatus) &&
+          terminalStatuses.includes(activity.toStatus);
+        const isTerminalToNonTerminal = terminalStatuses.includes(activity.fromStatus) &&
+          !terminalStatuses.includes(activity.toStatus);
 
-        if (!toStatusIsTerminal) {
-          // This is a non-terminal status
-          if (
-            lastNonTerminalStatus &&
-            lastNonTerminalStatus !== activity.toStatus
-          ) {
-            // Create a bridged transition from the last non-terminal status to this one
-            const key = `${lastNonTerminalStatus}->${activity.toStatus}`;
+        let transitionKey: string;
+        let fromStatus: string;
 
-            if (bridgedTransitions.has(key)) {
-              const existing = bridgedTransitions.get(key)!;
-              existing.count += 1;
-              existing.applications?.push({
+        if (isTerminalToTerminal || isTerminalToNonTerminal) {
+          // Bridge using the last meaningful state if available
+          if (lastMeaningfulState) {
+            fromStatus = lastMeaningfulState;
+            transitionKey = `${fromStatus}->${activity.toStatus}`;
+          } else {
+            // Skip transitions that have no meaningful progression to show
+            continue;
+          }
+        } else {
+          // Normal transition - keep as is
+          fromStatus = activity.fromStatus;
+          transitionKey = `${fromStatus}->${activity.toStatus}`;
+        }
+
+        // Update or create the transition entry
+        if (bridgedTransitions.has(transitionKey)) {
+          const existing = bridgedTransitions.get(transitionKey)!;
+          existing.count += 1;
+          existing.applications?.push({
+            id: activity.application!.id,
+            title: activity.application!.title,
+            company: activity.application!.company.name,
+            appliedAt: activity.application!.appliedAt,
+          });
+        } else {
+          bridgedTransitions.set(transitionKey, {
+            fromStatus: fromStatus,
+            toStatus: activity.toStatus,
+            count: 1,
+            applications: [
+              {
                 id: activity.application!.id,
                 title: activity.application!.title,
                 company: activity.application!.company.name,
                 appliedAt: activity.application!.appliedAt,
-              });
-            } else {
-              bridgedTransitions.set(key, {
-                fromStatus: lastNonTerminalStatus,
-                toStatus: activity.toStatus,
-                count: 1,
-                applications: [
-                  {
-                    id: activity.application!.id,
-                    title: activity.application!.title,
-                    company: activity.application!.company.name,
-                    appliedAt: activity.application!.appliedAt,
-                  },
-                ],
-              });
-            }
-          }
-          lastNonTerminalStatus = activity.toStatus;
-        } else if (!fromStatusIsTerminal) {
-          // If we're moving to a terminal status from a non-terminal status,
-          // we need to remember the non-terminal status for potential bridging
-          lastNonTerminalStatus = activity.fromStatus;
-        }
-        // If both are terminal, we skip entirely
-      }
-
-      // If the application ends in a terminal status, include that final transition
-      if (lastActivity && lastActivity.fromStatus && lastActivity.toStatus) {
-        const lastToStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[lastActivity.toStatus as ApplicationStatus]
-            .isTerminal;
-        const lastFromStatusIsTerminal =
-          APPLICATION_FLOW_STAGES[lastActivity.fromStatus as ApplicationStatus]
-            .isTerminal;
-
-        if (lastToStatusIsTerminal && !lastFromStatusIsTerminal) {
-          // This application ends in a terminal status from a non-terminal status
-          const key = `${lastActivity.fromStatus}->${lastActivity.toStatus}`;
-
-          if (bridgedTransitions.has(key)) {
-            const existing = bridgedTransitions.get(key)!;
-            existing.count += 1;
-            existing.applications?.push({
-              id: lastActivity.application!.id,
-              title: lastActivity.application!.title,
-              company: lastActivity.application!.company.name,
-              appliedAt: lastActivity.application!.appliedAt,
-            });
-          } else {
-            bridgedTransitions.set(key, {
-              fromStatus: lastActivity.fromStatus,
-              toStatus: lastActivity.toStatus,
-              count: 1,
-              applications: [
-                {
-                  id: lastActivity.application!.id,
-                  title: lastActivity.application!.title,
-                  company: lastActivity.application!.company.name,
-                  appliedAt: lastActivity.application!.appliedAt,
-                },
-              ],
-            });
-          }
+              },
+            ],
+          });
         }
       }
     });

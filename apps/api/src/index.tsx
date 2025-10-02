@@ -29,12 +29,27 @@ app.get('/', (c) => {
     <div
       style={{
         display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
       }}
     >
       <h1>The App Track API</h1>
+      <a
+        href="https://documenter.getpostman.com/view/21796760/2sB3QFPXDP#e9f83982-5b57-4a4f-9a70-e496e45705e3"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          fontSize: '14px',
+          color: 'blue',
+          textDecoration: 'underline',
+          underlineOffset: '4px',
+        }}
+      >
+        Documentation
+      </a>
     </div>,
   );
 });

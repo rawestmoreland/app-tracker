@@ -70,7 +70,7 @@ async function fetchCompanies(
       limit.toString(),
     ],
     {
-      revalidate: 300,
+      revalidate: 60,
       tags: ['companies, applications'],
     },
   );
