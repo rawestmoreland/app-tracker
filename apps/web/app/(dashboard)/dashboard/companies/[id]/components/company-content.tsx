@@ -33,7 +33,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { NoteType } from '@prisma/client';
-import { addNote } from '@/lib/actions/application-actions';
+import { addCompanyNote } from '@/lib/actions/application-actions';
 
 export function CompanyContent({
   company,
@@ -52,7 +52,7 @@ export function CompanyContent({
   });
 
   const handleAddNote = async (data: NoteFormData) => {
-    const result = await addNote(company.id, data);
+    const result = await addCompanyNote(company.id, data);
 
     if (result.success) {
       noteForm.reset();
