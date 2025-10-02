@@ -166,25 +166,31 @@ export function NotesSection({
         <p className="py-4 text-center text-gray-500">No notes yet.</p>
       ) : (
         <div className="space-y-4">
-          {notes.map((note) => (
-            <div
-              key={note.id}
-              className="cursor-pointer rounded-r-md border-l-4 border-blue-500 pl-4 transition-colors duration-150 hover:bg-gray-50"
-              onClick={() => handleNoteClick(note)}
-            >
-              <div className="flex items-start justify-between">
-                <div className="flex-1 text-sm whitespace-pre-wrap text-gray-900">
-                  <TiptapDisplay content={note.content} />
+          {notes
+            .sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime(),
+            )
+            .map((note) => (
+              <div
+                key={note.id}
+                className="cursor-pointer rounded-r-md border-l-4 border-blue-500 pl-4 transition-colors duration-150 hover:bg-gray-50"
+                onClick={() => handleNoteClick(note)}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 text-sm whitespace-pre-wrap text-gray-900">
+                    <TiptapDisplay content={note.content} />
+                  </div>
+                  <span className="ml-2 flex-shrink-0 text-xs text-gray-500">
+                    {format(note.createdAt, 'MM/dd/yyyy')}
+                  </span>
                 </div>
-                <span className="ml-2 flex-shrink-0 text-xs text-gray-500">
-                  {format(note.createdAt, 'MM/dd/yyyy')}
+                <span className="mt-1 inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
+                  {note.type.replace('_', ' ')}
                 </span>
               </div>
-              <span className="mt-1 inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
-                {note.type.replace('_', ' ')}
-              </span>
-            </div>
-          ))}
+            ))}
         </div>
       )}
 
