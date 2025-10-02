@@ -40,7 +40,7 @@ import { InterviewFormatDropdown } from '@/app/_components/dashboard/interview-f
 import { InterviewDurationEditor } from '@/app/_components/dashboard/interview-duration-editor';
 import { InterviewDateTimeEditor } from '@/app/_components/dashboard/interview-datetime-editor';
 import { NotesSection } from '@/app/_components/dashboard/notes/notes-section';
-import { addNote } from '@/lib/actions/application-actions';
+import { addApplicationNote } from '@/lib/actions/application-actions';
 import { toast } from 'sonner';
 import { deleteInterview } from '@/lib/actions/interview-actions';
 import { useRouter } from 'next/navigation';
@@ -105,7 +105,7 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
 
   const handleAddNote = async (data: NoteFormData) => {
     try {
-      const result = await addNote(interview.application.id, {
+      const result = await addApplicationNote(interview.application.id, {
         ...data,
         interviewId: interview.id,
       });
