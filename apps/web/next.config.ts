@@ -34,6 +34,10 @@ const nextConfig: NextConfig = {
         source: '/privacy-policy',
         destination: '/privacy.html',
       },
+      {
+        source: '/cookie-policy',
+        destination: '/cookie-policy.html',
+      },
     ];
   },
 };

@@ -8,7 +8,7 @@ export default function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    const consent = getCookie('cookie-consent');
+    const consent = getCookie('cookie-consent-apptrack');
     if (!consent) {
       setShowBanner(true);
     }
@@ -30,7 +30,16 @@ export default function CookieBanner() {
     <div className="fixed right-0 bottom-0 left-0 z-50 bg-gray-900 p-4 text-white">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 md:flex-row">
         <div className="text-sm">
-          We use cookies to improve your experience and analyze site traffic.
+          We use cookies to improve your experience and analyze site traffic. By
+          clicking "Accept", you consent to our use of cookies.{' '}
+          <a
+            href="/cookie-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Learn more
+          </a>
         </div>
         <div className="flex gap-2">
           <button

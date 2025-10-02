@@ -8,6 +8,7 @@ import { getSignedInUser } from '../lib/auth';
 import { UserRole } from '@prisma/client';
 import CookieBanner from '@/components/cookie-banner';
 import { ConditionalAnalytics } from '@/components/conditional-analytics';
+import CookieButton from '@/components/cookie-button';
 
 export const metadata: Metadata = {
   title: 'App Track - Dashboard',
@@ -44,12 +45,13 @@ export default async function RootLayout({
                   {children}
                 </div>
               </main>
-              <footer className="h-16 shrink-0 border-t border-gray-200 bg-white">
-                <div className="flex h-16 items-center justify-center">
+              <footer className="h-16 shrink-0 border-t border-gray-200 bg-white px-4">
+                <div className="flex h-16 items-center justify-between">
                   <p className="text-center text-sm text-gray-500">
                     &copy; {new Date().getFullYear()} Westmoreland Creative LLC.
                     All rights reserved.
                   </p>
+                  <CookieButton />
                 </div>
               </footer>
             </div>
