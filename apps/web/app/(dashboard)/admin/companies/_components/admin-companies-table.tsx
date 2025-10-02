@@ -21,6 +21,9 @@ import {
   Calendar,
   TrendingUp,
   Shield,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -292,7 +295,22 @@ export function AdminCompaniesTable({
       ),
     }),
     columnHelper.accessor('createdAt', {
-      header: 'Added',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="h-auto p-0 font-medium tracking-wider text-gray-500 uppercase hover:bg-transparent"
+        >
+          Added
+          {column.getIsSorted() === 'asc' ? (
+            <ChevronUp className="ml-2 h-4 w-4" />
+          ) : column.getIsSorted() === 'desc' ? (
+            <ChevronDown className="ml-2 h-4 w-4" />
+          ) : (
+            <ChevronsUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      ),
       cell: (info) => {
         const date = info.getValue();
         return (
@@ -301,6 +319,11 @@ export function AdminCompaniesTable({
             <span>{new Date(date).toLocaleDateString()}</span>
           </div>
         );
+      },
+      sortingFn: (rowA, rowB) => {
+        const dateA = new Date(rowA.original.createdAt).getTime();
+        const dateB = new Date(rowB.original.createdAt).getTime();
+        return dateA - dateB;
       },
     }),
   ];
