@@ -93,7 +93,7 @@ export async function createCompany({
   const plainTextDescription = company.plainTextDescription || null;
 
   // Upload the logo to our R2 bucket
-  let logoFilename = null;
+  let filename = null;
   if (logo) {
     const result = await LogoUploadService.uploadLogo(
       logo,
@@ -101,7 +101,7 @@ export async function createCompany({
       name,
     );
     if (result.success) {
-      logoFilename = result.filename;
+      filename = result.filename;
     }
   }
 
@@ -114,7 +114,8 @@ export async function createCompany({
       industry,
       size,
       location,
-      logo: logoFilename || logo,
+      logo:
+        `${process.env.R2_COMPANY_LOGO_BASE_URL}/${filename}` || logo || null,
       visibility: finalVisibility,
       isGlobal: finalIsGlobal,
       createdBy: dbUser.id,
