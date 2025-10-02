@@ -216,7 +216,7 @@ function CTASection() {
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             Ready to Transform Your Job Search?
           </h2>
-          <p className="mt-4 text-lg text-blue-100">
+          <p className="mt-4 text-lg text-white">
             Join thousands of professionals who have already streamlined their
             career journey with App Track.
           </p>
