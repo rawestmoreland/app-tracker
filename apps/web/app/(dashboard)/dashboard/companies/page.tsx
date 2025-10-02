@@ -64,6 +64,7 @@ async function fetchCompanies(
     },
     [
       'companies-with-apps',
+      dbUser.id,
       search,
       skip.toString(),
       page.toString(),
@@ -79,7 +80,7 @@ async function fetchCompanies(
     async () => {
       return prisma.company.count({ where });
     },
-    ['companies-with-apps-count', search],
+    ['companies-with-apps-count', dbUser.id, search],
     {
       revalidate: 300,
       tags: ['companies, applications'],
