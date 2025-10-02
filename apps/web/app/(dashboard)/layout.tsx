@@ -9,6 +9,7 @@ import { UserRole } from '@prisma/client';
 import CookieBanner from '@/components/cookie-banner';
 import { ConditionalAnalytics } from '@/components/conditional-analytics';
 import CookieButton from '@/components/cookie-button';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
   title: 'App Track - Dashboard',
@@ -35,6 +36,7 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider waitlistUrl="/waitlist" signUpForceRedirectUrl="/onboarding">
+      <SpeedInsights />
       <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
         <body className="antialiased">
           <>

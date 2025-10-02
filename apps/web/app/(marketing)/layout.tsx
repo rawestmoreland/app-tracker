@@ -4,6 +4,7 @@ import '../globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import CookieBanner from '@/components/cookie-banner';
 import { ConditionalAnalytics } from '@/components/conditional-analytics';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -90,6 +91,7 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider waitlistUrl="/waitlist" signUpForceRedirectUrl="/onboarding">
+      <SpeedInsights />
       <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
         <body className="antialiased">
           <>
