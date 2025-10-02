@@ -307,7 +307,10 @@ export async function updateApplication(id: string, data: ApplicationFormData) {
   }
 }
 
-export async function addNote(applicationId: string, data: NoteFormData) {
+export async function addApplicationNote(
+  applicationId: string,
+  data: NoteFormData,
+) {
   const { dbUser } = await getSignedInUser();
 
   if (!dbUser) {
@@ -342,6 +345,48 @@ export async function addNote(applicationId: string, data: NoteFormData) {
     revalidatePath(`/dashboard/applications/${applicationId}`);
     revalidateTag('applications');
     revalidateTag('analytics');
+
+    return { success: true, note };
+  } catch (error) {
+    console.error('Error adding note:', error);
+    return { success: false, error: 'Failed to add note' };
+  }
+}
+
+export async function addCompanyNote(companyId: string, data: NoteFormData) {
+  const { dbUser } = await getSignedInUser();
+
+  if (!dbUser) {
+    return { success: false, error: 'Unauthorized' };
+  }
+
+  try {
+    const note = await prisma.note.create({
+      data: {
+        content: data.content,
+        type: data.type,
+        userId: dbUser.id,
+        companyId: companyId,
+        interviewId: data.interviewId,
+      },
+      include: {
+        application: {
+          include: { company: true },
+        },
+        interview: {
+          include: { application: { include: { company: true } } },
+        },
+      },
+    });
+
+    await ActivityTracker.trackNoteCreated(
+      note.id,
+      note.type,
+      note.application?.company.name,
+    );
+
+    revalidatePath(`/dashboard/companies/${companyId}`);
+    revalidateTag('companies');
 
     return { success: true, note };
   } catch (error) {

@@ -30,7 +30,7 @@ import {
   getStatusColor,
 } from '@/lib/utils';
 import {
-  addNote,
+  addApplicationNote,
   deleteApplication,
   deleteResume,
   updateApplication,
@@ -166,7 +166,7 @@ export default function ApplicationContent({
   };
 
   const handleAddNote = async (data: NoteFormData) => {
-    const result = await addNote(application.id, data);
+    const result = await addApplicationNote(application.id, data);
 
     if (result.success) {
       noteForm.reset();
