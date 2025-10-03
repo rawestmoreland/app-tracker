@@ -53,6 +53,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { TiptapDisplay } from '@/components/tiptap-editor';
 
 type FullInterview = Interview & {
   notes: Note[];
@@ -293,7 +294,7 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
                   </h3>
                   <div className="rounded-md bg-gray-50 p-3">
                     <p className="text-sm whitespace-pre-wrap text-gray-900">
-                      {interview.feedback}
+                      <TiptapDisplay content={interview.feedback} />
                     </p>
                   </div>
                 </div>
