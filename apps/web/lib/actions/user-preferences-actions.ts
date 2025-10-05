@@ -146,6 +146,7 @@ export async function updateUserPreferences(data: z.infer<typeof prefsSchema>) {
         configValue: {
           receiveEmailNotifications: data.receiveEmailNotifications,
           ghostThreshold: data.ghostThreshold,
+          currency: data.currency,
         },
       },
       create: {
@@ -154,6 +155,7 @@ export async function updateUserPreferences(data: z.infer<typeof prefsSchema>) {
         configValue: {
           receiveEmailNotifications: data.receiveEmailNotifications,
           ghostThreshold: data.ghostThreshold,
+          currency: data.currency,
         },
       },
       select: {

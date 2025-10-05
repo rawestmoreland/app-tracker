@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
               configName: 'user-preferences',
               configValue: {
                 ghostThreshold: 5 * 24 * 60 * 60,
+                currency: 'USD',
               },
             },
           ],

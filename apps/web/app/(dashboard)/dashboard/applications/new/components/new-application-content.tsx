@@ -18,8 +18,10 @@ import {
 
 export default function NewApplicationContent({
   companies,
+  defaultCurrency,
 }: {
   companies: Company[];
+  defaultCurrency: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,7 +36,7 @@ export default function NewApplicationContent({
       jobUrl: '',
       lowSalary: undefined,
       highSalary: undefined,
-      currency: 'USD',
+      currency: defaultCurrency ?? 'USD',
       location: '',
       remote: RemoteType.ON_SITE,
       status: ApplicationStatus.APPLIED,
@@ -102,6 +104,7 @@ export default function NewApplicationContent({
             form={form}
             handleSubmit={handleSubmit}
             companies={companies}
+            defaultCurrency={defaultCurrency}
           />
         </div>
       </div>

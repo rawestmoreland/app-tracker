@@ -26,6 +26,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { updateUserPreferences } from '@/lib/actions/user-preferences-actions';
 import { type UserPreferences } from '@/lib/types/user';
+import { CURRENCIES } from '@/lib/utils/currency';
 import { useAuth } from '@clerk/clerk-react';
 import { UserButton } from '@clerk/nextjs';
 import { useForm } from 'react-hook-form';
@@ -36,6 +37,7 @@ export const prefsSchema = z.object({
   ghostThreshold: z.number().min(5 * 24 * 60 * 60),
   receiveEmailNotifications: z.boolean(),
   dataOptOut: z.boolean(),
+  currency: z.string(),
 });
 
 export default function ProfileContent({
@@ -44,11 +46,13 @@ export default function ProfileContent({
   userPrefs: UserPreferences;
 }) {
   const { isLoaded } = useAuth();
+
   const prefsForm = useForm({
     defaultValues: {
       ghostThreshold: userPrefs.ghostThreshold,
       receiveEmailNotifications: userPrefs.receiveEmailNotifications,
       dataOptOut: userPrefs.dataOptOut,
+      currency: userPrefs.currency ?? 'USD',
     },
   });
 
@@ -60,6 +64,7 @@ export default function ProfileContent({
         ghostThreshold: result.prefs.ghostThreshold,
         receiveEmailNotifications: result.prefs.receiveEmailNotifications,
         dataOptOut: result.prefs.dataOptOut,
+        currency: result.prefs.currency,
       });
       toast('User preferences updated', {
         description: 'Your preferences have been updated.',
@@ -132,6 +137,45 @@ export default function ProfileContent({
                         <SelectItem value={(30 * 24 * 60 * 60).toString()}>
                           30 days
                         </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={prefsForm.control}
+                name="currency"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Default Currency</FormLabel>
+                    <FormDescription>
+                      The currency you want to use for salary fields.
+                    </FormDescription>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        prefsForm.handleSubmit(onSubmit)();
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder="Select a currency"
+                            defaultValue={field.value}
+                          />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {CURRENCIES.map((currency) => (
+                          <SelectItem
+                            key={currency.currencyCode}
+                            value={currency.currencyCode}
+                          >
+                            {currency.currencyCode} {currency.symbol}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

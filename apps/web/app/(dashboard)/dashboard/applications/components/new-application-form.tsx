@@ -34,6 +34,7 @@ import { ApplicationFormData } from '../lib/new-application-schema';
 import { startCase } from 'lodash';
 import { TiptapEditor } from '@/components/tiptap-editor';
 import { useState, useEffect, useMemo } from 'react';
+import { CURRENCIES } from '@/lib/utils/currency';
 
 export default function ApplicationForm({
   form,
@@ -41,12 +42,14 @@ export default function ApplicationForm({
   companies,
   isEdit = false,
   cancelEdit,
+  defaultCurrency,
 }: {
   form: UseFormReturn<ApplicationFormData>;
   handleSubmit: (data: ApplicationFormData) => Promise<void>;
   companies: Company[];
   isEdit?: boolean;
   cancelEdit?: () => void;
+  defaultCurrency: string;
 }): React.ReactNode {
   const router = useRouter();
   const [isNewCompany, setIsNewCompany] = useState(false);
@@ -264,7 +267,7 @@ export default function ApplicationForm({
                 <FormLabel>Currency</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  defaultValue={defaultCurrency ?? 'USD'}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -272,12 +275,14 @@ export default function ApplicationForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="USD">USD ($)</SelectItem>
-                    <SelectItem value="EUR">EUR (€)</SelectItem>
-                    <SelectItem value="GBP">GBP (£)</SelectItem>
-                    <SelectItem value="CAD">CAD (C$)</SelectItem>
-                    <SelectItem value="AUD">AUD (A$)</SelectItem>
-                    <SelectItem value="JPY">JPY (¥)</SelectItem>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem
+                        key={currency.currencyCode}
+                        value={currency.currencyCode}
+                      >
+                        {currency.currencyCode} {currency.symbol}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <FormMessage />
