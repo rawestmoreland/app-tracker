@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation';
 import ApplicationContent from './components/application-content';
 import { User } from '@prisma/client';
 import { UserPreferences } from '@/lib/types/user';
+import { unstable_cache } from 'next/cache';
 
 export async function generateMetadata({
   params,
@@ -27,7 +28,40 @@ export async function generateMetadata({
 }
 
 const fetchCompanies = async () => {
-  const companies = await prisma.company.findMany();
+  const { dbUser } = await getSignedInUser();
+  if (!dbUser) {
+    return [];
+  }
+
+  const getCachedCompanies = unstable_cache(
+    async () => {
+      const { dbUser } = await getSignedInUser();
+      if (!dbUser) {
+        return [];
+      }
+      return prisma.company.findMany({
+        include: {
+          applications: {
+            select: {
+              id: true,
+            },
+            where: {
+              userId: dbUser.id,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    },
+    ['companies-with-apps', dbUser.id],
+    {
+      revalidate: 60,
+      tags: ['companies, applications'],
+    },
+  );
+  const companies = await getCachedCompanies();
 
   return companies;
 };
