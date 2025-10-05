@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import ApplicationContent from './components/application-content';
 import { User } from '@prisma/client';
+import { UserPreferences } from '@/lib/types/user';
+import { unstable_cache } from 'next/cache';
 
 export async function generateMetadata({
   params,
@@ -25,8 +27,32 @@ export async function generateMetadata({
   };
 }
 
-const fetchCompanies = async () => {
-  const companies = await prisma.company.findMany();
+const fetchCompanies = async (dbUser: User) => {
+  const getCachedCompanies = unstable_cache(
+    async (dbUser: User) => {
+      return prisma.company.findMany({
+        include: {
+          applications: {
+            select: {
+              id: true,
+            },
+            where: {
+              userId: dbUser.id,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+    },
+    ['companies-with-apps', dbUser.id],
+    {
+      revalidate: 60,
+      tags: ['companies, applications'],
+    },
+  );
+  const companies = await getCachedCompanies(dbUser);
 
   return companies;
 };
@@ -67,6 +93,18 @@ const fetchResumes = async (dbUser: User) => {
   return resumes;
 };
 
+const fetchUserPrefs = async (dbUser: User) => {
+  const userPrefs = await prisma.userPreference.findUnique({
+    where: {
+      userId_configName: {
+        userId: dbUser.id,
+        configName: 'user-preferences',
+      },
+    },
+  });
+  return userPrefs?.configValue as UserPreferences;
+};
+
 export default async function ApplicationDetail({
   params,
 }: {
@@ -80,13 +118,15 @@ export default async function ApplicationDetail({
   }
 
   const applicationPromise = fetchApplication(dbUser, id);
-  const companiesPromise = fetchCompanies();
+  const companiesPromise = fetchCompanies(dbUser);
+  const userPrefsPromise = fetchUserPrefs(dbUser);
   const resumesPromise = fetchResumes(dbUser);
 
-  const [application, companies, resumes] = await Promise.all([
+  const [application, companies, resumes, userPrefs] = await Promise.all([
     applicationPromise,
     companiesPromise,
     resumesPromise,
+    userPrefsPromise,
   ]);
 
   return (
@@ -94,6 +134,7 @@ export default async function ApplicationDetail({
       application={application}
       companies={companies}
       resumes={resumes}
+      defaultCurrency={userPrefs?.currency ?? 'USD'}
     />
   );
 }

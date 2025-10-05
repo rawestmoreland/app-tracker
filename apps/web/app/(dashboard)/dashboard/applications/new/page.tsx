@@ -6,6 +6,7 @@ import { getSignedInUser } from '@/app/lib/auth';
 import { Metadata } from 'next';
 import { unauthorized } from 'next/navigation';
 import { User } from '@prisma/client';
+import { UserPreferences } from '@/lib/types/user';
 
 export const metadata: Metadata = {
   title: 'App Track - New Application',
@@ -61,17 +62,38 @@ async function fetchCompanies(dbUser: User) {
   return companies;
 }
 
+async function fetchUserPrefs(dbUser: User) {
+  const userPrefs = await prisma.userPreference.findUnique({
+    where: {
+      userId_configName: {
+        userId: dbUser.id,
+        configName: 'user-preferences',
+      },
+    },
+  });
+  return userPrefs?.configValue as UserPreferences;
+}
+
 export default async function NewApplication() {
   const { dbUser } = await getSignedInUser();
   if (!dbUser) {
     return unauthorized();
   }
 
-  const companies = await fetchCompanies(dbUser);
+  const prefsPromise = fetchUserPrefs(dbUser);
+  const companiesPromise = fetchCompanies(dbUser);
+
+  const [companies, userPrefs] = await Promise.all([
+    companiesPromise,
+    prefsPromise,
+  ]);
 
   return (
     <Suspense fallback={<NewApplicationLoading />}>
-      <NewApplicationContent companies={companies} />
+      <NewApplicationContent
+        companies={companies}
+        defaultCurrency={userPrefs?.currency ?? 'USD'}
+      />
     </Suspense>
   );
 }

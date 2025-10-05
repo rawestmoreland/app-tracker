@@ -16,13 +16,12 @@ import {
 } from '@prisma/client';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ApplicationFormData, schema } from '../../lib/new-application-schema';
 import ApplicationForm from '../../components/new-application-form';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { FileUpload } from '@/components/file-upload';
 import ResumeSelector from '@/components/resume-selector';
 import {
   getRemotePolicyColor,
@@ -32,25 +31,9 @@ import {
 import {
   addApplicationNote,
   deleteApplication,
-  deleteResume,
   updateApplication,
 } from '@/lib/actions/application-actions';
 import { NoteFormData, noteSchema } from '../../lib/new-note-schema';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -62,9 +45,9 @@ import {
 import { DollarSignIcon, GlobeIcon, LinkIcon, MapPinIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import ActivityLog from './activity-log';
-import TiptapEditor, { TiptapDisplay } from '@/components/tiptap-editor';
-import { startCase } from 'lodash';
 import { NotesSection } from '@/app/_components/dashboard/notes/notes-section';
+import { CURRENCIES } from '@/lib/utils/currency';
+import { TiptapDisplay } from '@/components/tiptap-editor';
 
 type FullApplication = Application & {
   company: Company;
@@ -81,16 +64,25 @@ export default function ApplicationContent({
   application,
   companies,
   resumes,
+  defaultCurrency,
 }: {
   application: FullApplication;
   companies: Company[];
   resumes: Resume[];
+  defaultCurrency: string;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [currentResumeId, setCurrentResumeId] = useState<string | null>(
     application.resumeId || null,
   );
+
+  const currencyLocale = useMemo(() => {
+    return (
+      CURRENCIES.find((c) => c.currencyCode === defaultCurrency)?.locale ||
+      'en-US'
+    );
+  }, [defaultCurrency]);
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(schema),
@@ -100,7 +92,7 @@ export default function ApplicationContent({
       jobUrl: '',
       lowSalary: undefined,
       highSalary: undefined,
-      currency: 'USD',
+      currency: defaultCurrency ?? 'USD',
       location: '',
       remote: application?.remote || RemoteType.ON_SITE,
       status: application?.status || ApplicationStatus.APPLIED,
@@ -130,7 +122,7 @@ export default function ApplicationContent({
         jobUrl: application?.jobUrl || '',
         lowSalary: application?.lowSalary || 0,
         highSalary: application?.highSalary || 0,
-        currency: application?.currency || 'USD',
+        currency: application?.currency || defaultCurrency || 'USD',
         location: application?.location || '',
         remote: application?.remote || RemoteType.ON_SITE,
         status: application?.status || ApplicationStatus.APPLIED,
@@ -188,25 +180,25 @@ export default function ApplicationContent({
   ) => {
     let salaryString = '';
     if (lowSalary && highSalary) {
-      salaryString = `${new Intl.NumberFormat('en-US', {
+      salaryString = `${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: 'USD',
+        currency: defaultCurrency || 'USD',
         maximumFractionDigits: 0,
-      }).format(lowSalary)} - ${new Intl.NumberFormat('en-US', {
+      }).format(lowSalary)} - ${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: 'USD',
+        currency: defaultCurrency || 'USD',
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     } else if (lowSalary) {
-      salaryString = `${new Intl.NumberFormat('en-US', {
+      salaryString = `${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: 'USD',
+        currency: defaultCurrency || 'USD',
         maximumFractionDigits: 0,
       }).format(lowSalary)}`;
     } else if (highSalary) {
-      salaryString = `${new Intl.NumberFormat('en-US', {
+      salaryString = `${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: 'USD',
+        currency: defaultCurrency || 'USD',
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     }
@@ -283,6 +275,7 @@ export default function ApplicationContent({
 
               {editing ? (
                 <ApplicationForm
+                  defaultCurrency={defaultCurrency}
                   form={form}
                   handleSubmit={handleUpdate}
                   companies={companies}

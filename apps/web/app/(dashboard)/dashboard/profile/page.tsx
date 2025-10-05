@@ -28,6 +28,7 @@ async function fetchUserPreferences(dbUser: User) {
       ghostThreshold: 5 * 24 * 60 * 60,
       receiveEmailNotifications: false,
       dataOptOut: false,
+      currency: 'USD',
     };
   }
 
