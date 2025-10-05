@@ -27,18 +27,9 @@ export async function generateMetadata({
   };
 }
 
-const fetchCompanies = async () => {
-  const { dbUser } = await getSignedInUser();
-  if (!dbUser) {
-    return [];
-  }
-
+const fetchCompanies = async (dbUser: User) => {
   const getCachedCompanies = unstable_cache(
-    async () => {
-      const { dbUser } = await getSignedInUser();
-      if (!dbUser) {
-        return [];
-      }
+    async (dbUser: User) => {
       return prisma.company.findMany({
         include: {
           applications: {
@@ -61,7 +52,7 @@ const fetchCompanies = async () => {
       tags: ['companies, applications'],
     },
   );
-  const companies = await getCachedCompanies();
+  const companies = await getCachedCompanies(dbUser);
 
   return companies;
 };
@@ -127,7 +118,7 @@ export default async function ApplicationDetail({
   }
 
   const applicationPromise = fetchApplication(dbUser, id);
-  const companiesPromise = fetchCompanies();
+  const companiesPromise = fetchCompanies(dbUser);
   const userPrefsPromise = fetchUserPrefs(dbUser);
   const resumesPromise = fetchResumes(dbUser);
 
