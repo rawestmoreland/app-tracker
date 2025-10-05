@@ -40,16 +40,16 @@ export default function ApplicationForm({
   form,
   handleSubmit,
   companies,
+  defaultCurrency,
   isEdit = false,
   cancelEdit,
-  defaultCurrency,
 }: {
   form: UseFormReturn<ApplicationFormData>;
   handleSubmit: (data: ApplicationFormData) => Promise<void>;
   companies: Company[];
+  defaultCurrency: string;
   isEdit?: boolean;
   cancelEdit?: () => void;
-  defaultCurrency: string;
 }): React.ReactNode {
   const router = useRouter();
   const [isNewCompany, setIsNewCompany] = useState(false);
