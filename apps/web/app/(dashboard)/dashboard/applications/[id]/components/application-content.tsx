@@ -16,7 +16,7 @@ import {
 } from '@prisma/client';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ApplicationFormData, schema } from '../../lib/new-application-schema';
 import ApplicationForm from '../../components/new-application-form';
@@ -77,12 +77,11 @@ export default function ApplicationContent({
     application.resumeId || null,
   );
 
-  const currencyLocale = useMemo(() => {
+  const getCurrencyLocale = (currency: string = defaultCurrency) => {
     return (
-      CURRENCIES.find((c) => c.currencyCode === defaultCurrency)?.locale ||
-      'en-US'
+      CURRENCIES.find((c) => c.currencyCode === currency)?.locale || 'en-US'
     );
-  }, [defaultCurrency]);
+  };
 
   const form = useForm<ApplicationFormData>({
     resolver: zodResolver(schema),
@@ -175,30 +174,32 @@ export default function ApplicationContent({
   };
 
   const displaySalary = (
+    currency: string,
     lowSalary: number | undefined,
     highSalary: number | undefined,
   ) => {
     let salaryString = '';
+    const currencyLocale = getCurrencyLocale(currency);
     if (lowSalary && highSalary) {
       salaryString = `${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: defaultCurrency || 'USD',
+        currency: currency || 'USD',
         maximumFractionDigits: 0,
       }).format(lowSalary)} - ${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: defaultCurrency || 'USD',
+        currency: currency || 'USD',
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     } else if (lowSalary) {
       salaryString = `${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: defaultCurrency || 'USD',
+        currency: currency || 'USD',
         maximumFractionDigits: 0,
       }).format(lowSalary)}`;
     } else if (highSalary) {
       salaryString = `${new Intl.NumberFormat(currencyLocale, {
         style: 'currency',
-        currency: defaultCurrency || 'USD',
+        currency: currency || 'USD',
         maximumFractionDigits: 0,
       }).format(highSalary)}`;
     }
@@ -338,6 +339,7 @@ export default function ApplicationContent({
                         </div>
                         <p className="mt-1 text-sm text-gray-900">
                           {displaySalary(
+                            application.currency || defaultCurrency || 'USD',
                             application.lowSalary || 0,
                             application.highSalary || 0,
                           )}
