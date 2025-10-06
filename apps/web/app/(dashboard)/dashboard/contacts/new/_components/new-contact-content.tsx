@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { NewContactForm } from "@/app/_components/dashboard/contacts/new-contact-form";
+import { NewContactForm } from '@/app/_components/dashboard/contacts/new-contact-form';
 import {
   newContactSchema,
   NewContactSchema,
-} from "@/app/_components/dashboard/contacts/new-contact-schema";
+} from '@/app/_components/dashboard/contacts/new-contact-schema';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,14 +12,14 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { addContact } from "@/lib/actions/contact-actions";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Company } from "@prisma/client";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+} from '@/components/ui/breadcrumb';
+import { addContact } from '@/lib/actions/contact-actions';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Company } from '@prisma/client';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 export default function NewContactContent({
   companies,
@@ -29,18 +29,20 @@ export default function NewContactContent({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const companyId = searchParams.get("companyId");
+  const companyId = searchParams.get('companyId');
+  const interviewId = searchParams.get('interviewId');
 
   const form = useForm<NewContactSchema>({
     resolver: zodResolver(newContactSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      title: "",
-      linkedin: "",
-      notes: "",
-      companyId: companyId || "",
+      name: '',
+      email: '',
+      phone: '',
+      title: '',
+      linkedin: '',
+      notes: '',
+      companyId: companyId || '',
+      interviewId: interviewId || '',
     },
   });
 
@@ -49,11 +51,15 @@ export default function NewContactContent({
 
     if (error) {
       toast(message, {
-        description: "Please try again.",
+        description: 'Please try again.',
       });
     } else {
       toast(message);
-      router.push(`/dashboard/companies/${contact?.companyId}`);
+      if (!!interviewId) {
+        router.push(`/dashboard/interviews/${interviewId}`);
+      } else {
+        router.push(`/dashboard/companies/${contact?.companyId}`);
+      }
     }
   };
 
@@ -79,6 +85,18 @@ export default function NewContactContent({
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
+              {interviewId && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbLink asChild>
+                      <Link href={`/dashboard/interviews/${interviewId}`}>
+                        Interview
+                      </Link>
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                </>
+              )}
               <BreadcrumbSeparator />
               <BreadcrumbItem>
                 <BreadcrumbPage>New Contact</BreadcrumbPage>
@@ -86,6 +104,14 @@ export default function NewContactContent({
             </BreadcrumbList>
           </Breadcrumb>
           <h1 className="text-3xl font-bold text-gray-900">Add New Contact</h1>
+          {interviewId && (
+            <p className="text-gray-600">
+              This contact will be added as an interviewer for the interview at{' '}
+              <strong>
+                {companies.find((company) => company.id === companyId)?.name}
+              </strong>
+            </p>
+          )}
         </div>
         <div className="rounded-lg bg-white p-6 shadow-sm">
           <NewContactForm

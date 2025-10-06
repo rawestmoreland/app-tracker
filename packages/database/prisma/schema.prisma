@@ -12,27 +12,27 @@ datasource db {
 }
 
 model User {
-  id                     String             @id @default(cuid())
-  clerkId                String             @unique
-  email                  String             @unique
-  name                   String?
-  createdAt              DateTime           @default(now())
-  updatedAt              DateTime           @updatedAt
-  role                   UserRole           @default(USER)
-  isDonor                Boolean            @default(false)
-  signupReason           SignupReason?      @default(OTHER)
-  activities             Activity[]
-  events                 ApplicationEvent[]
-  applications           Application[]
-  Company                Company[]          @relation("CreatedCompanies")
-  contacts               Contact[]
-  FeatureRequest         FeatureRequest[]
-  interviews             Interview[]
-  notes                  Note[]
-  Offer                  Offer[]
-  onboardingComplete     Boolean            @default(false)
-  UserPreferences        UserPreference[]
-  dataOptOut Boolean            @default(false)
+  id                 String             @id @default(cuid())
+  clerkId            String             @unique
+  email              String             @unique
+  name               String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  role               UserRole           @default(USER)
+  isDonor            Boolean            @default(false)
+  signupReason       SignupReason?      @default(OTHER)
+  activities         Activity[]
+  events             ApplicationEvent[]
+  applications       Application[]
+  Company            Company[]          @relation("CreatedCompanies")
+  contacts           Contact[]
+  FeatureRequest     FeatureRequest[]
+  interviews         Interview[]
+  notes              Note[]
+  Offer              Offer[]
+  onboardingComplete Boolean            @default(false)
+  UserPreferences    UserPreference[]
+  dataOptOut         Boolean            @default(false)
 
   Resume Resume[]
 }
@@ -143,23 +143,24 @@ model Resume {
 }
 
 model Contact {
-  id         String      @id @default(cuid())
-  name       String
-  email      String?
-  phone      String?
-  title      String?
-  linkedin   String?
-  notes      String?
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  userId     String
-  companyId  String?
-  activities Activity[]
-  company    Company?    @relation(fields: [companyId], references: [id])
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  interviews Interview[] @relation("ContactToInterview")
+  id          String      @id @default(cuid())
+  name        String
+  email       String?
+  phone       String?
+  title       String?
+  linkedin    String?
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId   String?
+  company     Company?    @relation(fields: [companyId], references: [id])
+  interviewId String?
+  interview   Interview?  @relation(fields: [interviewId], references: [id])
 
   @@map("contacts")
+  activities  Activity[]
 }
 
 model Interview {
@@ -179,10 +180,10 @@ model Interview {
   application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   notes         Note[]
-  contacts      Contact[]         @relation("ContactToInterview")
   archived      Boolean           @default(false)
 
   @@map("interviews")
+  contacts Contact[]
 }
 
 model Note {

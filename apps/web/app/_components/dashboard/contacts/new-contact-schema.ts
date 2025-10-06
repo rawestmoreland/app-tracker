@@ -11,6 +11,7 @@ export const newContactSchema = z.object({
     .or(z.literal('')),
   notes: z.string().optional(),
   companyId: z.string(),
+  interviewId: z.string().optional(),
 });
 
 export type NewContactSchema = z.infer<typeof newContactSchema>;

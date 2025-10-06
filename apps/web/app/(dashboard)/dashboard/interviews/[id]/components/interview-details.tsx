@@ -397,11 +397,12 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
                     View Full Application
                   </Link>
                 </Button>
+                {/* TODO: This page doesn't exist. https://github.com/rawestmoreland/app-tracker/issues/58*/}
                 <Button variant="outline" className="w-full" asChild>
                   <Link
-                    href={`dashboard/contacts/new?companyId=${interview.application.company.id}`}
+                    href={`/dashboard/contacts/new?companyId=${interview.application.company.id}&interviewId=${interview.id}`}
                   >
-                    Add Contact
+                    Add Interviewer
                   </Link>
                 </Button>
               </div>
