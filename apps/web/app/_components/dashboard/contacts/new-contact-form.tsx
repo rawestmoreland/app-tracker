@@ -123,6 +123,23 @@ export function NewContactForm({
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="interviewId"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  type="hidden"
+                  {...field}
+                  placeholder="Select an interview"
+                  className="w-full"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button
           disabled={form.formState.isSubmitting}
           type="submit"
