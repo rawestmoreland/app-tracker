@@ -62,7 +62,11 @@ const fetchApplication = async (dbUser: User, id: string) => {
     where: { id, userId: dbUser.id },
     include: {
       connectedResume: true,
-      company: true,
+      company: {
+        include: {
+          contacts: true,
+        },
+      },
       interviews: {
         include: {
           contacts: true,

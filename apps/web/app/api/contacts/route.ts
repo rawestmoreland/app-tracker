@@ -21,7 +21,7 @@ export async function GET() {
       where: { userId: dbUser.id },
       include: {
         company: true,
-        interviews: {
+        interview: {
           include: {
             application: {
               include: { company: true },
@@ -37,7 +37,7 @@ export async function GET() {
     console.error('Error fetching contacts:', error);
     return NextResponse.json(
       { error: 'Failed to fetch contacts' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
       },
       include: {
         company: true,
-        interviews: {
+        interview: {
           include: {
             application: {
               include: { company: true },
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     await ActivityTracker.trackContactCreated(
       contact.id,
       contact.name,
-      contact.company?.name
+      contact.company?.name,
     );
 
     return NextResponse.json(contact, { status: 201 });
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating contact:', error);
     return NextResponse.json(
       { error: 'Failed to create contact' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
