@@ -457,7 +457,7 @@ export default function ApplicationContent({
                         <div className="mt-2">
                           <p className="text-sm text-gray-600">Feedback:</p>
                           <div className="mt-1 text-sm whitespace-pre-wrap text-gray-900">
-                            {interview.feedback}
+                            <TiptapDisplay content={interview.feedback} />
                           </div>
                         </div>
                       )}
