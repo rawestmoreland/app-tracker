@@ -1,4 +1,4 @@
-import { ApplicationStatus, RemoteType } from "@prisma/client";
+import { ApplicationStatus, RemoteType, InterviewType, InterviewFormat, InterviewOutcome } from "@prisma/client";
 import { FacetOption } from "@/components/ui/faceted-filter";
 import {
   BriefcaseIcon,
@@ -17,6 +17,13 @@ import {
   StopCircleIcon,
   Shield,
   Users,
+  VideoIcon,
+  CodeIcon,
+  LayoutGridIcon,
+  AlertCircleIcon,
+  CalendarIcon,
+  XIcon,
+  RotateCcwIcon,
 } from "lucide-react";
 
 export const applicationStatusOptions: FacetOption[] = [
@@ -130,5 +137,119 @@ export const companyTypeOptions: FacetOption[] = [
     label: "Private",
     value: "private",
     icon: Users,
+  },
+];
+
+export const interviewTypeOptions: FacetOption[] = [
+  {
+    label: "Phone Screen",
+    value: InterviewType.PHONE_SCREEN,
+    icon: PhoneIcon,
+  },
+  {
+    label: "Technical",
+    value: InterviewType.TECHNICAL,
+    icon: ShieldCheckIcon,
+  },
+  {
+    label: "Behavioral",
+    value: InterviewType.BEHAVIORAL,
+    icon: UserCheckIcon,
+  },
+  {
+    label: "System Design",
+    value: InterviewType.SYSTEM_DESIGN,
+    icon: LayoutGridIcon,
+  },
+  {
+    label: "Coding Challenge",
+    value: InterviewType.CODING_CHALLENGE,
+    icon: CodeIcon,
+  },
+  {
+    label: "Pair Programming",
+    value: InterviewType.PAIR_PROGRAMMING,
+    icon: CodeIcon,
+  },
+  {
+    label: "Onsite",
+    value: InterviewType.ONSITE,
+    icon: MapPinIcon,
+  },
+  {
+    label: "Final Round",
+    value: InterviewType.FINAL_ROUND,
+    icon: CheckCircleIcon,
+  },
+  {
+    label: "Reference Check",
+    value: InterviewType.REFERENCE_CHECK,
+    icon: UserCheckIcon,
+  },
+  {
+    label: "Other",
+    value: InterviewType.OTHER,
+    icon: AlertCircleIcon,
+  },
+];
+
+export const interviewFormatOptions: FacetOption[] = [
+  {
+    label: "Phone",
+    value: InterviewFormat.PHONE,
+    icon: PhoneIcon,
+  },
+  {
+    label: "Video",
+    value: InterviewFormat.VIDEO,
+    icon: VideoIcon,
+  },
+  {
+    label: "In Person",
+    value: InterviewFormat.IN_PERSON,
+    icon: MapPinIcon,
+  },
+  {
+    label: "Coding Platform",
+    value: InterviewFormat.CODING_PLATFORM,
+    icon: CodeIcon,
+  },
+  {
+    label: "Take Home",
+    value: InterviewFormat.TAKE_HOME,
+    icon: HomeIcon,
+  },
+  {
+    label: "Other",
+    value: InterviewFormat.OTHER,
+    icon: AlertCircleIcon,
+  },
+];
+
+export const interviewOutcomeOptions: FacetOption[] = [
+  {
+    label: "Passed",
+    value: InterviewOutcome.PASSED,
+    icon: CheckCircleIcon,
+  },
+  {
+    label: "Failed",
+    value: InterviewOutcome.FAILED,
+    icon: XCircleIcon,
+  },
+  {
+    label: "Pending",
+    value: InterviewOutcome.PENDING,
+    icon: ClockIcon,
+  },
+  {
+    label: "Cancelled",
+    value: InterviewOutcome.CANCELLED,
+    icon: XIcon,
+  },
+  {
+    label: "Rescheduled",
+    value: InterviewOutcome.RESCHEDULED,
+    icon: RotateCcwIcon,
   },
 ];

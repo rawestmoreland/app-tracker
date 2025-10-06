@@ -115,22 +115,22 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                   >
                     Application Flow
                   </Link>
-                  {/* <Link
+                  <Link
                     href="/dashboard/interviews"
                     aria-current={
-                      isCurrentPath("/dashboard/interviews")
-                        ? "page"
+                      isCurrentPath('/dashboard/interviews')
+                        ? 'page'
                         : undefined
                     }
                     className={cn(
-                      isCurrentPath("/dashboard/interviews")
-                        ? "border-indigo-600 text-gray-900"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700",
-                      "inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium",
+                      isCurrentPath('/dashboard/interviews')
+                        ? 'border-indigo-600 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                      'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     )}
                   >
                     My Interviews
-                  </Link> */}
+                  </Link>
                 </div>
               )}
             </div>
@@ -264,6 +264,9 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                         Application Flow
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/interviews">My Interviews</Link>
+                    </DropdownMenuItem>
                     {isAdmin && (
                       <DropdownMenuItem asChild>
                         <Link href="/admin">Admin</Link>
@@ -276,9 +279,6 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    {/* <DropdownMenuItem asChild>
-                      <Link href="/dashboard/interviews">My Interviews</Link>
-                    </DropdownMenuItem> */}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link

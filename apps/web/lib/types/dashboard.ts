@@ -6,6 +6,13 @@ export type DashboardApplication = Application & {
   activities: Activity[];
 };
 
+export type DashboardInterview = Interview & {
+  application: Application & {
+    company: Company;
+  };
+  activities: Activity[];
+};
+
 export type Analytics = {
   totalApplications: number;
   responseRate: number; // Human response rate only
