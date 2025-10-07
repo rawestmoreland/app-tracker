@@ -235,3 +235,77 @@ export async function deleteInterview(
     console.error('Failed to delete interview:', error);
   }
 }
+
+export async function getInterviews() {
+  try {
+    const { dbUser } = await getSignedInUser();
+    if (!dbUser) {
+      throw new Error('Unauthorized');
+    }
+
+    const interviews = await prisma.interview.findMany({
+      where: {
+        userId: dbUser.id,
+        archived: false,
+      },
+      include: {
+        application: {
+          include: {
+            company: true,
+          },
+        },
+        activities: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 1,
+        },
+      },
+      orderBy: {
+        scheduledAt: 'desc',
+      },
+    });
+
+    return interviews;
+  } catch (error) {
+    console.error('Failed to fetch interviews:', error);
+    throw error;
+  }
+}
+
+export async function archiveInterviews(
+  interviewIds: string[],
+): Promise<{
+  success?: boolean;
+  error?: string;
+  message?: string;
+}> {
+  try {
+    const { dbUser } = await getSignedInUser();
+    if (!dbUser) {
+      return { error: 'Unauthorized' };
+    }
+
+    await prisma.interview.updateMany({
+      where: {
+        id: {
+          in: interviewIds,
+        },
+        userId: dbUser.id,
+      },
+      data: {
+        archived: true,
+      },
+    });
+
+    revalidatePath('/dashboard/interviews');
+
+    return {
+      success: true,
+      message: `${interviewIds.length} interview${interviewIds.length === 1 ? '' : 's'} archived successfully`,
+    };
+  } catch (error) {
+    console.error('Failed to archive interviews:', error);
+    return { error: 'Failed to archive interviews' };
+  }
+}
