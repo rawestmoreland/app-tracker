@@ -64,6 +64,7 @@ export async function updateApplicationStatus(
   applicationId: string,
   status: ApplicationStatus,
   responseType?: ResponseType,
+  occurredAt?: Date,
 ) {
   try {
     const { dbUser } = await getSignedInUser();
@@ -104,7 +105,7 @@ export async function updateApplicationStatus(
 
     // Create activity log entry and status transition if status changed
     if (statusChanged) {
-      const transitionTime = new Date();
+      const transitionTime = occurredAt || new Date();
 
       // Create traditional activity log entry
       await prisma.applicationEvent.create({

@@ -22,6 +22,7 @@ interface StatusDropdownProps<T = string> {
   statusOptions: StatusOption<T>[];
   onStatusUpdate: (itemId: string, newStatus: T) => Promise<{ error?: string }>;
   getStatusColor?: (status: T) => string;
+  disabled?: boolean;
 }
 
 export function StatusDropdown<T = string>({
@@ -30,6 +31,7 @@ export function StatusDropdown<T = string>({
   statusOptions,
   onStatusUpdate,
   getStatusColor: getStatusColorProp,
+  disabled = false,
 }: StatusDropdownProps<T>) {
   const [isPending, startTransition] = useTransition();
   const [optimisticStatus, setOptimisticStatus] = useState(currentStatus);
@@ -41,7 +43,10 @@ export function StatusDropdown<T = string>({
       const result = await onStatusUpdate(itemId, newStatus);
 
       if (result.error) {
-        toast(result.error);
+        // Don't show toast for 'cancelled' error (used for dialog flows)
+        if (result.error !== 'cancelled') {
+          toast(result.error);
+        }
         setOptimisticStatus(currentStatus);
       } else {
         toast("Status updated successfully");
@@ -59,7 +64,7 @@ export function StatusDropdown<T = string>({
     <Select
       value={String(optimisticStatus)}
       onValueChange={(value) => handleStatusChange(value as T)}
-      disabled={isPending}
+      disabled={isPending || disabled}
     >
       <SelectTrigger className="h-auto w-fit border-none bg-transparent p-0 shadow-none">
         <SelectValue asChild>
