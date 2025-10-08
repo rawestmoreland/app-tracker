@@ -25,6 +25,8 @@ export async function addContact(data: NewContactSchema): Promise<{
     const contact = await prisma.contact.create({
       data: {
         ...data,
+        interviewId: data.interviewId || undefined,
+        companyId: data.companyId || undefined,
         userId: dbUser.id,
       },
       include: {
