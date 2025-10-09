@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       // Send the welcome email
       await resend.emails
         .send({
-          from: 'Richard from App Track <richard@apptrack.space>',
+          from: 'Richard from App Track <richard@jobble.app>',
           replyTo: 'richard@westmorelandcreative.com',
           to: [email_addresses[0].email_address],
           subject: 'Welcome to App Track',
