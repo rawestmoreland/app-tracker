@@ -73,11 +73,6 @@ export default async function NewContactPage({
   const uniqueContacts =
     companies?.flatMap((company) => company.contacts) ?? [];
 
-  const uniqueContacts =
-    companies?.flatMap((company) => company.contacts) ?? [];
-
-  console.log(uniqueContacts);
-
   return (
     <Suspense fallback={<LoadingFallback />}>
       <NewContactContent
