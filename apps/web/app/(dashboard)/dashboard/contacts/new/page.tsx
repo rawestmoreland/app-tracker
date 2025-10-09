@@ -5,7 +5,7 @@ import NewContactContent from './_components/new-contact-content';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'App Track - New Contact',
+  title: 'Jobble - New Contact',
   description: 'Create a new contact for a company',
 };
 

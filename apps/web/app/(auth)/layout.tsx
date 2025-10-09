@@ -7,8 +7,8 @@ import { ConditionalAnalytics } from '@/components/conditional-analytics';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
-  title: 'App Track - Onboarding',
-  description: 'Complete your App Track account setup',
+  title: 'Jobble - Onboarding',
+  description: 'Complete your Jobble account setup',
 };
 
 const geistSans = Geist({

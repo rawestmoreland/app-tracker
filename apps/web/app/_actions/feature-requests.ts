@@ -34,7 +34,7 @@ export async function createFeatureRequest(data: z.infer<typeof formSchema>) {
       from: 'Richard from Jobble <richard@jobble.app>',
       replyTo: 'richard@westmorelandcreative.com',
       to: ['richard@westmorelandcreative.com'],
-      subject: 'New App Track Feature Request',
+      subject: 'New Jobble Feature Request',
       react: FeatureRequestTemplate({ featureRequest }),
     });
 

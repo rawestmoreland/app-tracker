@@ -15,14 +15,14 @@ export async function generateMetadata({
   const { dbUser } = await getSignedInUser();
   if (!dbUser) {
     return {
-      title: 'App Track',
-      description: 'Track your job applications and interviews with App Track',
+      title: 'Jobble',
+      description: 'Track your job applications and interviews with Jobble',
     };
   }
   const { id } = await params;
   const application = await fetchApplication(dbUser, id);
   return {
-    title: `${application?.title} - App Track`,
+    title: `${application?.title} - Jobble`,
     description: `View ${application?.title}`,
   };
 }

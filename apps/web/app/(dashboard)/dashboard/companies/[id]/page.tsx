@@ -9,7 +9,7 @@ export async function generateMetadata({ params }: PageProps) {
   const { id } = await params;
   const company = await fetchCompany(id);
   return {
-    title: `${company?.name} - App Track`,
+    title: `${company?.name} - Jobble`,
     description: `View ${company?.name}`,
   };
 }

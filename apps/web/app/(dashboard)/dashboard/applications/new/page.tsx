@@ -9,7 +9,7 @@ import { User } from '@prisma/client';
 import { UserPreferences } from '@/lib/types/user';
 
 export const metadata: Metadata = {
-  title: 'App Track - New Application',
+  title: 'Jobble - New Application',
   description: 'Create a new application',
 };
 

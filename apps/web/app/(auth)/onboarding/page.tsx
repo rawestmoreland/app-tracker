@@ -3,7 +3,10 @@
 import * as React from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { completeOnboarding, checkUserExists } from './_actions/complete-onboarding';
+import {
+  completeOnboarding,
+  checkUserExists,
+} from './_actions/complete-onboarding';
 import z from 'zod';
 import { SignupReason } from '@prisma/client';
 import { useForm } from 'react-hook-form';
@@ -179,7 +182,7 @@ export default function OnboardingComponent() {
             <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
           <h1 className="mb-2 text-3xl font-bold text-gray-900">
-            Welcome to App Track
+            Welcome to Jobble
           </h1>
           <p className="text-lg text-gray-600">
             Let&apos;s get you set up for success

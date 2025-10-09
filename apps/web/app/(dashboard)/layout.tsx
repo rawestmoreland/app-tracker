@@ -12,8 +12,8 @@ import CookieButton from '@/components/cookie-button';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
-  title: 'App Track - Dashboard',
-  description: 'Track your job applications and interviews with App Track',
+  title: 'Jobble - Dashboard',
+  description: 'Track your job applications and interviews with Jobble',
 };
 
 const geistSans = Geist({
