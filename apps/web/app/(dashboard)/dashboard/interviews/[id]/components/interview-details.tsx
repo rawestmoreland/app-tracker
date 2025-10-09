@@ -293,9 +293,7 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
                     Feedback
                   </h3>
                   <div className="rounded-md bg-gray-50 p-3">
-                    <p className="text-sm whitespace-pre-wrap text-gray-900">
-                      <TiptapDisplay content={interview.feedback} />
-                    </p>
+                    <TiptapDisplay content={interview.feedback} />
                   </div>
                 </div>
               )}

@@ -38,7 +38,6 @@ export function InterviewStatusDropdown({
   interviewId,
   currentOutcome,
 }: InterviewStatusDropdownProps) {
-  console.log(currentOutcome);
   return (
     <StatusDropdown<InterviewOutcome>
       itemId={interviewId}
