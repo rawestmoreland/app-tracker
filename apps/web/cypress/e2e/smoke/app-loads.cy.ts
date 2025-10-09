@@ -10,7 +10,7 @@ describe('Smoke: Application Loads', () => {
   it('should load the homepage', () => {
     cy.visit('/');
 
-    cy.contains('h1', 'Track Your Job Search');
+    cy.contains('h1', 'Juggle Your Job Applications');
   });
 
   it('should load the terms of service', () => {
