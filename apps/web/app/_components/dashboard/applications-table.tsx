@@ -92,6 +92,7 @@ export default function ApplicationsTable({
   applications,
   tableConfig,
   userPreferences,
+  isDemoMode = false,
 }: {
   applications: DashboardApplication[];
   tableConfig?: {
@@ -101,6 +102,7 @@ export default function ApplicationsTable({
     };
   };
   userPreferences: UserPreferences;
+  isDemoMode?: boolean;
 }) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -202,7 +204,11 @@ export default function ApplicationsTable({
         header: 'Position',
         cell: (info) => (
           <Link
-            href={`/dashboard/applications/${info.row.original.id}`}
+            href={
+              isDemoMode
+                ? '/sign-up'
+                : `/dashboard/applications/${info.row.original.id}`
+            }
             className="font-medium underline hover:text-blue-900 hover:underline-offset-2"
           >
             {info.getValue()}
@@ -214,7 +220,11 @@ export default function ApplicationsTable({
         header: 'Company',
         cell: (info) => (
           <Link
-            href={`/dashboard/companies/${info.row.original.company.id}`}
+            href={
+              isDemoMode
+                ? '/sign-up'
+                : `/dashboard/companies/${info.row.original.company.id}`
+            }
             className="font-medium text-blue-600 hover:text-blue-900"
           >
             <div className="flex items-center gap-2">
@@ -260,6 +270,7 @@ export default function ApplicationsTable({
             <ApplicationStatusDropdown
               applicationId={application.id}
               currentStatus={application.status}
+              isDemoMode={isDemoMode}
             />
           );
         },
@@ -359,6 +370,11 @@ export default function ApplicationsTable({
         setOptimisticColumnVisibility(newColumnVisibilityConfiguration);
       }
 
+      // Skip API calls in demo mode
+      if (isDemoMode) {
+        return;
+      }
+
       // Check if this is a duplicate update
       const newConfigString = JSON.stringify(
         newColumnVisibilityConfigurationResult,
@@ -371,7 +387,7 @@ export default function ApplicationsTable({
       // Call server action immediately but only if it's a new configuration
       updateApplicationTableColumns(newColumnVisibilityConfigurationResult);
     },
-    [optimisticColumnVisibility],
+    [optimisticColumnVisibility, isDemoMode],
   );
 
   const handlePaginationChange = useCallback(
@@ -387,6 +403,11 @@ export default function ApplicationsTable({
 
       // Always update the local state
       setPagination(newPaginationConfigurationResult);
+
+      // Skip API calls in demo mode
+      if (isDemoMode) {
+        return;
+      }
 
       // Only call server action if pageSize changed (not pageIndex)
       if (
@@ -406,7 +427,7 @@ export default function ApplicationsTable({
         updateApplicationTablePagination(newPaginationConfigurationResult);
       }
     },
-    [pagination],
+    [pagination, isDemoMode],
   );
 
   const tableData = useMemo(() => {
@@ -502,6 +523,10 @@ export default function ApplicationsTable({
                       variant="outline"
                       size="icon"
                       onClick={async () => {
+                        if (isDemoMode) {
+                          toast('This is a demo. Sign up to archive applications!');
+                          return;
+                        }
                         const selectedIds = Object.keys(rowSelection);
                         try {
                           const result = await archiveApplications(selectedIds);
@@ -549,7 +574,7 @@ export default function ApplicationsTable({
         {/* Ghosted Applications Alert */}
         {ghostedApplications.length > 0 && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-red-100 p-2">
                   <GhostIcon className="h-6 w-6 text-red-600" />
@@ -570,7 +595,7 @@ export default function ApplicationsTable({
                 variant="outline"
                 size="sm"
                 onClick={() => setShowGhostedOnly(!showGhostedOnly)}
-                className="border-red-300 bg-white text-red-700 hover:bg-red-100 hover:text-red-800"
+                className="w-full border-red-300 bg-white text-red-700 hover:bg-red-100 hover:text-red-800 md:w-auto"
               >
                 {showGhostedOnly ? 'Show All' : 'Show Ghosted Only'}
               </Button>
@@ -735,35 +760,37 @@ export default function ApplicationsTable({
           </DropdownMenu>
 
           {/* Column Visibility */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="ml-auto">
-                <Filter className="h-4 w-4 md:mr-2" />
-                <span className="sr-only md:not-sr-only md:block">Columns</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value: boolean) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id === 'appliedAt'
-                        ? 'Applied Date'
-                        : column.id.replace('.', ' ')}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {!isDemoMode && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="ml-auto">
+                  <Filter className="h-4 w-4 md:mr-2" />
+                  <span className="sr-only md:not-sr-only md:block">Columns</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value: boolean) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id === 'appliedAt'
+                          ? 'Applied Date'
+                          : column.id.replace('.', ' ')}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         {/* Active Filters */}
@@ -924,9 +951,9 @@ export default function ApplicationsTable({
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between space-x-2 py-4">
-          <div className="flex items-center space-x-2">
-            <div className="text-muted-foreground text-sm">
+        <div className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-muted-foreground text-sm">
+            <span className="hidden sm:inline">
               Showing{' '}
               {table.getState().pagination.pageIndex *
                 table.getState().pagination.pageSize +
@@ -938,15 +965,18 @@ export default function ApplicationsTable({
                 table.getFilteredRowModel().rows.length,
               )}{' '}
               of {table.getFilteredRowModel().rows.length} applications
-            </div>
+            </span>
+            <span className="sm:hidden">
+              {table.getFilteredRowModel().rows.length} applications
+            </span>
           </div>
-          <div className="flex items-center space-x-2">
-            <div className="text-muted-foreground text-sm">
-              Page {table.getState().pagination.pageIndex + 1} of{' '}
-              {table.getPageCount()}
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center space-x-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2">
+            <div className="flex items-center justify-between gap-2 sm:justify-start">
+              <div className="text-muted-foreground text-sm">
+                Page {table.getState().pagination.pageIndex + 1} of{' '}
+                {table.getPageCount()}
+              </div>
+              <div className="flex items-center gap-2">
                 <span className="text-sm text-gray-500">Show:</span>
                 <Select
                   value={table.getState().pagination.pageSize.toString()}
@@ -968,24 +998,26 @@ export default function ApplicationsTable({
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => table.previousPage()}
-                  disabled={!table.getCanPreviousPage()}
-                >
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => table.nextPage()}
-                  disabled={!table.getCanNextPage()}
-                >
-                  Next
-                </Button>
-              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="flex-1 sm:flex-none"
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="flex-1 sm:flex-none"
+              >
+                Next
+              </Button>
             </div>
           </div>
         </div>

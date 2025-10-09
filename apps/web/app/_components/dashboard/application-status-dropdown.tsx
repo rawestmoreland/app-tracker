@@ -44,10 +44,12 @@ const APPLICATION_STATUS_OPTIONS: StatusOption<ApplicationStatus>[] = [
 interface ApplicationStatusDropdownProps {
   applicationId: string;
   currentStatus: ApplicationStatus;
+  isDemoMode?: boolean;
 }
 
 export function ApplicationStatusDropdown({
   applicationId,
+  isDemoMode = false,
   currentStatus,
 }: ApplicationStatusDropdownProps) {
   const [showDateDialog, setShowDateDialog] = useState(false);
@@ -64,6 +66,12 @@ export function ApplicationStatusDropdown({
     itemId: string,
     newStatus: ApplicationStatus,
   ): Promise<{ error?: string }> => {
+    // Block status changes in demo mode
+    if (isDemoMode) {
+      toast('This is a demo. Sign up to update application status!');
+      return { error: 'Demo mode' };
+    }
+
     // Always show date dialog first for all status changes
     setPendingStatus(newStatus);
     setSelectedDate(new Date()); // Reset to today's date

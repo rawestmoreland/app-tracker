@@ -79,6 +79,7 @@ interface CompaniesTableProps {
   hasNextPage: boolean;
   hasPreviousPage: boolean;
   initialSearch: string;
+  isDemoMode?: boolean;
 }
 
 export function CompaniesTable({
@@ -89,6 +90,7 @@ export function CompaniesTable({
   hasNextPage,
   hasPreviousPage,
   initialSearch,
+  isDemoMode = false,
 }: CompaniesTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -100,6 +102,7 @@ export function CompaniesTable({
   const previousSearchInput = useRef(initialSearch);
 
   const navigateToPage = (page: number) => {
+    if (isDemoMode) return; // Don't navigate in demo mode
     const params = new URLSearchParams(searchParams);
     params.set('page', page.toString());
     router.push(`?${params.toString()}`);
@@ -107,6 +110,7 @@ export function CompaniesTable({
 
   const updateSearchUrl = useCallback(
     (value: string) => {
+      if (isDemoMode) return; // Don't update URL in demo mode
       const params = new URLSearchParams(searchParams);
       if (value.trim()) {
         params.set('search', value);
@@ -116,7 +120,7 @@ export function CompaniesTable({
       params.delete('page'); // Reset to page 1 when searching
       router.push(`?${params.toString()}`);
     },
-    [searchParams, router],
+    [searchParams, router, isDemoMode],
   );
 
   // Update previous search input when initialSearch prop changes (navigation)
@@ -150,12 +154,12 @@ export function CompaniesTable({
       header: 'Company',
       cell: (info) => {
         const company = info.row.original;
+        const companyUrl = isDemoMode
+          ? '/sign-up'
+          : `/dashboard/companies/${company.id}`;
         return (
           <div className="flex items-center gap-3">
-            <Link
-              href={`/dashboard/companies/${company.id}`}
-              className="text-2xl"
-            >
+            <Link href={companyUrl} className="text-2xl">
               {company.logo ? (
                 <Image
                   src={company.logo}
@@ -171,10 +175,7 @@ export function CompaniesTable({
               )}
             </Link>
             <div>
-              <Link
-                href={`/dashboard/companies/${company.id}`}
-                className="font-medium"
-              >
+              <Link href={companyUrl} className="font-medium">
                 {company.name}
               </Link>
               <div className="text-muted-foreground text-sm">
@@ -306,33 +307,35 @@ export function CompaniesTable({
             className="max-w-sm"
           />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              <Filter className="mr-2 h-4 w-4" />
-              Columns
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value: boolean) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        {!isDemoMode && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                <Filter className="mr-2 h-4 w-4" />
+                Columns
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value: boolean) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
 
       {/* Table */}
@@ -402,24 +405,29 @@ export function CompaniesTable({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="flex items-center space-x-2">
-          <div className="text-muted-foreground text-sm">
+      <div className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-muted-foreground text-sm">
+          <span className="hidden sm:inline">
             Showing {(currentPage - 1) * 10 + 1} to{' '}
             {Math.min(currentPage * 10, totalCount)} of {totalCount} companies
             {initialSearch && ` matching "${initialSearch}"`}
-          </div>
+          </span>
+          <span className="sm:hidden">
+            {totalCount} companies
+            {initialSearch && ` matching "${initialSearch}"`}
+          </span>
         </div>
-        <div className="flex items-center space-x-2">
-          <div className="text-muted-foreground text-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-2">
+          <div className="text-muted-foreground text-center text-sm sm:text-left">
             Page {currentPage} of {totalPages}
           </div>
-          <div className="space-x-2">
+          <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => navigateToPage(currentPage - 1)}
               disabled={!hasPreviousPage}
+              className="flex-1 sm:flex-none"
             >
               Previous
             </Button>
@@ -428,6 +436,7 @@ export function CompaniesTable({
               size="sm"
               onClick={() => navigateToPage(currentPage + 1)}
               disabled={!hasNextPage}
+              className="flex-1 sm:flex-none"
             >
               Next
             </Button>
