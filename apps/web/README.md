@@ -1,4 +1,4 @@
-# App Track
+# Jobble
 
 A comprehensive platform for tracking job applications, interviews, and career progress. Built with Next.js, Prisma, and Clerk authentication.
 
@@ -74,7 +74,7 @@ A comprehensive platform for tracking job applications, interviews, and career p
 
 ```bash
 git clone <your-repo-url>
-cd job-tracker
+cd jobble
 ```
 
 2. Install dependencies:

@@ -76,7 +76,7 @@ export function FeedbackDialog() {
           <DialogHeader>
             <DialogTitle>We&apos;d love to hear from you!</DialogTitle>
             <DialogDescription>
-              We&apos;re always looking for ways to improve App Track. Let us
+              We&apos;re always looking for ways to improve Jobble. Let us
               know what you&apos;d like to see added to the platform.
             </DialogDescription>
           </DialogHeader>

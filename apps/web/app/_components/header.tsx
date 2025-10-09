@@ -65,7 +65,7 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500"
               >
                 <LaptopMinimalCheckIcon className="h-5 w-5" color="white" />
-                <span className="sr-only">App Track</span>
+                <span className="sr-only">Jobble</span>
               </Link>
 
               {/* Desktop Navigation */}
@@ -313,7 +313,7 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
           <DialogHeader>
             <DialogTitle>We&apos;d love to hear from you!</DialogTitle>
             <DialogDescription>
-              We&apos;re always looking for ways to improve App Track. Let us
+              We&apos;re always looking for ways to improve Jobble. Let us
               know what you&apos;d like to see added to the platform.
             </DialogDescription>
           </DialogHeader>

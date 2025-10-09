@@ -536,7 +536,7 @@ function BrowserFrame({
           <div className="flex items-center gap-1 truncate">
             <span className="text-gray-400">🔒</span>
             <span className="truncate">
-              apptrack.space/dashboard{path ? `/${path}` : ''}
+              jobble.app/dashboard{path ? `/${path}` : ''}
             </span>
           </div>
         </div>

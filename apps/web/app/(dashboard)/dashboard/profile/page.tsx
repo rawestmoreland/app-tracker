@@ -9,7 +9,7 @@ import { Loading } from '@/components/ui/loading';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'App Track - Profile',
+  title: 'Jobble - Profile',
   description: 'Manage your profile and preferences',
 };
 

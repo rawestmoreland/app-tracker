@@ -19,8 +19,8 @@ function HeroSection() {
             🚀 Trusted by 10,000+ job seekers
           </Badge> */}
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
-            Track Your Job Search
-            <span className="block text-blue-600">Like a Pro</span>
+            Juggle Your Job Applications
+            <span className="block text-blue-600">With Ease</span>
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">
             Organize applications, manage interviews, and get insights that help
@@ -140,14 +140,14 @@ function SocialProofSection() {
           </h2>
           <p className="mt-4 text-lg text-gray-600">
             Join thousands of professionals who have streamlined their job
-            search with App Track.
+            search with Jobble.
           </p>
         </div>
         <div className="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">
           {[
             {
               quote:
-                'App Track completely transformed my job search. I went from scattered spreadsheets to a professional system that helped me land my dream role.',
+                'Jobble completely transformed my job search. I went from scattered spreadsheets to a professional system that helped me land my dream role.',
               author: 'Sarah Chen',
               role: 'Software Engineer',
               company: 'TechCorp',
@@ -219,7 +219,7 @@ function CTASection() {
           </h2>
           <p className="mt-4 text-lg text-white">
             Join thousands of professionals who have already streamlined their
-            career journey with App Track.
+            career journey with Jobble.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Button
@@ -280,10 +280,10 @@ function LandingPageContent() {
           __html: JSON.stringify({
             '@context': 'https://schema.org',
             '@type': 'SoftwareApplication',
-            name: 'App Track',
+            name: 'Jobble',
             description:
-              'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
-            url: 'https://apptrack.space',
+              'Track job applications, manage interviews, and organize your career journey with Jobble.',
+            url: 'https://jobble.app',
             applicationCategory: 'BusinessApplication',
             operatingSystem: 'Web Browser',
             offers: {
@@ -299,7 +299,7 @@ function LandingPageContent() {
             },
             author: {
               '@type': 'Organization',
-              name: 'App Track',
+              name: 'Jobble',
             },
             featureList: [
               'Application Tracking',
@@ -319,7 +319,7 @@ function LandingPageContent() {
         >
           <div className="flex flex-1">
             <Link href="/" className="-m-1.5 p-1.5">
-              <span className="text-xl font-bold text-blue-600">App Track</span>
+              <span className="text-xl font-bold text-blue-600">Jobble</span>
             </Link>
           </div>
           <div className="hidden gap-x-12 md:flex">

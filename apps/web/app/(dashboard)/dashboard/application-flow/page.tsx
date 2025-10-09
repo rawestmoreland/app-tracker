@@ -4,7 +4,7 @@ import ApplicationFlowChart from '@/components/dashboard/application-flow-chart'
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'App Track - Application Flow',
+  title: 'Jobble - Application Flow',
   description:
     'Visualize how your job applications progress through different statuses using this Sankey diagram.',
 };
