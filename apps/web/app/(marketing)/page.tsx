@@ -7,6 +7,7 @@ import { AppTrackerLoading } from '@/components/ui/loading';
 import Link from 'next/link';
 import Script from 'next/script';
 import { useAuth } from '@clerk/nextjs';
+import { ScreenshotsSection } from './_components/screenshots-section';
 
 // Hero Section Component
 function HeroSection() {
@@ -316,12 +317,12 @@ function LandingPageContent() {
           className="flex items-center justify-between p-6 lg:px-8"
           aria-label="Global"
         >
-          <div className="flex lg:flex-1">
+          <div className="flex flex-1">
             <Link href="/" className="-m-1.5 p-1.5">
               <span className="text-xl font-bold text-blue-600">App Track</span>
             </Link>
           </div>
-          <div className="flex gap-x-12">
+          <div className="hidden gap-x-12 md:flex">
             <Link
               href="#features"
               className="text-sm leading-6 font-semibold text-gray-900 hover:text-blue-600"
@@ -341,13 +342,17 @@ function LandingPageContent() {
               About
             </Link>
           </div>
-          <div className="flex lg:flex-1 lg:justify-end">
+          <div className="flex flex-1 justify-end">
             {isSignedIn ? (
               <Link
                 href="/dashboard"
                 className="text-sm leading-6 font-semibold text-gray-900 hover:text-blue-600"
               >
-                Dashboard <span aria-hidden="true">&rarr;</span>
+                <span className="hidden sm:inline">Dashboard</span>
+                <span className="sm:hidden">App</span>
+                <span aria-hidden="true" className="ml-1">
+                  &rarr;
+                </span>
               </Link>
             ) : (
               <Link
@@ -364,6 +369,7 @@ function LandingPageContent() {
       <main className="flex-1">
         <HeroSection />
         <FeaturesSection />
+        <ScreenshotsSection />
         {/* <SocialProofSection /> */}
         <CTASection />
       </main>

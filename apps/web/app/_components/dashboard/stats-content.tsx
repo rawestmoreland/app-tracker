@@ -7,7 +7,7 @@ export default function StatsContent({ analytics }: { analytics: Analytics }) {
   if (!analytics) return null;
 
   return (
-    <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+    <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
       <div className="rounded-lg bg-white p-6 shadow">
         <div className="flex items-center">
           <div className="rounded-lg bg-blue-100 p-2">
