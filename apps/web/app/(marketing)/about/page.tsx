@@ -16,7 +16,7 @@ export default function AboutPage() {
         >
           <div className="flex lg:flex-1">
             <Link href="/" className="-m-1.5 p-1.5">
-              <span className="text-xl font-bold text-blue-600">App Track</span>
+              <span className="text-xl font-bold text-blue-600">Jobble</span>
             </Link>
           </div>
           <div className="flex gap-x-12">
@@ -110,8 +110,8 @@ export default function AboutPage() {
                 <p className="mb-0 text-lg leading-relaxed text-gray-800">
                   <strong className="text-blue-700">The Solution:</strong> That
                   night, instead of wallowing in self-pity (okay, maybe a little
-                  wallowing), I channeled my frustration into code. I built App
-                  Track—a simple, intuitive way to keep track of every
+                  wallowing), I channeled my frustration into code. I built
+                  Jobble—a simple, intuitive way to keep track of every
                   application, interview, and follow-up without losing my mind.
                 </p>
               </div>
@@ -120,7 +120,7 @@ export default function AboutPage() {
                 <p className="mb-0 text-lg leading-relaxed text-gray-800">
                   <strong className="text-green-700">The Mission:</strong> Now I
                   want to help every job seeker avoid the chaos I went through.
-                  That&apos;s why App Track is completely free—because looking
+                  That&apos;s why Jobble is completely free—because looking
                   for work is stressful enough without worrying about
                   subscription fees.
                 </p>
@@ -193,10 +193,10 @@ export default function AboutPage() {
           <div className="mx-auto max-w-3xl text-center">
             <Coffee className="mx-auto mb-6 h-12 w-12 text-blue-200" />
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Found App Track Helpful?
+              Found Jobble Helpful?
             </h2>
             <p className="mt-6 text-lg leading-8 text-blue-100">
-              App Track will always be free, but if it&apos;s helped you stay
+              Jobble will always be free, but if it&apos;s helped you stay
               organized and land interviews, a small donation helps me keep the
               servers running and continue improving the platform.
             </p>
@@ -225,7 +225,7 @@ export default function AboutPage() {
                 <div className="mt-2 flex justify-center gap-4">
                   <Button variant="outline" size="sm" asChild>
                     <Link
-                      href="https://twitter.com/intent/tweet?url=https://apptrack.space&text=Check%20out%20App%20Track%2C%20a%20free%20job%20application%20tracker%20for%20job%20seekers."
+                      href="https://twitter.com/intent/tweet?url=https://jobble.app&text=Check%20out%20Jobble%2C%20a%20free%20job%20application%20tracker%20for%20job%20seekers."
                       target="_blank"
                     >
                       Share on Twitter
@@ -287,7 +287,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="text-center">
             <Link href="/" className="text-xl font-bold text-blue-400">
-              App Track
+              Jobble
             </Link>
             <p className="mt-4 text-sm text-gray-400">
               Built with ❤️ by a fellow job seeker. &copy;{' '}

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a **Job Application Tracker** built with Next.js 15, featuring user authentication via Clerk and PostgreSQL database integration via Prisma. The application allows users to track their job applications with full user management and data persistence.
+This is **Jobble**, a job application tracker built with Next.js 15, featuring user authentication via Clerk and PostgreSQL database integration via Prisma. The application allows users to track their job applications with full user management and data persistence.
 
 ## Development Commands
 

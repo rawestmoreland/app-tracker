@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'App Track - Streamline Your Job Search & Application Management',
+  title: 'Jobble - Juggle Your Job Applications',
   description:
-    'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker. Get insights, stay organized, and land your dream job faster.',
+    'Track job applications, manage interviews, and organize your career journey with Jobble. Get insights, stay organized, and land your dream job faster.',
   keywords: [
     'job application tracker',
     'job search management',
@@ -32,30 +32,30 @@ export const metadata: Metadata = {
     'application management',
     'interview scheduling',
   ],
-  authors: [{ name: 'App Track Team' }],
-  creator: 'App Track',
-  publisher: 'App Track',
+  authors: [{ name: 'Jobble Team' }],
+  creator: 'Jobble',
+  publisher: 'Jobble',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://apptrack.space'),
+  metadataBase: new URL('https://jobble.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: 'App Track - Streamline Your Job Search & Application Management',
+    title: 'Jobble - Juggle Your Job Applications',
     description:
-      'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
-    url: 'https://apptrack.space',
-    siteName: 'App Track',
+      'Track job applications, manage interviews, and organize your career journey with Jobble.',
+    url: 'https://jobble.app',
+    siteName: 'Jobble',
     images: [
       {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'App Track - Job Application Management Platform',
+        alt: 'Jobble - Job Application Management Platform',
       },
     ],
     locale: 'en_US',
@@ -63,9 +63,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'App Track - Streamline Your Job Search & Application Management',
+    title: 'Jobble - Juggle Your Job Applications',
     description:
-      'Track job applications, manage interviews, and organize your career journey with our intuitive job application tracker.',
+      'Track job applications, manage interviews, and organize your career journey with Jobble.',
     images: ['/og-image.png'],
   },
   robots: {

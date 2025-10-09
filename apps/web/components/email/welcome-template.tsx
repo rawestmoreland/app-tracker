@@ -37,7 +37,7 @@ export function WelcomeTemplate({ firstName, lastName }: EmailTemplateProps) {
             fontWeight: 'bold',
           }}
         >
-          🎉 Welcome to App Track, {name}!
+          🎉 Welcome to Jobble, {name}!
         </h1>
         <p
           style={{
@@ -86,7 +86,7 @@ export function WelcomeTemplate({ firstName, lastName }: EmailTemplateProps) {
               fontWeight: 'bold',
             }}
           >
-            ✨ What you can do with App Tracker:
+            ✨ What you can do with Jobble:
           </h2>
           <ul
             style={{
@@ -133,7 +133,7 @@ export function WelcomeTemplate({ firstName, lastName }: EmailTemplateProps) {
           }}
         >
           <a
-            href="https://apptrack.space/sign-in"
+            href="https://jobble.app/sign-in"
             style={{
               backgroundColor: '#3b82f6',
               color: '#ffffff',
@@ -209,7 +209,7 @@ export function WelcomeTemplate({ firstName, lastName }: EmailTemplateProps) {
         >
           Best regards,
           <br />
-          <strong>Richard & the App Track Team</strong> 👋
+          <strong>Richard & the Jobble Team</strong> 👋
         </p>
       </div>
     </div>
