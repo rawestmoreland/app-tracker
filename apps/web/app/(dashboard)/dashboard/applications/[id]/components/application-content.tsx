@@ -13,6 +13,7 @@ import {
   NoteType,
   ApplicationEvent,
   Resume,
+  InterviewContact,
 } from '@prisma/client';
 import Link from 'next/link';
 import { notFound, useRouter } from 'next/navigation';
@@ -52,7 +53,7 @@ import { TiptapDisplay } from '@/components/tiptap-editor';
 type FullApplication = Application & {
   company: Company;
   interviews: (Interview & {
-    contacts: Contact[];
+    interviewContacts: (InterviewContact & { contact: Contact })[];
   })[];
   notes: Note[];
   events: ApplicationEvent[];
@@ -439,11 +440,11 @@ export default function ApplicationContent({
                         )}
                       </div>
 
-                      {interview.contacts.length > 0 && (
+                      {interview.interviewContacts.length > 0 && (
                         <div className="mt-2">
                           <p className="text-sm text-gray-600">Interviewers:</p>
                           <div className="mt-1 flex flex-wrap gap-2">
-                            {interview.contacts.map((contact) => (
+                            {interview.interviewContacts.map(({ contact }) => (
                               <span
                                 key={contact.id}
                                 className="rounded bg-gray-100 px-2 py-1 text-sm"

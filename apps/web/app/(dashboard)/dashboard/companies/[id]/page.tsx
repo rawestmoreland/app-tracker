@@ -174,7 +174,11 @@ async function fetchCompany(id: string): Promise<Company | null> {
           include: {
             interviews: {
               include: {
-                contacts: true,
+                interviewContacts: {
+                  include: {
+                    contact: true,
+                  },
+                },
                 notes: true,
               },
             },

@@ -69,7 +69,11 @@ const fetchApplication = async (dbUser: User, id: string) => {
       },
       interviews: {
         include: {
-          contacts: true,
+          interviewContacts: {
+            include: {
+              contact: true,
+            },
+          },
           notes: true,
         },
       },
