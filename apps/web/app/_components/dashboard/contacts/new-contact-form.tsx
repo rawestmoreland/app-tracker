@@ -57,41 +57,45 @@ export function NewContactForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="flex flex-col gap-4"
       >
-        <FormField
-          control={form.control}
-          name="existingContactId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select Existing Contact</FormLabel>
-              <FormControl>
-                <Combobox
-                  options={availableContacts.map((contact) => ({
-                    value: contact.id,
-                    label: `${contact.name} - ${contact.title}${contact.companyId ? ` (${companies.find((c) => c.id === contact.companyId)?.name})` : ''}`,
-                  }))}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  placeholder="Select an existing contact"
-                  searchPlaceholder="Search contacts..."
-                  emptyText="No contact found."
-                  className="w-full"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {interviewId && (
+          <>
+            <FormField
+              control={form.control}
+              name="existingContactId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select Existing Contact</FormLabel>
+                  <FormControl>
+                    <Combobox
+                      options={availableContacts.map((contact) => ({
+                        value: contact.id,
+                        label: `${contact.name} - ${contact.title}${contact.companyId ? ` (${companies.find((c) => c.id === contact.companyId)?.name})` : ''}`,
+                      }))}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="Select an existing contact"
+                      searchPlaceholder="Search contacts..."
+                      emptyText="No contact found."
+                      className="w-full"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Or create new contact
-            </span>
-          </div>
-        </div>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or create new contact
+                </span>
+              </div>
+            </div>
+          </>
+        )}
 
         <FormField
           control={form.control}
