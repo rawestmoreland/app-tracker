@@ -28,6 +28,12 @@ export function NewContactForm({
   uniqueContacts: Contact[];
 }) {
   const existingContactId = form.watch('existingContactId');
+  const interviewId = form.watch('interviewId');
+
+  // Filter out contacts that are already interviewers for this interview
+  const availableContacts = uniqueContacts.filter(
+    (contact) => !interviewId || contact.interviewId !== interviewId
+  );
 
   useEffect(() => {
     if (existingContactId) {
@@ -59,7 +65,7 @@ export function NewContactForm({
               <FormLabel>Select Existing Contact</FormLabel>
               <FormControl>
                 <Combobox
-                  options={uniqueContacts.map((contact) => ({
+                  options={availableContacts.map((contact) => ({
                     value: contact.id,
                     label: `${contact.name} - ${contact.title}${contact.companyId ? ` (${companies.find((c) => c.id === contact.companyId)?.name})` : ''}`,
                   }))}
