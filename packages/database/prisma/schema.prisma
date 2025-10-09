@@ -143,24 +143,24 @@ model Resume {
 }
 
 model Contact {
-  id          String      @id @default(cuid())
-  name        String
-  email       String?
-  phone       String?
-  title       String?
-  linkedin    String?
-  notes       String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId   String?
-  company     Company?    @relation(fields: [companyId], references: [id])
-  interviewId String?
-  interview   Interview?  @relation(fields: [interviewId], references: [id])
+  id        String     @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  title     String?
+  linkedin  String?
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  interviewContacts InterviewContact[]
+  activities        Activity[]
 
   @@map("contacts")
-  activities  Activity[]
 }
 
 model Interview {
@@ -182,8 +182,22 @@ model Interview {
   notes         Note[]
   archived      Boolean           @default(false)
 
+  interviewContacts InterviewContact[]
+
   @@map("interviews")
-  contacts Contact[]
+}
+
+model InterviewContact {
+  id          String    @id @default(cuid())
+  interviewId String
+  contactId   String
+  createdAt   DateTime  @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([interviewId, contactId])
+  @@map("interview_contacts")
 }
 
 model Note {
