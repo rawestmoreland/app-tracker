@@ -17,6 +17,7 @@ import type {
   Application,
   Company,
   Contact,
+  InterviewContact,
 } from '@prisma/client';
 
 import { Button } from '@/components/ui/button';
@@ -60,7 +61,7 @@ type FullInterview = Interview & {
   application: Application & {
     company: Company;
   };
-  contacts: Contact[];
+  interviewContacts: (InterviewContact & { contact: Contact })[];
 };
 
 interface InterviewDetailsProps {
@@ -356,25 +357,29 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
             </div>
 
             {/* Contacts */}
-            {interview.contacts.length > 0 && (
+            {interview.interviewContacts.length > 0 && (
               <div className="rounded-lg bg-white p-6 shadow">
                 <h3 className="mb-4 text-lg font-medium text-gray-900">
                   Interview Contacts
                 </h3>
                 <div className="space-y-3">
-                  {interview.contacts.map((contact) => (
+                  {interview.interviewContacts.map((contact) => (
                     <div
                       key={contact.id}
                       className="border-b border-gray-200 pb-3 last:border-0 last:pb-0"
                     >
                       <h4 className="text-sm font-medium text-gray-900">
-                        {contact.name}
+                        {contact.contact.name}
                       </h4>
-                      {contact.title && (
-                        <p className="text-xs text-gray-600">{contact.title}</p>
+                      {contact.contact.title && (
+                        <p className="text-xs text-gray-600">
+                          {contact.contact.title}
+                        </p>
                       )}
-                      {contact.email && (
-                        <p className="text-xs text-gray-600">{contact.email}</p>
+                      {contact.contact.email && (
+                        <p className="text-xs text-gray-600">
+                          {contact.contact.email}
+                        </p>
                       )}
                     </div>
                   ))}

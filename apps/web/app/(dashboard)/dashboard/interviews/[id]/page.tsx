@@ -27,7 +27,11 @@ const fetchInterview = async (id: string) => {
           company: true,
         },
       },
-      contacts: true,
+      interviewContacts: {
+        include: {
+          contact: true,
+        },
+      },
     },
   });
 

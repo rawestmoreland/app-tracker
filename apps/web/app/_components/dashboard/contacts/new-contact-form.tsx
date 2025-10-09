@@ -10,7 +10,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { NewContactSchema } from './new-contact-schema';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Company, Contact } from '@prisma/client';
+import { Company, Contact, InterviewContact } from '@prisma/client';
 import { Combobox } from '@/components/ui/combobox';
 import { Loader2Icon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,14 +25,16 @@ export function NewContactForm({
   form: UseFormReturn<NewContactSchema>;
   handleSubmit: (data: NewContactSchema) => void;
   companies: Company[];
-  uniqueContacts: Contact[];
+  uniqueContacts: (Contact & { interviewContacts: InterviewContact[] })[];
 }) {
   const existingContactId = form.watch('existingContactId');
   const interviewId = form.watch('interviewId');
 
   // Filter out contacts that are already interviewers for this interview
   const availableContacts = uniqueContacts.filter(
-    (contact) => !interviewId || contact.interviewId !== interviewId
+    (contact) =>
+      !interviewId ||
+      !contact.interviewContacts.some((ic) => ic.interviewId === interviewId),
   );
 
   useEffect(() => {
@@ -89,7 +91,7 @@ export function NewContactForm({
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background text-muted-foreground px-2">
                   Or create new contact
                 </span>
               </div>

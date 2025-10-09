@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { addContact } from '@/lib/actions/contact-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Company, Contact } from '@prisma/client';
+import { Company, Contact, InterviewContact } from '@prisma/client';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -26,7 +26,7 @@ export default function NewContactContent({
   uniqueContacts,
 }: {
   companies: Company[];
-  uniqueContacts: Contact[];
+  uniqueContacts: (Contact & { interviewContacts: InterviewContact[] })[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();

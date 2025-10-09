@@ -3,7 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { NewContactSchema } from '@/app/_components/dashboard/contacts/new-contact-schema';
 import { getSignedInUser } from '@/app/lib/auth';
-import { Contact } from '@prisma/client';
+import { Company, Contact } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { ActivityTracker } from '@/lib/services/activity-tracker';
 
@@ -22,38 +22,52 @@ export async function addContact(data: NewContactSchema): Promise<{
   }
 
   try {
-    const contact = await prisma.contact.upsert({
-      where: {
-        id: data.existingContactId || '',
-      },
-      create: {
-        name: data.name || '',
-        email: data.email || '',
-        phone: data.phone || '',
-        title: data.title || '',
-        linkedin: data.linkedin || '',
-        notes: data.notes || '',
-        companyId: data.companyId || undefined,
-        interviewId: data.interviewId || undefined,
-        userId: dbUser.id,
-      },
-      update: {
-        interviewId: data.interviewId || undefined,
-        userId: dbUser.id,
-      },
-      include: {
-        company: true,
-      },
+    let contact: Contact & { company: Company | null };
+    await prisma.$transaction(async (tx) => {
+      if (data.existingContactId && data.interviewId) {
+        // Add existing contact to interview
+        await tx.interviewContact.create({
+          data: {
+            interviewId: data.interviewId,
+            contactId: data.existingContactId,
+          },
+        });
+        contact = await tx.contact.findUnique({
+          where: { id: data.existingContactId },
+          include: { company: true },
+        });
+      } else {
+        // Create new contact
+        contact = await tx.contact.create({
+          data: {
+            name: data.name || '',
+            email: data.email || '',
+            phone: data.phone || '',
+            title: data.title || '',
+            linkedin: data.linkedin || '',
+            notes: data.notes || '',
+            companyId: data.companyId || '',
+            userId: dbUser.id,
+            interviewContacts: {
+              create: {
+                interviewId: data.interviewId || '',
+              },
+            },
+          },
+          include: {
+            company: true,
+          },
+        });
+        await ActivityTracker.trackContactCreated(
+          contact.id,
+          contact.name,
+          contact.company.name || '',
+        );
+      }
     });
 
-    await ActivityTracker.trackContactCreated(
-      contact.id,
-      contact.name,
-      contact.company?.name,
-    );
-
-    revalidatePath('/dashboard/contacts/new');
     revalidatePath(`/dashboard/companies/${contact.companyId}`);
+    revalidatePath('/dashboard/contacts/new');
 
     return {
       error: false,

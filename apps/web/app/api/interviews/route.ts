@@ -22,7 +22,11 @@ export async function GET() {
         application: {
           include: { company: true },
         },
-        contacts: true,
+        interviewContacts: {
+          include: {
+            contact: true,
+          },
+        },
         notes: true,
       },
       orderBy: { scheduledAt: 'desc' },
@@ -33,7 +37,7 @@ export async function GET() {
     console.error('Error fetching interviews:', error);
     return NextResponse.json(
       { error: 'Failed to fetch interviews' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -66,7 +70,7 @@ export async function POST(request: NextRequest) {
     if (!type || !format || !applicationId) {
       return NextResponse.json(
         { error: 'Type, format, and applicationId are required' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -85,7 +89,11 @@ export async function POST(request: NextRequest) {
         application: {
           include: { company: true },
         },
-        contacts: true,
+        interviewContacts: {
+          include: {
+            contact: true,
+          },
+        },
         notes: true,
       },
     });
@@ -95,7 +103,7 @@ export async function POST(request: NextRequest) {
     console.error('Error creating interview:', error);
     return NextResponse.json(
       { error: 'Failed to create interview' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

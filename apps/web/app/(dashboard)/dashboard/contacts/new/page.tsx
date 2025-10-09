@@ -9,7 +9,11 @@ export const metadata: Metadata = {
   description: 'Create a new contact for a company',
 };
 
-async function fetchCompanies() {
+async function fetchCompanies(companyId: string) {
+  if (!companyId) {
+    return [];
+  }
+
   const { dbUser } = await getSignedInUser();
   if (!dbUser) {
     return [];
@@ -28,7 +32,10 @@ async function fetchCompanies() {
         where: { userId: dbUser.id },
       },
       contacts: {
-        where: { userId: dbUser.id },
+        where: { userId: dbUser.id, companyId },
+        include: {
+          interviewContacts: true,
+        },
       },
     },
   });
@@ -55,13 +62,16 @@ function LoadingFallback() {
   );
 }
 
-export default async function NewContactPage() {
-  const companies = await fetchCompanies();
+export default async function NewContactPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ companyId: string }>;
+}) {
+  const { companyId } = await searchParams;
+  const companies = await fetchCompanies(companyId);
 
   const uniqueContacts =
     companies?.flatMap((company) => company.contacts) ?? [];
-
-  console.log(uniqueContacts);
 
   return (
     <Suspense fallback={<LoadingFallback />}>

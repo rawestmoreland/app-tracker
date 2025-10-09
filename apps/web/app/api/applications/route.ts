@@ -25,7 +25,11 @@ export async function GET() {
         company: true,
         interviews: {
           include: {
-            contacts: true,
+            interviewContacts: {
+              include: {
+                contact: true,
+              },
+            },
             notes: true,
           },
         },
