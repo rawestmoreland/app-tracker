@@ -22,11 +22,23 @@ export async function addContact(data: NewContactSchema): Promise<{
   }
 
   try {
-    const contact = await prisma.contact.create({
-      data: {
-        ...data,
-        interviewId: data.interviewId || undefined,
+    const contact = await prisma.contact.upsert({
+      where: {
+        id: data.existingContactId || '',
+      },
+      create: {
+        name: data.name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        title: data.title || '',
+        linkedin: data.linkedin || '',
+        notes: data.notes || '',
         companyId: data.companyId || undefined,
+        interviewId: data.interviewId || undefined,
+        userId: dbUser.id,
+      },
+      update: {
+        interviewId: data.interviewId || undefined,
         userId: dbUser.id,
       },
       include: {

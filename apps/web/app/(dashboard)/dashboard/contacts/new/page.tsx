@@ -58,9 +58,15 @@ function LoadingFallback() {
 export default async function NewContactPage() {
   const companies = await fetchCompanies();
 
+  const uniqueContacts =
+    companies?.flatMap((company) => company.contacts) ?? [];
+
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <NewContactContent companies={companies} />
+      <NewContactContent
+        companies={companies}
+        uniqueContacts={uniqueContacts}
+      />
     </Suspense>
   );
 }

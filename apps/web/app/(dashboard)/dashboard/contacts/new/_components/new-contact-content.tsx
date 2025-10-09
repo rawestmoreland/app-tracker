@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/breadcrumb';
 import { addContact } from '@/lib/actions/contact-actions';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Company } from '@prisma/client';
+import { Company, Contact } from '@prisma/client';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -23,8 +23,10 @@ import { toast } from 'sonner';
 
 export default function NewContactContent({
   companies,
+  uniqueContacts,
 }: {
   companies: Company[];
+  uniqueContacts: Contact[];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -118,6 +120,7 @@ export default function NewContactContent({
             form={form}
             handleSubmit={handleSubmit}
             companies={companies}
+            uniqueContacts={uniqueContacts}
           />
         </div>
       </div>
