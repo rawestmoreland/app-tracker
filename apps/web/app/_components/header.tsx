@@ -36,6 +36,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { JobbleMascot } from '@/components/jobble-mascot';
 
 export function Header({ isAdmin }: { isAdmin: boolean }) {
   const router = useRouter();
@@ -62,10 +63,11 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
             <div className="flex items-center">
               <Link
                 href="/dashboard"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500"
+                className="flex items-center gap-2 rounded-md border-2 border-blue-600 bg-blue-300/20 p-1 shadow-sm"
               >
-                <LaptopMinimalCheckIcon className="h-5 w-5" color="white" />
-                <span className="sr-only">Jobble</span>
+                <span className="text-lg font-semibold text-blue-600">
+                  Jobble
+                </span>
               </Link>
 
               {/* Desktop Navigation */}
@@ -313,8 +315,8 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
           <DialogHeader>
             <DialogTitle>We&apos;d love to hear from you!</DialogTitle>
             <DialogDescription>
-              We&apos;re always looking for ways to improve Jobble. Let us
-              know what you&apos;d like to see added to the platform.
+              We&apos;re always looking for ways to improve Jobble. Let us know
+              what you&apos;d like to see added to the platform.
             </DialogDescription>
           </DialogHeader>
           <Textarea
