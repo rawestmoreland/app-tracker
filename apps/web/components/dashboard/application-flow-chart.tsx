@@ -1,24 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { transformApplicationFlowToSankeyData } from '@/lib/utils/sankey-data';
 import { getApplicationFlowData } from '@/lib/actions/sankey-actions';
 import { SankeyData, ApplicationFlowData } from '@/lib/types/sankey';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Info } from 'lucide-react';
+import { RefreshCw, Info, Share2 } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import SankeyChart from './sankey-chart';
+import { shareApplicationFlow } from '@/lib/utils/share-flow';
+import { toast } from 'sonner';
 
 export default function ApplicationFlowChart() {
   const [sankeyData, setSankeyData] = useState<SankeyData | null>(null);
   const [flowData, setFlowData] = useState<ApplicationFlowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
+  const chartRef = useRef<HTMLDivElement>(null);
 
   const loadData = async () => {
     try {
@@ -49,6 +53,24 @@ export default function ApplicationFlowChart() {
     ...flowData.map((f) => f.fromStatus),
     ...flowData.map((f) => f.toStatus),
   ]).size;
+
+  const handleShare = async () => {
+    if (!chartRef.current) {
+      toast.error('Unable to capture chart. Please try again.');
+      return;
+    }
+
+    setIsSharing(true);
+    try {
+      await shareApplicationFlow({ element: chartRef.current });
+      toast.success('Application flow image downloaded successfully!');
+    } catch (error) {
+      toast.error('Failed to generate image. Please try again.');
+      console.error('Share error:', error);
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -147,6 +169,21 @@ export default function ApplicationFlowChart() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShare}
+                disabled={isSharing || loading}
+              >
+                <Share2 className={`h-4 w-4 ${isSharing ? 'animate-pulse' : ''}`} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Share as image</p>
+            </TooltipContent>
+          </Tooltip>
           <Button
             variant="outline"
             size="sm"
@@ -158,22 +195,24 @@ export default function ApplicationFlowChart() {
         </div>
       </CardHeader>
       <CardContent>
-        <SankeyChart data={sankeyData} height={400} />
+        <div ref={chartRef}>
+          <SankeyChart data={sankeyData} height={400} />
 
-        {/* Legend */}
-        <div className="mt-4 border-t pt-4">
-          <div className="flex flex-wrap gap-2">
-            {sankeyData.nodes.map((node) => (
-              <div key={node.id} className="flex items-center gap-1">
-                <div
-                  className="h-3 w-3 rounded-sm"
-                  style={{ backgroundColor: node.color }}
-                />
-                <span className="text-muted-foreground text-xs">
-                  {node.name}
-                </span>
-              </div>
-            ))}
+          {/* Legend */}
+          <div className="mt-4 border-t pt-4">
+            <div className="flex flex-wrap gap-2">
+              {sankeyData.nodes.map((node) => (
+                <div key={node.id} className="flex items-center gap-1">
+                  <div
+                    className="h-3 w-3 rounded-sm"
+                    style={{ backgroundColor: node.color }}
+                  />
+                  <span className="text-muted-foreground text-xs">
+                    {node.name}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </CardContent>
