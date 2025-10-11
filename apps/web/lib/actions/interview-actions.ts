@@ -4,6 +4,7 @@ import {
   InterviewOutcome,
   InterviewType,
   InterviewFormat,
+  InterviewFeeling,
 } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
@@ -191,6 +192,43 @@ export async function updateInterviewDuration(
   } catch (error) {
     console.error('Failed to update interview duration:', error);
     return { error: 'Failed to update interview duration' };
+  }
+}
+
+export async function updateInterviewFeeling(
+  interviewId: string,
+  feeling: InterviewFeeling | null,
+): Promise<{ error?: string; success?: boolean }> {
+  try {
+    const { dbUser } = await getSignedInUser();
+    if (!dbUser) {
+      return { error: 'Unauthorized' };
+    }
+
+    const interview = await prisma.interview.findFirst({
+      where: {
+        id: interviewId,
+        userId: dbUser.id,
+      },
+    });
+
+    if (!interview) {
+      return { error: 'Interview not found' };
+    }
+
+    await prisma.interview.update({
+      where: { id: interviewId },
+      data: { feeling },
+    });
+
+    revalidatePath('/dashboard/interviews');
+    revalidatePath(`/dashboard/interviews/${interviewId}`);
+    revalidatePath('/dashboard/applications');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update interview feeling:', error);
+    return { error: 'Failed to update interview feeling' };
   }
 }
 
