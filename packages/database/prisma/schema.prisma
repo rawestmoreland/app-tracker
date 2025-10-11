@@ -21,6 +21,8 @@ model User {
   role               UserRole           @default(USER)
   isDonor            Boolean            @default(false)
   signupReason       SignupReason?      @default(OTHER)
+  onboardingComplete Boolean            @default(false)
+  dataOptOut         Boolean            @default(false)
   activities         Activity[]
   events             ApplicationEvent[]
   applications       Application[]
@@ -30,20 +32,17 @@ model User {
   interviews         Interview[]
   notes              Note[]
   Offer              Offer[]
-  onboardingComplete Boolean            @default(false)
+  Resume             Resume[]
   UserPreferences    UserPreference[]
-  dataOptOut         Boolean            @default(false)
-
-  Resume Resume[]
 }
 
 model UserPreference {
   id          String   @id @default(cuid())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  userId      String
   configName  String
   configValue Json
-  userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, configName])
@@ -55,16 +54,16 @@ model Company {
   name                 String
   website              String?
   description          String?
-  plainTextDescription String?
   industry             String?
   size                 CompanySize?
   location             String?
   logo                 String?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
-  isGlobal             Boolean           @default(false)
   createdBy            String?
+  isGlobal             Boolean           @default(false)
   visibility           CompanyVisibility @default(PRIVATE)
+  plainTextDescription String?
   activities           Activity[]
   applications         Application[]
   creator              User?             @relation("CreatedCompanies", fields: [createdBy], references: [id])
@@ -91,51 +90,49 @@ model Application {
   title              String
   description        String?
   jobUrl             String?
-  lowSalary          Int?
-  highSalary         Int?
-  currency           String             @default("USD")
   location           String?
   remote             RemoteType?
   status             ApplicationStatus  @default(APPLIED)
   appliedAt          DateTime
-  referredBy         String?
-  firstResponseAt    DateTime?
-  interviewInviteAt  DateTime?
-  firstInterviewAt   DateTime?
-  finalDecisionAt    DateTime?
-  lastContactAt      DateTime?
-  responseTimeHours  Int?
-  interviewTimeHours Int?
-  totalProcessHours  Int?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   userId             String
   companyId          String
+  currency           String             @default("USD")
+  highSalary         Int?
+  lowSalary          Int?
+  finalDecisionAt    DateTime?
+  firstInterviewAt   DateTime?
+  firstResponseAt    DateTime?
+  interviewInviteAt  DateTime?
+  interviewTimeHours Int?
+  lastContactAt      DateTime?
+  responseTimeHours  Int?
+  totalProcessHours  Int?
+  referredBy         String?
+  archived           Boolean            @default(false)
+  resumeId           String?
   activities         Activity[]
   events             ApplicationEvent[]
   company            Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  connectedResume    Resume?            @relation(fields: [resumeId], references: [id])
   user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   interviews         Interview[]
   notes              Note[]
   Offer              Offer[]
-  archived           Boolean            @default(false)
-
-  resumeId        String?
-  connectedResume Resume? @relation(fields: [resumeId], references: [id])
 
   @@map("applications")
 }
 
 model Resume {
-  id        String   @id @default(cuid())
-  name      String
-  url       String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  id          String        @id @default(cuid())
+  name        String
+  url         String        @unique
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  userId      String
   Application Application[]
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([name, userId, url])
   @@index([userId, createdAt])
@@ -143,46 +140,45 @@ model Resume {
 }
 
 model Contact {
-  id        String     @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  title     String?
-  linkedin  String?
-  notes     String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  userId    String
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyId String
-  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  interviewContacts InterviewContact[]
+  id                String             @id @default(cuid())
+  name              String
+  email             String?
+  phone             String?
+  title             String?
+  linkedin          String?
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  userId            String
+  companyId         String
   activities        Activity[]
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interviewContacts InterviewContact[]
 
   @@map("contacts")
 }
 
 model Interview {
-  id            String            @id @default(cuid())
-  type          InterviewType
-  format        InterviewFormat
-  meetingLink   String?
-  scheduledAt   DateTime?
-  duration      Int?
-  feedback      String?
-  outcome       InterviewOutcome?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  applicationId String
-  userId        String
-  activities    Activity[]
-  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notes         Note[]
-  archived      Boolean           @default(false)
-
+  id                String             @id @default(cuid())
+  type              InterviewType
+  format            InterviewFormat
+  scheduledAt       DateTime?
+  duration          Int?
+  feedback          String?
+  outcome           InterviewOutcome?
+  feeling           InterviewFeeling?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  applicationId     String
+  userId            String
+  meetingLink       String?
+  archived          Boolean            @default(false)
+  activities        Activity[]
   interviewContacts InterviewContact[]
+  application       Application        @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notes             Note[]
 
   @@map("interviews")
 }
@@ -192,9 +188,8 @@ model InterviewContact {
   interviewId String
   contactId   String
   createdAt   DateTime  @default(now())
-
-  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
-  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  contact     Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
 
   @@unique([interviewId, contactId])
   @@map("interview_contacts")
@@ -207,9 +202,9 @@ model Note {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
   userId        String
-  companyId     String?
   applicationId String?
   interviewId   String?
+  companyId     String?
   activities    Activity[]
   application   Application? @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   company       Company?     @relation(fields: [companyId], references: [id])
@@ -286,11 +281,11 @@ model ApplicationEvent {
   content       String?
   occurredAt    DateTime
   source        EventSource
-  responseType  ResponseType?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   applicationId String
   userId        String
+  responseType  ResponseType?
   application   Application   @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -306,10 +301,6 @@ model Activity {
   entityName    String?
   description   String
   metadata      Json?
-  fromStatus    ApplicationStatus?
-  toStatus      ApplicationStatus?
-  isProgression Boolean?
-  stageOrder    Int?
   ipAddress     String?
   userAgent     String?
   platform      Platform?
@@ -321,6 +312,10 @@ model Activity {
   interviewId   String?
   noteId        String?
   offerId       String?
+  fromStatus    ApplicationStatus?
+  isProgression Boolean?
+  stageOrder    Int?
+  toStatus      ApplicationStatus?
   application   Application?       @relation(fields: [applicationId], references: [id])
   company       Company?           @relation(fields: [companyId], references: [id])
   contact       Contact?           @relation(fields: [contactId], references: [id])
@@ -413,14 +408,24 @@ enum InterviewOutcome {
   RESCHEDULED
 }
 
+enum InterviewFeeling {
+  EXCELLENT
+  CONFIDENT
+  POSITIVE
+  NEUTRAL
+  UNCERTAIN
+  DIFFICULT
+  POOR
+}
+
 enum NoteType {
   GENERAL
   INTERVIEW_PREP
-  INTERVIEW_NOTES
   FEEDBACK
   FOLLOW_UP
   SALARY_NEGOTIATION
   OFFER_DETAILS
+  INTERVIEW_NOTES
 }
 
 enum OfferStatus {
@@ -490,8 +495,8 @@ enum EventType {
 enum FeatureRequestStatus {
   PENDING
   IMPLEMENTED
-  ADDED_TO_ROADMAP
   REJECTED
+  ADDED_TO_ROADMAP
 }
 
 enum EventSource {

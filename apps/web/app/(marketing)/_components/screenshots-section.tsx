@@ -90,6 +90,7 @@ const mockApplications: DashboardApplication[] = [
         applicationId: '1',
         userId: 'user1',
         archived: false,
+        feeling: null,
       },
       {
         id: 'int2',
@@ -105,6 +106,7 @@ const mockApplications: DashboardApplication[] = [
         applicationId: '1',
         userId: 'user1',
         archived: false,
+        feeling: null,
       },
     ],
     activities: [
@@ -265,6 +267,7 @@ const mockApplications: DashboardApplication[] = [
         applicationId: '3',
         userId: 'user1',
         archived: false,
+        feeling: null,
       },
       {
         id: 'int4',
@@ -280,6 +283,7 @@ const mockApplications: DashboardApplication[] = [
         applicationId: '3',
         userId: 'user1',
         archived: false,
+        feeling: null,
       },
       {
         id: 'int5',
@@ -295,6 +299,7 @@ const mockApplications: DashboardApplication[] = [
         applicationId: '3',
         userId: 'user1',
         archived: false,
+        feeling: null,
       },
     ],
     activities: [

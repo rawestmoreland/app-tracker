@@ -40,6 +40,7 @@ import { InterviewTypeDropdown } from '@/app/_components/dashboard/interview-typ
 import { InterviewFormatDropdown } from '@/app/_components/dashboard/interview-format-dropdown';
 import { InterviewDurationEditor } from '@/app/_components/dashboard/interview-duration-editor';
 import { InterviewDateTimeEditor } from '@/app/_components/dashboard/interview-datetime-editor';
+import { InterviewFeelingDropdown } from '@/app/_components/dashboard/interview-feeling-dropdown';
 import { NotesSection } from '@/app/_components/dashboard/notes/notes-section';
 import { addApplicationNote } from '@/lib/actions/application-actions';
 import { toast } from 'sonner';
@@ -283,6 +284,16 @@ export default function InterviewDetails({ interview }: InterviewDetailsProps) {
                     <InterviewStatusDropdown
                       interviewId={interview.id}
                       currentOutcome={interview.outcome}
+                    />
+                  </div>
+
+                  <div>
+                    <h3 className="mb-2 text-sm font-medium text-gray-700">
+                      How did you feel?
+                    </h3>
+                    <InterviewFeelingDropdown
+                      interviewId={interview.id}
+                      currentFeeling={interview.feeling}
                     />
                   </div>
                 </div>
