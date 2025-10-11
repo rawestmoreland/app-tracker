@@ -102,7 +102,9 @@ export default function StatsContent({ analytics }: { analytics: Analytics }) {
       {/* Ghost Rate */}
       <StatCard
         title="Ghost Rate"
-        value={analytics.ghostRate.toFixed(2)}
+        value={
+          !!analytics.ghostRate ? analytics.ghostRate.toFixed(2) + '%' : '0.00%'
+        }
         icon={
           <div className="rounded-lg bg-yellow-100 p-2">
             <GhostIcon className="h-6 w-6 text-yellow-600" />
