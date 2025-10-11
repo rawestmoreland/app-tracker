@@ -1,15 +1,40 @@
-"use client";
+'use client';
 
-import { Analytics } from "@/lib/types/dashboard";
-import { GhostIcon } from "lucide-react";
+import { Analytics } from '@/lib/types/dashboard';
+import { GhostIcon } from 'lucide-react';
+
+const StatCard = ({
+  title,
+  value,
+  icon,
+}: {
+  title: string;
+  value: string;
+  icon: React.ReactNode;
+}) => {
+  return (
+    <div className="bg-background rounded-lg p-6 shadow">
+      <div className="flex items-start">
+        {icon}
+        <div className="ml-4">
+          <p className="text-muted-foreground text-sm font-medium">{title}</p>
+          <p className="text-foreground text-2xl font-semibold">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function StatsContent({ analytics }: { analytics: Analytics }) {
   if (!analytics) return null;
 
   return (
     <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6">
-      <div className="rounded-lg bg-white p-6 shadow">
-        <div className="flex items-center">
+      {/* Total Applications */}
+      <StatCard
+        title="Total Applications"
+        value={analytics.totalApplications.toString()}
+        icon={
           <div className="rounded-lg bg-blue-100 p-2">
             <svg
               className="h-6 w-6 text-blue-600"
@@ -25,19 +50,14 @@ export default function StatsContent({ analytics }: { analytics: Analytics }) {
               />
             </svg>
           </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">
-              Total Applications
-            </p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {analytics.totalApplications}
-            </p>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="rounded-lg bg-white p-6 shadow">
-        <div className="flex items-center">
+      {/* Response Rate */}
+      <StatCard
+        title="Response Rate"
+        value={analytics.responseRate.toFixed(1)}
+        icon={
           <div className="rounded-lg bg-green-100 p-2">
             <svg
               className="h-6 w-6 text-green-600"
@@ -53,19 +73,14 @@ export default function StatsContent({ analytics }: { analytics: Analytics }) {
               />
             </svg>
           </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">
-              Response Rate
-            </p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {analytics.responseRate.toFixed(1)}%
-            </p>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="rounded-lg bg-white p-6 shadow">
-        <div className="flex items-center">
+      {/* Applications This Week */}
+      <StatCard
+        title="Applications This Week"
+        value={analytics.applicationsThisWeek.toString()}
+        icon={
           <div className="rounded-lg bg-purple-100 p-2">
             <svg
               className="h-6 w-6 text-purple-600"
@@ -81,30 +96,19 @@ export default function StatsContent({ analytics }: { analytics: Analytics }) {
               />
             </svg>
           </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">
-              Applications This Week
-            </p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {analytics.applicationsThisWeek}
-            </p>
-          </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="rounded-lg bg-white p-6 shadow">
-        <div className="flex items-center">
+      {/* Ghost Rate */}
+      <StatCard
+        title="Ghost Rate"
+        value={analytics.ghostRate.toFixed(2)}
+        icon={
           <div className="rounded-lg bg-yellow-100 p-2">
             <GhostIcon className="h-6 w-6 text-yellow-600" />
           </div>
-          <div className="ml-4">
-            <p className="text-sm font-medium text-gray-600">Ghost Rate</p>
-            <p className="text-2xl font-semibold text-gray-900">
-              {analytics.ghostRate.toFixed(2)}%
-            </p>
-          </div>
-        </div>
-      </div>
+        }
+      />
     </div>
   );
 }

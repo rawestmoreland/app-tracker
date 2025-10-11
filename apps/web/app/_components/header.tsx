@@ -2,6 +2,7 @@
 
 import { SignOutButton, UserButton, useAuth, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -9,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import {
   CircleQuestionMarkIcon,
   CoffeeIcon,
-  LaptopMinimalCheckIcon,
   MenuIcon,
   User2Icon,
 } from 'lucide-react';
@@ -55,16 +55,22 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white">
+      <nav className="bg-background border-border sticky top-0 z-50 border-b">
         <div className="container mx-auto px-4 md:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo and Desktop Navigation */}
             <div className="flex items-center">
               <Link
                 href="/dashboard"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500"
+                className="flex items-center justify-center"
               >
-                <LaptopMinimalCheckIcon className="h-5 w-5" color="white" />
+                <Image
+                  src="/jobble-logo.png"
+                  alt="Jobble"
+                  className="rounded-md"
+                  width={100}
+                  height={100}
+                />
                 <span className="sr-only">Jobble</span>
               </Link>
 
@@ -78,8 +84,8 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                     }
                     className={cn(
                       isCurrentPath('/dashboard')
-                        ? 'border-indigo-600 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        ? 'border-primary text-foreground'
+                        : 'text-muted-foreground hover:border-primary hover:text-foreground border-transparent',
                       'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     )}
                   >
@@ -92,8 +98,8 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                     }
                     className={cn(
                       isCurrentPath('/dashboard/companies')
-                        ? 'border-indigo-600 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        ? 'border-primary text-foreground'
+                        : 'text-muted-foreground hover:border-primary hover:text-foreground border-transparent',
                       'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     )}
                   >
@@ -108,8 +114,8 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                     }
                     className={cn(
                       isCurrentPath('/dashboard/application-flow')
-                        ? 'border-indigo-600 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        ? 'border-primary text-foreground'
+                        : 'text-muted-foreground hover:border-primary hover:text-foreground border-transparent',
                       'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     )}
                   >
@@ -124,8 +130,8 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
                     }
                     className={cn(
                       isCurrentPath('/dashboard/interviews')
-                        ? 'border-indigo-600 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                        ? 'border-primary text-foreground'
+                        : 'text-muted-foreground hover:border-primary hover:text-foreground border-transparent',
                       'inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium',
                     )}
                   >
@@ -313,8 +319,8 @@ export function Header({ isAdmin }: { isAdmin: boolean }) {
           <DialogHeader>
             <DialogTitle>We&apos;d love to hear from you!</DialogTitle>
             <DialogDescription>
-              We&apos;re always looking for ways to improve Jobble. Let us
-              know what you&apos;d like to see added to the platform.
+              We&apos;re always looking for ways to improve Jobble. Let us know
+              what you&apos;d like to see added to the platform.
             </DialogDescription>
           </DialogHeader>
           <Textarea

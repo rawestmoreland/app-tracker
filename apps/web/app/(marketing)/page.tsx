@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Script from 'next/script';
 import { useAuth } from '@clerk/nextjs';
 import { ScreenshotsSection } from './_components/screenshots-section';
+import Image from 'next/image';
 
 // Hero Section Component
 function HeroSection() {
@@ -20,7 +21,7 @@ function HeroSection() {
           </Badge> */}
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
             Juggle Your Job Applications
-            <span className="block text-blue-600">With Ease</span>
+            <span className="text-primary block">With Ease</span>
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600">
             Organize applications, manage interviews, and get insights that help
@@ -28,7 +29,7 @@ function HeroSection() {
             opportunity again.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
+            <Button asChild size="lg">
               <Link href="/sign-up">Get Started</Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
@@ -94,13 +95,13 @@ function FeaturesSection() {
   ];
 
   return (
-    <section id="features" className="bg-white py-24 sm:py-32">
+    <section id="features" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Everything You Need to Land Your Dream Job
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="text-muted-foreground mt-4 text-lg">
             Powerful features designed to streamline your job search and keep
             you organized throughout your career journey.
           </p>
@@ -109,7 +110,7 @@ function FeaturesSection() {
           <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
             {features.map((feature) => (
               <div key={feature.title} className="flex flex-col">
-                <dt className="flex items-center gap-x-3 text-base leading-7 font-semibold text-gray-900">
+                <dt className="text-foreground flex items-center gap-x-3 text-base leading-7 font-semibold">
                   <span
                     className={`flex h-10 w-10 items-center justify-center rounded-lg ${feature.color}`}
                   >
@@ -117,7 +118,7 @@ function FeaturesSection() {
                   </span>
                   {feature.title}
                 </dt>
-                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                <dd className="text-muted-foreground mt-4 flex flex-auto flex-col text-base leading-7">
                   <p className="flex-auto">{feature.description}</p>
                 </dd>
               </div>
@@ -211,33 +212,28 @@ function CTASection() {
   }
 
   return (
-    <section className="bg-blue-600 py-24 sm:py-32">
+    <section className="bg-primary py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+          <h2 className="text-primary-foreground text-3xl font-bold tracking-tight sm:text-4xl">
             Ready to Transform Your Job Search?
           </h2>
-          <p className="mt-4 text-lg text-white">
+          <p className="text-primary-foreground mt-4 text-lg">
             Join thousands of professionals who have already streamlined their
             career journey with Jobble.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Button
-              asChild
-              size="lg"
-              variant="secondary"
-              className="bg-white text-blue-600 hover:bg-gray-100"
-            >
+            <Button asChild size="lg" variant="secondary">
               <Link href="/sign-up">Get Started</Link>
             </Button>
             {isSignedIn ? (
-              <Button asChild>
+              <Button asChild variant="secondary">
                 <Link href="/dashboard">
                   Dashboard <span aria-hidden="true">&rarr;</span>
                 </Link>
               </Button>
             ) : (
-              <Button variant="outline" asChild>
+              <Button variant="secondary" asChild>
                 <Link href="/sign-in">
                   Sign In <span aria-hidden="true">&rarr;</span>
                 </Link>
@@ -255,7 +251,7 @@ function Footer() {
   return (
     <footer className="h-12 shrink-0 bg-gray-900">
       <div className="flex h-12 items-center justify-center">
-        <p className="text-center text-sm text-gray-300">
+        <p className="text-muted text-center text-sm">
           &copy; 2025 Westmoreland Creative. All rights reserved.
         </p>
       </div>
@@ -319,13 +315,19 @@ function LandingPageContent() {
         >
           <div className="flex flex-1">
             <Link href="/" className="-m-1.5 p-1.5">
-              <span className="text-xl font-bold text-blue-600">Jobble</span>
+              <Image
+                src="/jobble-logo.png"
+                alt="Jobble"
+                width={100}
+                height={100}
+                className="rounded-md"
+              />
             </Link>
           </div>
           <div className="hidden gap-x-12 md:flex">
             <Link
               href="#features"
-              className="text-sm leading-6 font-semibold text-gray-900 hover:text-blue-600"
+              className="text-foreground hover:text-primary text-sm leading-6 font-semibold hover:underline"
             >
               Features
             </Link>
@@ -337,7 +339,7 @@ function LandingPageContent() {
             </Link> */}
             <Link
               href="/about"
-              className="text-sm leading-6 font-semibold text-gray-900 hover:text-blue-600"
+              className="text-foreground hover:text-primary text-sm leading-6 font-semibold hover:underline"
             >
               About
             </Link>
@@ -346,7 +348,7 @@ function LandingPageContent() {
             {isSignedIn ? (
               <Link
                 href="/dashboard"
-                className="text-sm leading-6 font-semibold text-gray-900 hover:text-blue-600"
+                className="text-foreground hover:text-primary text-sm leading-6 font-semibold hover:underline"
               >
                 <span className="hidden sm:inline">Dashboard</span>
                 <span className="sm:hidden">App</span>
@@ -357,7 +359,7 @@ function LandingPageContent() {
             ) : (
               <Link
                 href="/sign-in"
-                className="text-sm leading-6 font-semibold text-gray-900 hover:text-blue-600"
+                className="text-foreground hover:text-primary text-sm leading-6 font-semibold hover:underline"
               >
                 Sign in <span aria-hidden="true">&rarr;</span>
               </Link>

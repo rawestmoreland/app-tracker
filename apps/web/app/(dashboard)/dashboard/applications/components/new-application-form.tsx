@@ -490,8 +490,8 @@ export default function ApplicationForm({
         <div className="flex justify-end space-x-4 pt-6">
           <Button
             onClick={() => (isEdit ? cancelEdit?.() : router.back())}
-            variant="link"
-            className="cursor-pointer p-0 text-sm font-medium text-blue-600 hover:text-blue-800"
+            variant="outline"
+            className="cursor-pointer"
           >
             Cancel
           </Button>
